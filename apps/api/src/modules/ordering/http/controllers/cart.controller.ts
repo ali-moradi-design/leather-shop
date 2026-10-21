@@ -55,6 +55,10 @@ export const merge = asyncHandler(async (req: Request, res: Response) => {
   res.json({ data: await presentCart(cart) });
 });
 
+export const quote = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ data: await cartService.quote(req.cartOwner!, req.body.discountCode) });
+});
+
 export const checkout = asyncHandler(async (req: Request, res: Response) => {
   const order = await cartService.checkout(
     req.user!.id,

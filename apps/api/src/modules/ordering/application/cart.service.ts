@@ -29,7 +29,7 @@ export class CartService {
     private readonly carts: ICartRepository,
     private readonly products: IProductRepository,
     orders: IOrderRepository,
-    discounts: DiscountService,
+    private readonly discounts: DiscountService,
   ) {
     this.addToCart = new AddToCartUseCase(carts, products);
     this.checkoutCart = new CheckoutCartUseCase(carts, products, orders, discounts);
@@ -120,6 +120,21 @@ export class CartService {
       count: items.reduce((n, i) => n + i.quantity, 0),
       subtotal: computeSubtotal(items),
       currency: 'USD',
+    };
+  }
+
+  /** Totals for the checkout page, with an optional discount code applied. */
+  async quote(owner: string, discountCode?: string) {
+    const cart = await this.view(await this.carts.getOrCreate(owner));
+    const { discount, discountAmount } = await this.discounts.computeDiscount(
+      discountCode,
+      cart.subtotal,
+    );
+    return {
+      ...cart,
+      discountCode: discount?.code,
+      discountAmount,
+      total: cart.subtotal - discountAmount,
     };
   }
 

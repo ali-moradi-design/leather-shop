@@ -18,7 +18,7 @@ export function assertDiscountApplicable(discount: Discount, subtotal: number, n
   }
   if (discount.minOrderAmount !== undefined && subtotal < discount.minOrderAmount) {
     throw new DomainError(
-      `Order subtotal must be at least ${discount.minOrderAmount} to use this code`,
+      `Order subtotal must be at least $${(discount.minOrderAmount / 100).toFixed(2)} to use this code`,
       'INVALID_DISCOUNT',
     );
   }

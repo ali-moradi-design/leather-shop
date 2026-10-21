@@ -351,6 +351,10 @@ describe('Welt & Grain API (integration)', () => {
 
       const mine = await visitor.get('/api/v1/cart').expect(200);
       expect(mine.body.data.items[0].sku).toBe(sku);
+
+      const quote = await visitor.post('/api/v1/cart/quote').send({}).expect(200);
+      expect(quote.body.data).toMatchObject({ discountAmount: 0, total: quote.body.data.subtotal });
+      await visitor.post('/api/v1/cart/quote').send({ discountCode: 'NOPE' }).expect(400);
     });
   });
 
