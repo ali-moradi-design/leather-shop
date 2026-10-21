@@ -15,20 +15,33 @@ export function assertCartNotEmpty(items: CartItem[]): void {
   }
 }
 
-export function mergeCartItem(items: CartItem[], productId: string, quantity: number): CartItem[] {
+const sameLine = (productId: string, sku: string) => (i: CartItem) =>
+  i.productId === productId && i.sku === sku;
+
+export function mergeCartItem(
+  items: CartItem[],
+  productId: string,
+  sku: string,
+  quantity: number,
+): CartItem[] {
   const next = items.map((i) => ({ ...i }));
-  const existing = next.find((i) => i.productId === productId);
+  const existing = next.find(sameLine(productId, sku));
   if (existing) {
     existing.quantity += quantity;
   } else {
-    next.push({ productId, quantity });
+    next.push({ productId, sku, quantity });
   }
   return next;
 }
 
-export function setCartItemQuantity(items: CartItem[], productId: string, quantity: number): CartItem[] {
+export function setCartItemQuantity(
+  items: CartItem[],
+  productId: string,
+  sku: string,
+  quantity: number,
+): CartItem[] {
   const next = items.map((i) => ({ ...i }));
-  const item = next.find((i) => i.productId === productId);
+  const item = next.find(sameLine(productId, sku));
   if (!item) {
     throw new DomainError('Item not in cart', 'NOT_FOUND');
   }
@@ -36,8 +49,8 @@ export function setCartItemQuantity(items: CartItem[], productId: string, quanti
   return next;
 }
 
-export function removeCartItem(items: CartItem[], productId: string): CartItem[] {
-  const next = items.filter((i) => i.productId !== productId);
+export function removeCartItem(items: CartItem[], productId: string, sku: string): CartItem[] {
+  const next = items.filter((i) => !sameLine(productId, sku)(i));
   if (next.length === items.length) {
     throw new DomainError('Item not in cart', 'NOT_FOUND');
   }

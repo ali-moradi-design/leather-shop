@@ -5,7 +5,7 @@ import * as ctrl from '../controllers/cart.controller';
 import {
   addCartItemSchema,
   updateCartItemSchema,
-  productIdParamSchema,
+  lineParamSchema,
   checkoutSchema,
 } from '../validators/cart.validation';
 
@@ -15,11 +15,11 @@ router.use(authenticate);
 router.get('/', ctrl.get);
 router.post('/items', validate({ body: addCartItemSchema }), ctrl.addItem);
 router.patch(
-  '/items/:productId',
-  validate({ params: productIdParamSchema, body: updateCartItemSchema }),
+  '/items/:productId/:sku',
+  validate({ params: lineParamSchema, body: updateCartItemSchema }),
   ctrl.updateItem,
 );
-router.delete('/items/:productId', validate({ params: productIdParamSchema }), ctrl.removeItem);
+router.delete('/items/:productId/:sku', validate({ params: lineParamSchema }), ctrl.removeItem);
 router.delete('/', ctrl.clear);
 router.post(
   '/checkout',

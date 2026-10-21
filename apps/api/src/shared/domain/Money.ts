@@ -1,6 +1,6 @@
 import { DomainError } from './DomainError';
 
-/** Pragmatic money helper (minor-unit rounding to 2 decimals). */
+/** Money in minor units (integer cents). */
 export class Money {
   readonly amount: number;
   readonly currency: string;
@@ -18,7 +18,7 @@ export class Money {
   }
 
   static round(n: number): number {
-    return Math.round(n * 100) / 100;
+    return Math.round(n);
   }
 
   add(other: Money): Money {

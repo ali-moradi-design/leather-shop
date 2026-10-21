@@ -13,7 +13,7 @@ export class MongooseReviewRepository implements IReviewRepository {
   async findById(id: string, populate = false): Promise<Review | null> {
     let q = ReviewModel.findById(id);
     if (populate) {
-      q = q.populate('user', 'name email').populate('product', 'title author');
+      q = q.populate('user', 'name email').populate('product', 'title slug');
     }
     const doc = await q;
     return doc ? mapReview(doc) : null;
@@ -27,7 +27,7 @@ export class MongooseReviewRepository implements IReviewRepository {
     const [docs, total] = await Promise.all([
       ReviewModel.find(query)
         .populate('user', 'name email')
-        .populate('product', 'title author')
+        .populate('product', 'title slug')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),

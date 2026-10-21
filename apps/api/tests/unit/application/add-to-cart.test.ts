@@ -2,21 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { AddToCartUseCase } from '../../../src/modules/ordering/application/use-cases/add-to-cart';
 import { DomainError } from '../../../src/shared/domain/DomainError';
 import type { Cart } from '../../../src/modules/ordering/domain/cart.entity';
-import type { Product } from '../../../src/modules/catalog/domain/product.entity';
+import { makeProduct } from '../../helpers/product';
 
 describe('AddToCartUseCase', () => {
-  const product: Product = {
-    id: 'b1',
-    title: 'Clean Code',
-    author: 'Uncle Bob',
-    description: 'x',
-    price: 30,
-    currency: 'USD',
-    stock: 5,
-    featured: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  const product = makeProduct({ id: 'b1' });
 
   it('adds a new line when stock allows', async () => {
     const cart: Cart = {
@@ -32,8 +21,8 @@ describe('AddToCartUseCase', () => {
     };
     const products = { findById: vi.fn().mockResolvedValue(product) };
     const uc = new AddToCartUseCase(carts as never, products as never);
-    const result = await uc.execute('u1', 'b1', 2);
-    expect(result.items).toEqual([{ productId: 'b1', quantity: 2 }]);
+    const result = await uc.execute('u1', 'b1', 'CAP-10', 2);
+    expect(result.items).toEqual([{ productId: 'b1', sku: 'CAP-10', quantity: 2 }]);
   });
 
   it('fails when stock insufficient', async () => {
@@ -41,7 +30,7 @@ describe('AddToCartUseCase', () => {
       getOrCreate: vi.fn().mockResolvedValue({
         id: 'c1',
         userId: 'u1',
-        items: [{ productId: 'b1', quantity: 4 }],
+        items: [{ productId: 'b1', sku: 'CAP-10', quantity: 4 }],
         createdAt: new Date(),
         updatedAt: new Date(),
       }),
@@ -49,6 +38,14 @@ describe('AddToCartUseCase', () => {
     };
     const products = { findById: vi.fn().mockResolvedValue(product) };
     const uc = new AddToCartUseCase(carts as never, products as never);
-    await expect(uc.execute('u1', 'b1', 2)).rejects.toBeInstanceOf(DomainError);
+    await expect(uc.execute('u1', 'b1', 'CAP-10', 2)).rejects.toBeInstanceOf(DomainError);
+  });
+
+  it('fails for a sold-out size or an unknown size', async () => {
+    const carts = { getOrCreate: vi.fn().mockResolvedValue({ id: 'c1', userId: 'u1', items: [] }), save: vi.fn() };
+    const products = { findById: vi.fn().mockResolvedValue(product) };
+    const uc = new AddToCartUseCase(carts as never, products as never);
+    await expect(uc.execute('u1', 'b1', 'CAP-11', 1)).rejects.toThrow(/Insufficient stock/);
+    await expect(uc.execute('u1', 'b1', 'NOPE', 1)).rejects.toThrow(/Size not available/);
   });
 });

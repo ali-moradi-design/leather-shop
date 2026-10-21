@@ -10,7 +10,7 @@ export interface Review {
   /** populated fields when requested */
   populated?: {
     user?: { name: string; email: string };
-    product?: { title: string; author: string };
+    product?: { title: string; slug: string };
   };
 }
 

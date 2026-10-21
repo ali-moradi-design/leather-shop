@@ -7,10 +7,10 @@ function pendingOrder(): Order {
   return {
     id: 'o1',
     user: 'u1',
-    items: [{ product: 'b1', title: 'T', price: 10, quantity: 1 }],
-    subtotalAmount: 10,
+    items: [{ product: 'b1', sku: 'B1-10', size: '10', title: 'T', price: 1000, quantity: 1 }],
+    subtotalAmount: 1000,
     discountAmount: 0,
-    totalAmount: 10,
+    totalAmount: 1000,
     status: 'pending_payment',
     payment: { method: 'fake', status: 'pending' },
     shippingAddress: {
@@ -45,7 +45,7 @@ describe('PayOrderUseCase', () => {
     const uc = new PayOrderUseCase(orders as never, products as never);
     const paid = await uc.execute('o1', 'u1', false);
     expect(paid.status).toBe('paid');
-    expect(products.decrementStock).toHaveBeenCalledWith('b1', 1);
+    expect(products.decrementStock).toHaveBeenCalledWith('b1', 'B1-10', 1);
   });
 
   it('forbids other users', async () => {

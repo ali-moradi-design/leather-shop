@@ -6,13 +6,18 @@ import {
   createProductSchema,
   updateProductSchema,
   idParamSchema,
+  slugParamSchema,
   listProductsQuerySchema,
+  facetsQuerySchema,
 } from '../validators/products.validation';
 
 const router = Router();
 
 router.get('/featured', ctrl.listFeatured);
+router.get('/facets', validate({ query: facetsQuerySchema }), ctrl.facets);
 router.get('/', validate({ query: listProductsQuerySchema }), ctrl.list);
+router.get('/slug/:slug', validate({ params: slugParamSchema }), ctrl.getBySlug);
+router.get('/slug/:slug/colors', validate({ params: slugParamSchema }), ctrl.colors);
 router.get('/:id', validate({ params: idParamSchema }), ctrl.getById);
 
 router.post('/', authenticate, requirePermission('products:create'), validate({ body: createProductSchema }), ctrl.create);

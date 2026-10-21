@@ -1,7 +1,7 @@
 import { connectDb } from '../shared/config/db';
 import { repos } from '../shared/composition/repos';
 import { seedIdentity } from './seed/identity';
-import { seedCatalog, FEATURED_ISBNS } from './seed/catalog';
+import { seedCatalog, FEATURED_COUNT } from './seed/catalog';
 import { seedPromotions } from './seed/promotions';
 
 export type SeedOptions = {
@@ -20,9 +20,9 @@ async function main() {
   console.log('Seeding...');
   await runSeed();
   const productCount = await repos.products.count();
-  console.log(`Products upserted (catalog count: ${productCount}); featured: ${FEATURED_ISBNS.size}`);
+  console.log(`Products upserted (catalog count: ${productCount}); featured: ${FEATURED_COUNT}`);
   console.log('Admin user: admin@weltandgrain.local / Admin123!');
-  console.log('Sample discounts: WELCOME10 (10%), FLAT5 ($5)');
+  console.log('Sample discounts: WELCOME10 (10%), FLAT20 ($20 off $150+)');
   console.log('Seed complete.');
   process.exit(0);
 }

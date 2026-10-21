@@ -4,7 +4,7 @@ import type { IOrderRepository } from '@modules/ordering/domain/order.repository
 import type { Order, ShippingAddress } from '@modules/ordering/domain/order.entity';
 import type { DiscountService } from '@modules/promotions';
 import { DomainError } from '@shared/domain/DomainError';
-import { assertSufficientStock } from '@modules/catalog';
+import { buildOrderLines } from '@modules/ordering/domain/rules/order.lines';
 import {
   assertCartNotEmpty,
   computeSubtotal,
@@ -27,23 +27,12 @@ export class CheckoutCartUseCase {
     const cart = await this.carts.getOrCreate(userId);
     assertCartNotEmpty(cart.items);
 
-    const productIds = cart.items.map((i) => i.productId);
+    const productIds = [...new Set(cart.items.map((i) => i.productId))];
     const products = await this.products.findByIds(productIds);
-    if (products.length !== new Set(productIds).size) {
+    if (products.length !== productIds.length) {
       throw new DomainError('One or more products in cart not found', 'NOT_FOUND');
     }
-
-    const productMap = new Map(products.map((b) => [b.id, b]));
-    const orderItems = cart.items.map((item) => {
-      const product = productMap.get(item.productId)!;
-      assertSufficientStock(product.stock, item.quantity, product.title);
-      return {
-        product: product.id,
-        title: product.title,
-        price: product.price,
-        quantity: item.quantity,
-      };
-    });
+    const orderItems = buildOrderLines(products, cart.items);
 
     const subtotalAmount = computeSubtotal(
       orderItems.map((i) => ({

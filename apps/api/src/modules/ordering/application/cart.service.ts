@@ -5,7 +5,7 @@ import type { Cart } from '@modules/ordering/domain/cart.entity';
 import type { Order, ShippingAddress } from '@modules/ordering/domain/order.entity';
 import type { DiscountService } from '@modules/promotions';
 import { DomainError } from '@shared/domain/DomainError';
-import { assertPositiveQuantity, assertSufficientStock } from '@modules/catalog';
+import { assertPositiveQuantity, assertSufficientStock, findVariant } from '@modules/catalog';
 import { setCartItemQuantity, removeCartItem } from '@modules/ordering/domain/rules/cart.totals';
 import { AddToCartUseCase } from './use-cases/add-to-cart';
 import { CheckoutCartUseCase } from './use-cases/checkout-cart';
@@ -28,24 +28,24 @@ export class CartService {
     return this.carts.getOrCreate(userId);
   }
 
-  addItem(userId: string, productId: string, quantity: number): Promise<Cart> {
-    return this.addToCart.execute(userId, productId, quantity);
+  addItem(userId: string, productId: string, sku: string, quantity: number): Promise<Cart> {
+    return this.addToCart.execute(userId, productId, sku, quantity);
   }
 
-  async updateItem(userId: string, productId: string, quantity: number): Promise<Cart> {
+  async updateItem(userId: string, productId: string, sku: string, quantity: number): Promise<Cart> {
     assertPositiveQuantity(quantity);
     const product = await this.products.findById(productId);
     if (!product) throw new DomainError('Product not found', 'NOT_FOUND');
-    assertSufficientStock(product.stock, quantity, product.title);
+    assertSufficientStock(findVariant(product, sku).stock, quantity, product.title);
 
     const cart = await this.carts.getOrCreate(userId);
-    cart.items = setCartItemQuantity(cart.items, productId, quantity);
+    cart.items = setCartItemQuantity(cart.items, productId, sku, quantity);
     return this.carts.save(cart);
   }
 
-  async removeItem(userId: string, productId: string): Promise<Cart> {
+  async removeItem(userId: string, productId: string, sku: string): Promise<Cart> {
     const cart = await this.carts.getOrCreate(userId);
-    cart.items = removeCartItem(cart.items, productId);
+    cart.items = removeCartItem(cart.items, productId, sku);
     return this.carts.save(cart);
   }
 

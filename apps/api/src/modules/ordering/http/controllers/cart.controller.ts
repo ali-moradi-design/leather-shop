@@ -10,7 +10,12 @@ export const get = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const addItem = asyncHandler(async (req: Request, res: Response) => {
-  const cart = await cartService.addItem(req.user!.id, req.body.productId, req.body.quantity);
+  const cart = await cartService.addItem(
+    req.user!.id,
+    req.body.productId,
+    req.body.sku,
+    req.body.quantity,
+  );
   res.status(201).json({ data: presentCart(cart) });
 });
 
@@ -18,13 +23,18 @@ export const updateItem = asyncHandler(async (req: Request, res: Response) => {
   const cart = await cartService.updateItem(
     req.user!.id,
     String(req.params.productId),
+    String(req.params.sku),
     req.body.quantity,
   );
   res.json({ data: presentCart(cart) });
 });
 
 export const removeItem = asyncHandler(async (req: Request, res: Response) => {
-  const cart = await cartService.removeItem(req.user!.id, String(req.params.productId));
+  const cart = await cartService.removeItem(
+    req.user!.id,
+    String(req.params.productId),
+    String(req.params.sku),
+  );
   res.json({ data: presentCart(cart) });
 });
 

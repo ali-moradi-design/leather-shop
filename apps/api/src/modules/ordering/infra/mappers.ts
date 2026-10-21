@@ -11,7 +11,11 @@ export function mapOrder(doc: {
   user: { toString(): string };
   items: {
     product: { toString(): string };
+    sku: string;
+    size: string;
+    width?: string;
     title: string;
+    image?: string;
     price: number;
     quantity: number;
   }[];
@@ -29,7 +33,11 @@ export function mapOrder(doc: {
 }): Order {
   const items: OrderItem[] = doc.items.map((i) => ({
     product: i.product.toString(),
+    sku: i.sku,
+    size: i.size,
+    width: i.width,
     title: i.title,
+    image: i.image,
     price: i.price,
     quantity: i.quantity,
   }));
@@ -57,7 +65,7 @@ export function mapCart(doc: {
   id?: string;
   _id?: { toString(): string };
   userId: { toString(): string };
-  items: { productId: { toString(): string }; quantity: number }[];
+  items: { productId: { toString(): string }; sku: string; quantity: number }[];
   createdAt: Date;
   updatedAt: Date;
 }): Cart {
@@ -66,6 +74,7 @@ export function mapCart(doc: {
     userId: doc.userId.toString(),
     items: doc.items.map((i) => ({
       productId: i.productId.toString(),
+      sku: i.sku,
       quantity: i.quantity,
     })),
     createdAt: doc.createdAt,

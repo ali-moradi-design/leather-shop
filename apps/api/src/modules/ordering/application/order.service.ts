@@ -14,7 +14,7 @@ import {
   shouldRestockOnCancel,
 } from '@modules/ordering/domain/order.transitions';
 import { DomainError } from '@shared/domain/DomainError';
-import { assertSufficientStock } from '@modules/catalog';
+import { buildOrderLines } from '@modules/ordering/domain/rules/order.lines';
 import { computeSubtotal, computeOrderTotal } from '@modules/ordering/domain/rules/cart.totals';
 import { PayOrderUseCase } from './use-cases/pay-order';
 
@@ -33,27 +33,19 @@ export class OrderService {
 
   async create(
     userId: string,
-    items: { product: string; quantity: number }[],
+    items: { product: string; sku: string; quantity: number }[],
     shippingAddress: ShippingAddress,
     discountCode?: string,
   ): Promise<Order> {
-    const productIds = items.map((i) => i.product);
+    const productIds = [...new Set(items.map((i) => i.product))];
     const products = await this.products.findByIds(productIds);
-    if (products.length !== new Set(productIds).size) {
+    if (products.length !== productIds.length) {
       throw new DomainError('One or more products not found', 'NOT_FOUND');
     }
-
-    const productMap = new Map(products.map((b) => [b.id, b]));
-    const orderItems = items.map((item) => {
-      const product = productMap.get(item.product)!;
-      assertSufficientStock(product.stock, item.quantity, product.title);
-      return {
-        product: product.id,
-        title: product.title,
-        price: product.price,
-        quantity: item.quantity,
-      };
-    });
+    const orderItems = buildOrderLines(
+      products,
+      items.map((i) => ({ productId: i.product, sku: i.sku, quantity: i.quantity })),
+    );
 
     const subtotalAmount = computeSubtotal(
       orderItems.map((i) => ({
@@ -125,7 +117,7 @@ export class OrderService {
 
     if (nextStatus === 'cancelled' && shouldRestockOnCancel(order.status)) {
       for (const item of order.items) {
-        await this.products.incrementStock(item.product, item.quantity);
+        await this.products.incrementStock(item.product, item.sku, item.quantity);
       }
     }
 
