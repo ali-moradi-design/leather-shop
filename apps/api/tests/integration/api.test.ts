@@ -456,6 +456,16 @@ describe('Welt & Grain API (integration)', () => {
       expect(id1).toBeTruthy();
       expect(id2).toBeTruthy();
       expect(id1).not.toBe(id2);
+
+      // the product's rating follows its reviews
+      const product = await ctx.request.get(`/api/v1/products/${productId}`).expect(200);
+      expect(product.body.data.ratingCount).toBe(2);
+      expect(product.body.data.ratingAvg).toBe(4.5);
+
+      // the public list shows the reviewer's name, not the email
+      const list = await ctx.request.get(`/api/v1/reviews?product=${productId}`).expect(200);
+      expect(list.body.data[0].user.name).toBeTruthy();
+      expect(list.body.data[0].user.email).toBeUndefined();
     });
   });
 

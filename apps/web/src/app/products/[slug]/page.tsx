@@ -10,6 +10,8 @@ import {
   type Product,
 } from '@/entities/product';
 import { BuyBox, BuyBoxSkeleton } from '@/features/add-to-cart';
+import { FavoriteButton } from '@/features/favorite';
+import { ReviewForm, ReviewList } from '@/features/reviews';
 import { ColorPicker, Details, Editorial, Gallery } from '@/widgets/product-detail';
 import { COLLECTIONS, SITE } from '@/shared/config';
 import { formatMoney } from '@/shared/lib/money';
@@ -117,7 +119,10 @@ export default async function ProductPage({ params }: Props) {
       <section className="grid gap-10 px-4 sm:px-[58px] lg:grid-cols-[730px_1fr] lg:gap-[50px]">
         <Gallery images={product.images} title={product.title} />
         <div className="lg:sticky lg:top-[180px] lg:self-start">
-          <h1 className="heading text-[30px]">{product.name}</h1>
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="heading text-[30px]">{product.name}</h1>
+            <FavoriteButton productId={product.id} />
+          </div>
           <p className="my-2 text-[16px]">
             {product.compareAtPrice && <s className="mr-2 text-mute">{formatMoney(product.compareAtPrice)}</s>}
             {formatMoney(product.price)} or 4 payments of {formatMoney(Math.round(product.price / 4))}
@@ -142,6 +147,14 @@ export default async function ProductPage({ params }: Props) {
       </section>
       <Details product={product} />
       <Editorial product={product} />
+      <section id="reviews" className="scroll-mt-40 px-4 py-16 sm:px-[58px]">
+        <h2 className="heading mb-6 text-[28px]">Reviews</h2>
+        <Suspense fallback={<div className="h-40" />}>
+          <ReviewList productId={product.id} />
+        </Suspense>
+        <h3 className="heading mb-4 mt-12 text-[22px]">Write a review</h3>
+        <ReviewForm productId={product.id} />
+      </section>
     </>
   );
 }
