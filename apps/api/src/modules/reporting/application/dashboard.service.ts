@@ -1,25 +1,25 @@
 import type { IUserRepository } from '@modules/identity';
-import type { IBookRepository } from '@modules/catalog';
+import type { IProductRepository } from '@modules/catalog';
 import type { IOrderRepository } from '@modules/ordering';
 import type { IIssueReportRepository } from '@modules/reporting/domain/report.repository';
 import type { Order } from '@modules/ordering';
-import type { Book } from '@modules/catalog';
+import type { Product } from '@modules/catalog';
 
 export class DashboardService {
   constructor(
     private readonly users: IUserRepository,
-    private readonly books: IBookRepository,
+    private readonly products: IProductRepository,
     private readonly orders: IOrderRepository,
     private readonly issues: IIssueReportRepository,
   ) {}
 
   async summary(lowStockThreshold = 5) {
-    const [users, books, orders, openIssues, lowStock, revenueAgg] = await Promise.all([
+    const [users, products, orders, openIssues, lowStock, revenueAgg] = await Promise.all([
       this.users.count(),
-      this.books.count(),
+      this.products.count(),
       this.orders.count(),
       this.issues.countOpen(),
-      this.books.countLowStock(lowStockThreshold),
+      this.products.countLowStock(lowStockThreshold),
       this.orders.aggregateRevenue({
         deletedAt: null,
         'payment.status': 'paid',
@@ -29,7 +29,7 @@ export class DashboardService {
 
     return {
       users,
-      books,
+      products,
       orders,
       revenue: revenueAgg.totalRevenue ?? 0,
       openIssueReports: openIssues,
@@ -41,7 +41,7 @@ export class DashboardService {
     return this.orders.list({ limit: Math.min(50, Math.max(1, limit)) });
   }
 
-  async lowStock(threshold = 5, limit = 50): Promise<Book[]> {
-    return this.books.findLowStock(threshold, limit);
+  async lowStock(threshold = 5, limit = 50): Promise<Product[]> {
+    return this.products.findLowStock(threshold, limit);
   }
 }

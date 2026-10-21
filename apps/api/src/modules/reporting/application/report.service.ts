@@ -91,9 +91,9 @@ export class ReportService {
     return this.orders.aggregateByStatus();
   }
 
-  async topBooks(from?: string, to?: string, limit = 10) {
+  async topProducts(from?: string, to?: string, limit = 10) {
     const match = this.paidMatch(from, to);
-    return this.orders.aggregateTopBooks(match, Math.min(limit, 50));
+    return this.orders.aggregateTopProducts(match, Math.min(limit, 50));
   }
 
   async salesByDate(from?: string, to?: string) {

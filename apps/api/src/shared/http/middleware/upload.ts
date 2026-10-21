@@ -3,11 +3,11 @@ import path from 'path';
 import { AppError } from '@shared/errors/AppError';
 import { storage } from '@shared/infra';
 
-const booksDir = storage.absoluteDir('books');
+const productsDir = storage.absoluteDir('products');
 
 const disk = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, booksDir);
+    cb(null, productsDir);
   },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
@@ -21,7 +21,7 @@ const disk = multer.diskStorage({
 
 const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 
-export const bookCoverUpload = multer({
+export const productCoverUpload = multer({
   storage: disk,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {

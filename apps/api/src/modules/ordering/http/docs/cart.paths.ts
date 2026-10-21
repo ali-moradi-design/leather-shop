@@ -50,11 +50,11 @@ export const cartPaths = {
             "schema": {
               "type": "object",
               "required": [
-                "bookId",
+                "productId",
                 "quantity"
               ],
               "properties": {
-                "bookId": {
+                "productId": {
                   "type": "string"
                 },
                 "quantity": {
@@ -72,7 +72,7 @@ export const cartPaths = {
       }
     }
   },
-  "/api/v1/cart/items/{bookId}": {
+  "/api/v1/cart/items/{productId}": {
     "patch": {
       "tags": [
         "Cart"
@@ -85,7 +85,7 @@ export const cartPaths = {
       ],
       "parameters": [
         {
-          "name": "bookId",
+          "name": "productId",
           "in": "path",
           "required": true,
           "schema": {
@@ -111,7 +111,7 @@ export const cartPaths = {
       ],
       "parameters": [
         {
-          "name": "bookId",
+          "name": "productId",
           "in": "path",
           "required": true,
           "schema": {

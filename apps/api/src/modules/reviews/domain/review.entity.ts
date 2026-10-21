@@ -1,6 +1,6 @@
 export interface Review {
   id: string;
-  book: string;
+  product: string;
   user: string;
   rating: number;
   comment?: string;
@@ -10,12 +10,12 @@ export interface Review {
   /** populated fields when requested */
   populated?: {
     user?: { name: string; email: string };
-    book?: { title: string; author: string };
+    product?: { title: string; author: string };
   };
 }
 
 export interface CreateReviewInput {
-  book: string;
+  product: string;
   user: string;
   rating: number;
   comment?: string;
@@ -27,7 +27,7 @@ export interface UpdateReviewInput {
 }
 
 export interface ReviewListFilter {
-  book?: string;
+  product?: string;
   user?: string;
   page?: number;
   limit?: number;

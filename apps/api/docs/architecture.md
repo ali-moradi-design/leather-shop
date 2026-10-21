@@ -9,7 +9,7 @@ src/
   shared/                 # kernel: errors, pagination, logger, middleware, config, VOs, UoW, storage
   modules/
     identity/             # auth, users, RBAC
-    catalog/              # books, featured, cover uploads, stock rules
+    catalog/              # products, featured, cover uploads, stock rules
     ordering/             # cart, orders, checkout, pay
     reviews/
     engagement/           # favorites
@@ -44,7 +44,7 @@ HTTP (module http/) → application → domain ports/rules → module infra (mon
 
 - **Cart + orders + checkout/pay** → `ordering` (uses catalog stock + promotions discount *application*).
 - **Discount CRUD** → `promotions`; ordering never owns admin discount routes.
-- **Books / stock / uploads** → `catalog`.
+- **Products / stock / uploads** → `catalog`.
 - **Auth middleware** → `identity` (`authenticate`, `requirePermission`).
 
 ## Path aliases

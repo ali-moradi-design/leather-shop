@@ -5,8 +5,8 @@ import { seedCatalog, FEATURED_ISBNS } from './seed/catalog';
 import { seedPromotions } from './seed/promotions';
 
 export type SeedOptions = {
-  /** When true, seed only a handful of books (for automated tests). */
-  minimalBooks?: boolean;
+  /** When true, seed only a handful of products (for automated tests). */
+  minimalProducts?: boolean;
 };
 
 export async function runSeed(options: SeedOptions = {}): Promise<void> {
@@ -19,9 +19,9 @@ async function main() {
   await connectDb();
   console.log('Seeding...');
   await runSeed();
-  const bookCount = await repos.books.count();
-  console.log(`Books upserted (catalog count: ${bookCount}); featured: ${FEATURED_ISBNS.size}`);
-  console.log('Admin user: admin@bookstore.local / Admin123!');
+  const productCount = await repos.products.count();
+  console.log(`Products upserted (catalog count: ${productCount}); featured: ${FEATURED_ISBNS.size}`);
+  console.log('Admin user: admin@weltandgrain.local / Admin123!');
   console.log('Sample discounts: WELCOME10 (10%), FLAT5 ($5)');
   console.log('Seed complete.');
   process.exit(0);

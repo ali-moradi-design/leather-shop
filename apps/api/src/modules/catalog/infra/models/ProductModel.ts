@@ -1,6 +1,6 @@
 import { Schema, model, Document, Query } from 'mongoose';
 
-export interface IBookDoc extends Document {
+export interface IProductDoc extends Document {
   title: string;
   author: string;
   description: string;
@@ -17,7 +17,7 @@ export interface IBookDoc extends Document {
   updatedAt: Date;
 }
 
-const bookSchema = new Schema<IBookDoc>(
+const productSchema = new Schema<IProductDoc>(
   {
     title: { type: String, required: true, trim: true },
     author: { type: String, required: true, trim: true },
@@ -37,14 +37,14 @@ const bookSchema = new Schema<IBookDoc>(
 
 // Text search: regex on title/author/description (documented alternative to text index;
 // text index also available for production-scale search).
-bookSchema.index({ title: 'text', author: 'text', description: 'text' });
-bookSchema.index({ price: 1 });
-bookSchema.index({ featured: 1, featuredOrder: 1 });
+productSchema.index({ title: 'text', author: 'text', description: 'text' });
+productSchema.index({ price: 1 });
+productSchema.index({ featured: 1, featuredOrder: 1 });
 
-bookSchema.pre(/^find/, function (this: Query<unknown, IBookDoc>) {
+productSchema.pre(/^find/, function (this: Query<unknown, IProductDoc>) {
   if (this.getFilter().deletedAt === undefined) {
     this.where({ deletedAt: null });
   }
 });
 
-export const BookModel = model<IBookDoc>('Book', bookSchema);
+export const ProductModel = model<IProductDoc>('Product', productSchema);

@@ -1,10 +1,10 @@
 export const uploadsPaths = {
-  "/api/v1/uploads/book-cover": {
+  "/api/v1/uploads/product-cover": {
     "post": {
       "tags": [
         "Uploads"
       ],
-      "summary": "Upload book cover image (multipart field: file)",
+      "summary": "Upload product cover image (multipart field: file)",
       "security": [
         {
           "bearerAuth": []
@@ -35,7 +35,7 @@ export const uploadsPaths = {
                 "properties": {
                   "url": {
                     "type": "string",
-                    "example": "/uploads/books/123-cover.jpg"
+                    "example": "/uploads/products/123-cover.jpg"
                   }
                 }
               }

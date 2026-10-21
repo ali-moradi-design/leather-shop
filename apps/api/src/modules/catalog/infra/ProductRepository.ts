@@ -1,27 +1,27 @@
-import type { IBookRepository } from '@modules/catalog/domain/book.repository';
-import type { Book, CreateBookInput, UpdateBookInput, BookListFilter } from '@modules/catalog/domain/book.entity';
-import { BookModel } from './models/BookModel';
-import { mapBook } from './mappers';
+import type { IProductRepository } from '@modules/catalog/domain/product.repository';
+import type { Product, CreateProductInput, UpdateProductInput, ProductListFilter } from '@modules/catalog/domain/product.entity';
+import { ProductModel } from './models/ProductModel';
+import { mapProduct } from './mappers';
 import { paginate } from '@shared/pagination';
 
 /**
- * Book search strategy:
+ * Product search strategy:
  * - Prefer MongoDB text index ($text) when `q` is provided (index on title/author/description).
  * - Fall back to case-insensitive regex on title/author/description if text search fails
  *   or yields no usable results for short/special queries.
  */
-export class MongooseBookRepository implements IBookRepository {
-  async findById(id: string): Promise<Book | null> {
-    const doc = await BookModel.findById(id);
-    return doc ? mapBook(doc) : null;
+export class MongooseProductRepository implements IProductRepository {
+  async findById(id: string): Promise<Product | null> {
+    const doc = await ProductModel.findById(id);
+    return doc ? mapProduct(doc) : null;
   }
 
-  async findByIds(ids: string[]): Promise<Book[]> {
-    const docs = await BookModel.find({ _id: { $in: ids } });
-    return docs.map(mapBook);
+  async findByIds(ids: string[]): Promise<Product[]> {
+    const docs = await ProductModel.find({ _id: { $in: ids } });
+    return docs.map(mapProduct);
   }
 
-  async list(filter: BookListFilter): Promise<{ data: Book[]; total: number }> {
+  async list(filter: ProductListFilter): Promise<{ data: Product[]; total: number }> {
     const { limit, skip } = paginate(filter.page, filter.limit);
     const query: Record<string, unknown> = {};
 
@@ -61,75 +61,75 @@ export class MongooseBookRepository implements IBookRepository {
     const finalQuery = buildSearchQuery(filter, query);
 
     const [docs, total] = await Promise.all([
-      BookModel.find(finalQuery).sort(sort).skip(skip).limit(limit),
-      BookModel.countDocuments(finalQuery),
+      ProductModel.find(finalQuery).sort(sort).skip(skip).limit(limit),
+      ProductModel.countDocuments(finalQuery),
     ]);
-    return { data: docs.map(mapBook), total };
+    return { data: docs.map(mapProduct), total };
   }
 
-  async listFeatured(limit = 20): Promise<Book[]> {
-    const docs = await BookModel.find({ featured: true })
+  async listFeatured(limit = 20): Promise<Product[]> {
+    const docs = await ProductModel.find({ featured: true })
       .sort({ featuredOrder: 1, createdAt: -1 })
       .limit(limit);
-    return docs.map(mapBook);
+    return docs.map(mapProduct);
   }
 
-  async create(input: CreateBookInput): Promise<Book> {
-    const doc = await BookModel.create({
+  async create(input: CreateProductInput): Promise<Product> {
+    const doc = await ProductModel.create({
       ...input,
       featured: input.featured ?? false,
       featuredOrder: input.featuredOrder ?? 0,
     });
-    return mapBook(doc);
+    return mapProduct(doc);
   }
 
-  async update(id: string, input: UpdateBookInput): Promise<Book | null> {
-    const doc = await BookModel.findByIdAndUpdate(id, input, { returnDocument: 'after', runValidators: true });
-    return doc ? mapBook(doc) : null;
+  async update(id: string, input: UpdateProductInput): Promise<Product | null> {
+    const doc = await ProductModel.findByIdAndUpdate(id, input, { returnDocument: 'after', runValidators: true });
+    return doc ? mapProduct(doc) : null;
   }
 
-  async softDelete(id: string): Promise<Book | null> {
-    const doc = await BookModel.findByIdAndUpdate(id, { deletedAt: new Date() }, { returnDocument: 'after' });
-    return doc ? mapBook(doc) : null;
+  async softDelete(id: string): Promise<Product | null> {
+    const doc = await ProductModel.findByIdAndUpdate(id, { deletedAt: new Date() }, { returnDocument: 'after' });
+    return doc ? mapProduct(doc) : null;
   }
 
-  async decrementStock(bookId: string, quantity: number): Promise<boolean> {
-    const result = await BookModel.updateOne(
-      { _id: bookId, stock: { $gte: quantity }, deletedAt: null },
+  async decrementStock(productId: string, quantity: number): Promise<boolean> {
+    const result = await ProductModel.updateOne(
+      { _id: productId, stock: { $gte: quantity }, deletedAt: null },
       { $inc: { stock: -quantity } },
     );
     return result.modifiedCount === 1;
   }
 
-  async incrementStock(bookId: string, quantity: number): Promise<void> {
-    await BookModel.updateOne({ _id: bookId }, { $inc: { stock: quantity } });
+  async incrementStock(productId: string, quantity: number): Promise<void> {
+    await ProductModel.updateOne({ _id: productId }, { $inc: { stock: quantity } });
   }
 
   async upsertByIsbn(
     isbn: string,
-    data: CreateBookInput & { coverImageUrl: string },
-  ): Promise<Book> {
-    const doc = await BookModel.findOneAndUpdate({ isbn }, data, {
+    data: CreateProductInput & { coverImageUrl: string },
+  ): Promise<Product> {
+    const doc = await ProductModel.findOneAndUpdate({ isbn }, data, {
       upsert: true,
       returnDocument: 'after',
       setDefaultsOnInsert: true,
     });
-    return mapBook(doc!);
+    return mapProduct(doc!);
   }
 
   async count(): Promise<number> {
-    return BookModel.countDocuments();
+    return ProductModel.countDocuments();
   }
 
   async countLowStock(threshold: number): Promise<number> {
-    return BookModel.countDocuments({ stock: { $lte: threshold } });
+    return ProductModel.countDocuments({ stock: { $lte: threshold } });
   }
 
-  async findLowStock(threshold: number, limit = 50): Promise<Book[]> {
-    const docs = await BookModel.find({ stock: { $lte: threshold } })
+  async findLowStock(threshold: number, limit = 50): Promise<Product[]> {
+    const docs = await ProductModel.find({ stock: { $lte: threshold } })
       .sort({ stock: 1 })
       .limit(limit);
-    return docs.map(mapBook);
+    return docs.map(mapProduct);
   }
 }
 
@@ -138,7 +138,7 @@ function escapeRegex(s: string): string {
 }
 
 function buildSearchQuery(
-  filter: BookListFilter,
+  filter: ProductListFilter,
   base: Record<string, unknown>,
 ): Record<string, unknown> {
   // Documented choice: case-insensitive regex on title/author/description for `q`

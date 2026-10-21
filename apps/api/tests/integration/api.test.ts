@@ -9,7 +9,7 @@ import {
   type TestContext,
 } from '../helpers/testApp';
 
-describe('Bookstore API (integration)', () => {
+describe('Welt & Grain API (integration)', () => {
   let ctx: TestContext;
 
   beforeAll(async () => {
@@ -70,7 +70,7 @@ describe('Bookstore API (integration)', () => {
     it('rejects bad login', async () => {
       const res = await ctx.request
         .post('/api/v1/auth/login')
-        .send({ email: 'admin@bookstore.local', password: 'wrong-password' })
+        .send({ email: 'admin@weltandgrain.local', password: 'wrong-password' })
         .expect(401);
       expect(res.body.message).toMatch(/invalid credentials/i);
     });
@@ -124,7 +124,7 @@ describe('Bookstore API (integration)', () => {
         .expect(403);
 
       await ctx.request
-        .post('/api/v1/books')
+        .post('/api/v1/products')
         .set(authHeader(customer.accessToken))
         .send({
           title: 'Denied',
@@ -144,25 +144,25 @@ describe('Bookstore API (integration)', () => {
     });
   });
 
-  describe('Books', () => {
-    it('lists, searches, and returns featured books', async () => {
-      const list = await ctx.request.get('/api/v1/books').expect(200);
+  describe('Products', () => {
+    it('lists, searches, and returns featured products', async () => {
+      const list = await ctx.request.get('/api/v1/products').expect(200);
       expect(list.body.data.length).toBeGreaterThan(0);
 
-      const search = await ctx.request.get('/api/v1/books?q=Clean').expect(200);
+      const search = await ctx.request.get('/api/v1/products?q=Clean').expect(200);
       expect(search.body.data.some((b: { title: string }) => /clean/i.test(b.title))).toBe(true);
 
-      const featured = await ctx.request.get('/api/v1/books/featured').expect(200);
+      const featured = await ctx.request.get('/api/v1/products/featured').expect(200);
       expect(featured.body.data.length).toBeGreaterThan(0);
       expect(featured.body.data.every((b: { featured: boolean }) => b.featured === true)).toBe(true);
     });
 
-    it('admin can create and update a book', async () => {
+    it('admin can create and update a product', async () => {
       const created = await ctx.request
-        .post('/api/v1/books')
+        .post('/api/v1/products')
         .set(authHeader(ctx.adminToken))
         .send({
-          title: 'Test Book Create',
+          title: 'Test Product Create',
           author: 'Tester',
           description: 'Created in integration test',
           isbn: `978${Date.now().toString().slice(-10)}`,
@@ -175,7 +175,7 @@ describe('Bookstore API (integration)', () => {
       const id = created.body.data.id as string;
 
       const updated = await ctx.request
-        .patch(`/api/v1/books/${id}`)
+        .patch(`/api/v1/products/${id}`)
         .set(authHeader(ctx.adminToken))
         .send({ price: 21.5, stock: 8 })
         .expect(200);
@@ -187,24 +187,24 @@ describe('Bookstore API (integration)', () => {
 
   describe('Cart & orders', () => {
     it('add → update → checkout → pending_payment; pay decrements stock', async () => {
-      const books = await ctx.request.get('/api/v1/books?limit=1').expect(200);
-      const bookId = books.body.data[0].id as string;
-      const bookPrice = books.body.data[0].price as number;
+      const products = await ctx.request.get('/api/v1/products?limit=1').expect(200);
+      const productId = products.body.data[0].id as string;
+      const productPrice = products.body.data[0].price as number;
 
       const customer = await registerCustomer(ctx.request, `cart_${Date.now()}`);
       const token = customer.accessToken;
 
-      const beforeBook = await ctx.request.get(`/api/v1/books/${bookId}`).expect(200);
-      const stockBefore = beforeBook.body.data.stock as number;
+      const beforeProduct = await ctx.request.get(`/api/v1/products/${productId}`).expect(200);
+      const stockBefore = beforeProduct.body.data.stock as number;
 
       await ctx.request
         .post('/api/v1/cart/items')
         .set(authHeader(token))
-        .send({ bookId, quantity: 1 })
+        .send({ productId, quantity: 1 })
         .expect(201);
 
       await ctx.request
-        .patch(`/api/v1/cart/items/${bookId}`)
+        .patch(`/api/v1/cart/items/${productId}`)
         .set(authHeader(token))
         .send({ quantity: 2 })
         .expect(200);
@@ -217,7 +217,7 @@ describe('Bookstore API (integration)', () => {
 
       const order = checkout.body.data;
       expect(order.status).toBe('pending_payment');
-      expect(order.totalAmount).toBeCloseTo(bookPrice * 2, 2);
+      expect(order.totalAmount).toBeCloseTo(productPrice * 2, 2);
 
       const paid = await ctx.request
         .post(`/api/v1/orders/${order.id}/pay`)
@@ -226,16 +226,16 @@ describe('Bookstore API (integration)', () => {
 
       expect(paid.body.data.status).toBe('paid');
 
-      const afterBook = await ctx.request.get(`/api/v1/books/${bookId}`).expect(200);
-      expect(afterBook.body.data.stock).toBe(stockBefore - 2);
+      const afterProduct = await ctx.request.get(`/api/v1/products/${productId}`).expect(200);
+      expect(afterProduct.body.data.stock).toBe(stockBefore - 2);
     });
 
     it('out-of-stock pay fails when concurrent orders oversell', async () => {
       const created = await ctx.request
-        .post('/api/v1/books')
+        .post('/api/v1/products')
         .set(authHeader(ctx.adminToken))
         .send({
-          title: 'Scarce Book',
+          title: 'Scarce Product',
           author: 'Limited',
           description: 'Only one copy',
           isbn: `979${Date.now().toString().slice(-10)}`,
@@ -252,7 +252,7 @@ describe('Bookstore API (integration)', () => {
         await ctx.request
           .post('/api/v1/cart/items')
           .set(authHeader(c.accessToken))
-          .send({ bookId: scarceId, quantity: 1 })
+          .send({ productId: scarceId, quantity: 1 })
           .expect(201);
 
         await ctx.request
@@ -290,13 +290,13 @@ describe('Bookstore API (integration)', () => {
   describe('Favorites', () => {
     it('add → list → remove', async () => {
       const customer = await registerCustomer(ctx.request, `fav_${Date.now()}`);
-      const books = await ctx.request.get('/api/v1/books?limit=1').expect(200);
-      const bookId = books.body.data[0].id as string;
+      const products = await ctx.request.get('/api/v1/products?limit=1').expect(200);
+      const productId = products.body.data[0].id as string;
 
       await ctx.request
         .post('/api/v1/favorites')
         .set(authHeader(customer.accessToken))
-        .send({ bookId })
+        .send({ productId })
         .expect(201);
 
       const list = await ctx.request
@@ -304,10 +304,10 @@ describe('Bookstore API (integration)', () => {
         .set(authHeader(customer.accessToken))
         .expect(200);
 
-      expect(list.body.data.some((f: { bookId: string }) => f.bookId === bookId)).toBe(true);
+      expect(list.body.data.some((f: { productId: string }) => f.productId === productId)).toBe(true);
 
       await ctx.request
-        .delete(`/api/v1/favorites/${bookId}`)
+        .delete(`/api/v1/favorites/${productId}`)
         .set(authHeader(customer.accessToken))
         .expect(200);
 
@@ -323,16 +323,16 @@ describe('Bookstore API (integration)', () => {
   describe('Discounts', () => {
     it('applies WELCOME10 on checkout and rejects invalid codes', async () => {
       const customer = await registerCustomer(ctx.request, `disc_${Date.now()}`);
-      const books = await ctx.request.get('/api/v1/books?limit=20').expect(200);
-      const book =
-        books.body.data.find((b: { price: number; stock: number }) => b.price >= 20 && b.stock > 0) ??
-        books.body.data[0];
-      const qty = book.price >= 20 ? 1 : 2;
+      const products = await ctx.request.get('/api/v1/products?limit=20').expect(200);
+      const product =
+        products.body.data.find((b: { price: number; stock: number }) => b.price >= 20 && b.stock > 0) ??
+        products.body.data[0];
+      const qty = product.price >= 20 ? 1 : 2;
 
       await ctx.request
         .post('/api/v1/cart/items')
         .set(authHeader(customer.accessToken))
-        .send({ bookId: book.id, quantity: qty })
+        .send({ productId: product.id, quantity: qty })
         .expect(201);
 
       const checkout = await ctx.request
@@ -349,7 +349,7 @@ describe('Bookstore API (integration)', () => {
       await ctx.request
         .post('/api/v1/cart/items')
         .set(authHeader(customer2.accessToken))
-        .send({ bookId: book.id, quantity: 1 })
+        .send({ productId: product.id, quantity: 1 })
         .expect(201);
 
       const bad = await ctx.request
@@ -363,21 +363,21 @@ describe('Bookstore API (integration)', () => {
   });
 
   describe('Reviews', () => {
-    it('allows multiple reviews from the same user for the same book', async () => {
+    it('allows multiple reviews from the same user for the same product', async () => {
       const customer = await registerCustomer(ctx.request, `rev_${Date.now()}`);
-      const books = await ctx.request.get('/api/v1/books?limit=1').expect(200);
-      const bookId = books.body.data[0].id as string;
+      const products = await ctx.request.get('/api/v1/products?limit=1').expect(200);
+      const productId = products.body.data[0].id as string;
 
       const r1 = await ctx.request
         .post('/api/v1/reviews')
         .set(authHeader(customer.accessToken))
-        .send({ book: bookId, rating: 5, comment: 'First review' })
+        .send({ product: productId, rating: 5, comment: 'First review' })
         .expect(201);
 
       const r2 = await ctx.request
         .post('/api/v1/reviews')
         .set(authHeader(customer.accessToken))
-        .send({ book: bookId, rating: 4, comment: 'Second review same book' })
+        .send({ product: productId, rating: 4, comment: 'Second review same product' })
         .expect(201);
 
       const id1 = (r1.body.id ?? r1.body.data?.id) as string;
@@ -401,11 +401,11 @@ describe('Bookstore API (integration)', () => {
 
   describe('Uploads', () => {
     it('rejects unauthenticated and unauthorized upload attempts', async () => {
-      await ctx.request.post('/api/v1/uploads/book-cover').expect(401);
+      await ctx.request.post('/api/v1/uploads/product-cover').expect(401);
 
       const customer = await registerCustomer(ctx.request, `upl_${Date.now()}`);
       await ctx.request
-        .post('/api/v1/uploads/book-cover')
+        .post('/api/v1/uploads/product-cover')
         .set(authHeader(customer.accessToken))
         .expect(403);
     });

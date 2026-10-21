@@ -13,7 +13,7 @@ export interface OrderPaidPayload {
 }
 
 export interface StockLowPayload {
-  bookId: string;
+  productId: string;
   title: string;
   stock: number;
   threshold: number;

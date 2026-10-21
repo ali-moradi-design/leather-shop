@@ -13,7 +13,7 @@ export class MongooseReviewRepository implements IReviewRepository {
   async findById(id: string, populate = false): Promise<Review | null> {
     let q = ReviewModel.findById(id);
     if (populate) {
-      q = q.populate('user', 'name email').populate('book', 'title author');
+      q = q.populate('user', 'name email').populate('product', 'title author');
     }
     const doc = await q;
     return doc ? mapReview(doc) : null;
@@ -22,12 +22,12 @@ export class MongooseReviewRepository implements IReviewRepository {
   async list(filter: ReviewListFilter): Promise<{ data: Review[]; total: number }> {
     const { limit, skip } = paginate(filter.page, filter.limit);
     const query: Record<string, unknown> = {};
-    if (filter.book) query.book = filter.book;
+    if (filter.product) query.product = filter.product;
     if (filter.user) query.user = filter.user;
     const [docs, total] = await Promise.all([
       ReviewModel.find(query)
         .populate('user', 'name email')
-        .populate('book', 'title author')
+        .populate('product', 'title author')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),

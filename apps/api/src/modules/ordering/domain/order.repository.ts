@@ -18,7 +18,7 @@ export interface IOrderRepository {
     avgOrderValue: number;
   }>;
   aggregateByStatus(): Promise<{ status: string; count: number }[]>;
-  aggregateTopBooks(
+  aggregateTopProducts(
     match: Record<string, unknown>,
     limit: number,
   ): Promise<{ _id: string; title: string; quantitySold: number; revenue: number }[]>;

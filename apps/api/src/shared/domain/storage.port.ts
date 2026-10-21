@@ -1,5 +1,5 @@
 export interface StoredFile {
-  /** Relative public URL path, e.g. /uploads/books/xyz.jpg */
+  /** Relative public URL path, e.g. /uploads/products/xyz.jpg */
   url: string;
   filename: string;
   mimetype: string;
@@ -7,7 +7,7 @@ export interface StoredFile {
 }
 
 export interface IStoragePort {
-  /** Persist a buffer under a logical folder (e.g. "books"). */
+  /** Persist a buffer under a logical folder (e.g. "products"). */
   save(folder: string, filename: string, buffer: Buffer, mimetype: string): Promise<StoredFile>;
   /** Absolute directory used for a folder (for multer disk storage). */
   absoluteDir(folder: string): string;

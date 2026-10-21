@@ -1,5 +1,5 @@
-# Bookstore API — single-stage Node image
-FROM node:20-bookworm-slim
+# Welt & Grain API — single-stage Node image
+FROM node:20-productworm-slim
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ RUN npm install --no-save typescript tsc-alias && npm run build && npm prune --o
 
 COPY .env.example ./.env.example
 
-RUN mkdir -p uploads/books
+RUN mkdir -p uploads/products
 
 EXPOSE 4000
 

@@ -1,4 +1,4 @@
-export const ISSUE_TYPES = ['book', 'order', 'review', 'other'] as const;
+export const ISSUE_TYPES = ['product', 'order', 'review', 'other'] as const;
 export const ISSUE_STATUSES = ['open', 'in_progress', 'resolved', 'closed'] as const;
 
 export type IssueType = (typeof ISSUE_TYPES)[number];

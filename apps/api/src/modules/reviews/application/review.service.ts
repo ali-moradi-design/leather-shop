@@ -1,5 +1,5 @@
 import type { IReviewRepository } from '@modules/reviews/domain/review.repository';
-import type { IBookRepository } from '@modules/catalog';
+import type { IProductRepository } from '@modules/catalog';
 import type { ReviewListFilter } from '@modules/reviews/domain/review.entity';
 import { AppError } from '@shared/errors/AppError';
 import { paginate } from '@shared/pagination';
@@ -7,7 +7,7 @@ import { paginate } from '@shared/pagination';
 export class ReviewService {
   constructor(
     private readonly reviews: IReviewRepository,
-    private readonly books: IBookRepository,
+    private readonly products: IProductRepository,
   ) {}
 
   async list(filter: ReviewListFilter) {
@@ -25,12 +25,12 @@ export class ReviewService {
     return this.toResponse(review);
   }
 
-  async create(input: { book: string; userId: string; rating: number; comment?: string }) {
-    const book = await this.books.findById(input.book);
-    if (!book) throw new AppError('Book not found', 404);
+  async create(input: { product: string; userId: string; rating: number; comment?: string }) {
+    const product = await this.products.findById(input.product);
+    if (!product) throw new AppError('Product not found', 404);
 
     const review = await this.reviews.create({
-      book: input.book,
+      product: input.product,
       user: input.userId,
       rating: input.rating,
       comment: input.comment,
@@ -73,7 +73,7 @@ export class ReviewService {
 
   private toResponse(review: {
     id: string;
-    book: string;
+    product: string;
     user: string;
     rating: number;
     comment?: string;
@@ -81,15 +81,15 @@ export class ReviewService {
     updatedAt: Date;
     populated?: {
       user?: { name: string; email: string };
-      book?: { title: string; author: string };
+      product?: { title: string; author: string };
     };
   }) {
     return {
       id: review.id,
       _id: review.id,
-      book: review.populated?.book
-        ? { _id: review.book, ...review.populated.book }
-        : review.book,
+      product: review.populated?.product
+        ? { _id: review.product, ...review.populated.product }
+        : review.product,
       user: review.populated?.user
         ? { _id: review.user, ...review.populated.user }
         : review.user,

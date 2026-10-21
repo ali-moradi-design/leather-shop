@@ -1,5 +1,5 @@
 # Catalog module
 
-Owns books, featured listings, cover uploads, and stock rules.
+Owns products, featured listings, cover uploads, and stock rules.
 
-Public API (`index.ts`): `bookRepo`, `bookService`, `IBookRepository`, `Book` types, stock assertions, `registerCatalogRoutes`.
+Public API (`index.ts`): `productRepo`, `productService`, `IProductRepository`, `Product` types, stock assertions, `registerCatalogRoutes`.

@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import { authenticate, requireAnyPermission } from '@modules/identity/http/middleware';
-import { bookCoverUpload } from '@shared/http/middleware/upload';
+import { productCoverUpload } from '@shared/http/middleware/upload';
 import * as ctrl from '../controllers/uploads.controller';
 
 const router = Router();
 
 router.post(
-  '/book-cover',
+  '/product-cover',
   authenticate,
-  requireAnyPermission('books:create', 'books:update'),
-  bookCoverUpload.single('file'),
-  ctrl.uploadBookCover,
+  requireAnyPermission('products:create', 'products:update'),
+  productCoverUpload.single('file'),
+  ctrl.uploadProductCover,
 );
 
 export default router;

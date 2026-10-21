@@ -1,4 +1,4 @@
-export interface Book {
+export interface Product {
   id: string;
   title: string;
   author: string;
@@ -16,7 +16,7 @@ export interface Book {
   updatedAt: Date;
 }
 
-export interface CreateBookInput {
+export interface CreateProductInput {
   title: string;
   author: string;
   description: string;
@@ -30,9 +30,9 @@ export interface CreateBookInput {
   featuredOrder?: number;
 }
 
-export type UpdateBookInput = Partial<CreateBookInput>;
+export type UpdateProductInput = Partial<CreateProductInput>;
 
-export interface BookListFilter {
+export interface ProductListFilter {
   q?: string;
   category?: string;
   minPrice?: number;

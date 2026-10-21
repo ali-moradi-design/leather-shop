@@ -2,7 +2,7 @@ import { Schema, model, Document, Types, Query } from 'mongoose';
 import { ORDER_STATUSES, type OrderStatus } from '@modules/ordering/domain/order.entity';
 
 export interface IOrderItemDoc {
-  book: Types.ObjectId;
+  product: Types.ObjectId;
   title: string;
   price: number;
   quantity: number;
@@ -39,7 +39,7 @@ export interface IOrderDoc extends Document {
 
 const orderItemSchema = new Schema<IOrderItemDoc>(
   {
-    book: { type: Schema.Types.ObjectId, ref: 'Book', required: true },
+    product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
     title: { type: String, required: true },
     price: { type: Number, required: true, min: 0 },
     quantity: { type: Number, required: true, min: 1 },

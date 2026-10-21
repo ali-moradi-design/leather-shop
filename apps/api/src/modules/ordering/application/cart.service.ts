@@ -1,5 +1,5 @@
 import type { ICartRepository } from '@modules/ordering/domain/cart.repository';
-import type { IBookRepository } from '@modules/catalog';
+import type { IProductRepository } from '@modules/catalog';
 import type { IOrderRepository } from '@modules/ordering/domain/order.repository';
 import type { Cart } from '@modules/ordering/domain/cart.entity';
 import type { Order, ShippingAddress } from '@modules/ordering/domain/order.entity';
@@ -16,36 +16,36 @@ export class CartService {
 
   constructor(
     private readonly carts: ICartRepository,
-    private readonly books: IBookRepository,
+    private readonly products: IProductRepository,
     orders: IOrderRepository,
     discounts: DiscountService,
   ) {
-    this.addToCart = new AddToCartUseCase(carts, books);
-    this.checkoutCart = new CheckoutCartUseCase(carts, books, orders, discounts);
+    this.addToCart = new AddToCartUseCase(carts, products);
+    this.checkoutCart = new CheckoutCartUseCase(carts, products, orders, discounts);
   }
 
   async get(userId: string): Promise<Cart> {
     return this.carts.getOrCreate(userId);
   }
 
-  addItem(userId: string, bookId: string, quantity: number): Promise<Cart> {
-    return this.addToCart.execute(userId, bookId, quantity);
+  addItem(userId: string, productId: string, quantity: number): Promise<Cart> {
+    return this.addToCart.execute(userId, productId, quantity);
   }
 
-  async updateItem(userId: string, bookId: string, quantity: number): Promise<Cart> {
+  async updateItem(userId: string, productId: string, quantity: number): Promise<Cart> {
     assertPositiveQuantity(quantity);
-    const book = await this.books.findById(bookId);
-    if (!book) throw new DomainError('Book not found', 'NOT_FOUND');
-    assertSufficientStock(book.stock, quantity, book.title);
+    const product = await this.products.findById(productId);
+    if (!product) throw new DomainError('Product not found', 'NOT_FOUND');
+    assertSufficientStock(product.stock, quantity, product.title);
 
     const cart = await this.carts.getOrCreate(userId);
-    cart.items = setCartItemQuantity(cart.items, bookId, quantity);
+    cart.items = setCartItemQuantity(cart.items, productId, quantity);
     return this.carts.save(cart);
   }
 
-  async removeItem(userId: string, bookId: string): Promise<Cart> {
+  async removeItem(userId: string, productId: string): Promise<Cart> {
     const cart = await this.carts.getOrCreate(userId);
-    cart.items = removeCartItem(cart.items, bookId);
+    cart.items = removeCartItem(cart.items, productId);
     return this.carts.save(cart);
   }
 

@@ -1,5 +1,5 @@
 import type { IOrderRepository } from '@modules/ordering/domain/order.repository';
-import type { IBookRepository } from '@modules/catalog';
+import type { IProductRepository } from '@modules/catalog';
 import type {
   Order,
   OrderStatus,
@@ -23,41 +23,41 @@ export class OrderService {
 
   constructor(
     private readonly orders: IOrderRepository,
-    private readonly books: IBookRepository,
+    private readonly products: IProductRepository,
     private readonly discounts?: DiscountService,
     uow?: IUnitOfWork,
     notifications?: INotificationPort,
   ) {
-    this.payOrder = new PayOrderUseCase(orders, books, uow, notifications);
+    this.payOrder = new PayOrderUseCase(orders, products, uow, notifications);
   }
 
   async create(
     userId: string,
-    items: { book: string; quantity: number }[],
+    items: { product: string; quantity: number }[],
     shippingAddress: ShippingAddress,
     discountCode?: string,
   ): Promise<Order> {
-    const bookIds = items.map((i) => i.book);
-    const books = await this.books.findByIds(bookIds);
-    if (books.length !== new Set(bookIds).size) {
-      throw new DomainError('One or more books not found', 'NOT_FOUND');
+    const productIds = items.map((i) => i.product);
+    const products = await this.products.findByIds(productIds);
+    if (products.length !== new Set(productIds).size) {
+      throw new DomainError('One or more products not found', 'NOT_FOUND');
     }
 
-    const bookMap = new Map(books.map((b) => [b.id, b]));
+    const productMap = new Map(products.map((b) => [b.id, b]));
     const orderItems = items.map((item) => {
-      const book = bookMap.get(item.book)!;
-      assertSufficientStock(book.stock, item.quantity, book.title);
+      const product = productMap.get(item.product)!;
+      assertSufficientStock(product.stock, item.quantity, product.title);
       return {
-        book: book.id,
-        title: book.title,
-        price: book.price,
+        product: product.id,
+        title: product.title,
+        price: product.price,
         quantity: item.quantity,
       };
     });
 
     const subtotalAmount = computeSubtotal(
       orderItems.map((i) => ({
-        bookId: i.book,
+        productId: i.product,
         title: i.title,
         price: i.price,
         quantity: i.quantity,
@@ -125,7 +125,7 @@ export class OrderService {
 
     if (nextStatus === 'cancelled' && shouldRestockOnCancel(order.status)) {
       for (const item of order.items) {
-        await this.books.incrementStock(item.book, item.quantity);
+        await this.products.incrementStock(item.product, item.quantity);
       }
     }
 

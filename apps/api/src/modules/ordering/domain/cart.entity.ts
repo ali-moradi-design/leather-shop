@@ -1,5 +1,5 @@
 export interface CartItem {
-  bookId: string;
+  productId: string;
   quantity: number;
 }
 
@@ -12,7 +12,7 @@ export interface Cart {
 }
 
 export interface AddCartItemInput {
-  bookId: string;
+  productId: string;
   quantity: number;
 }
 

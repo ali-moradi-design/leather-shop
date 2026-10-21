@@ -1,5 +1,5 @@
 import type { IOrderRepository } from '@modules/ordering/domain/order.repository';
-import type { IBookRepository } from '@modules/catalog';
+import type { IProductRepository } from '@modules/catalog';
 import type { INotificationPort } from '@shared/domain/notifications.port';
 import type { IUnitOfWork } from '@shared/application/unit-of-work.port';
 import type { Order } from '@modules/ordering/domain/order.entity';
@@ -15,7 +15,7 @@ import {
 export class PayOrderUseCase {
   constructor(
     private readonly orders: IOrderRepository,
-    private readonly books: IBookRepository,
+    private readonly products: IProductRepository,
     private readonly uow?: IUnitOfWork,
     private readonly notifications?: INotificationPort,
     private readonly lowStockThreshold = DEFAULT_LOW_STOCK_THRESHOLD,
@@ -33,7 +33,7 @@ export class PayOrderUseCase {
 
     assertTransition(order.status, 'paid');
 
-    const decremented: { bookId: string; quantity: number }[] = [];
+    const decremented: { productId: string; quantity: number }[] = [];
     const run = this.uow
       ? <T>(fn: () => Promise<T>) => this.uow!.runInTransaction(async () => fn())
       : <T>(fn: () => Promise<T>) => fn();
@@ -41,14 +41,14 @@ export class PayOrderUseCase {
     try {
       await run(async () => {
         for (const item of order.items) {
-          const ok = await this.books.decrementStock(item.book, item.quantity);
+          const ok = await this.products.decrementStock(item.product, item.quantity);
           if (!ok) {
             throw new DomainError(
-              `Insufficient stock for book ${item.title}`,
+              `Insufficient stock for product ${item.title}`,
               'INSUFFICIENT_STOCK',
             );
           }
-          decremented.push({ bookId: item.book, quantity: item.quantity });
+          decremented.push({ productId: item.product, quantity: item.quantity });
         }
       });
 
@@ -83,13 +83,13 @@ export class PayOrderUseCase {
       }
 
       for (const item of saved.items) {
-        const book = await this.books.findById(item.book);
-        if (book && isStockLow(book.stock, this.lowStockThreshold)) {
+        const product = await this.products.findById(item.product);
+        if (product && isStockLow(product.stock, this.lowStockThreshold)) {
           await domainEvents.publish(
             stockLowEvent({
-              bookId: book.id,
-              title: book.title,
-              stock: book.stock,
+              productId: product.id,
+              title: product.title,
+              stock: product.stock,
               threshold: this.lowStockThreshold,
             }),
           );
@@ -99,7 +99,7 @@ export class PayOrderUseCase {
       return saved;
     } catch (err) {
       for (const d of decremented) {
-        await this.books.incrementStock(d.bookId, d.quantity);
+        await this.products.incrementStock(d.productId, d.quantity);
       }
 
       if (err instanceof DomainError && err.code === 'INSUFFICIENT_STOCK') {
