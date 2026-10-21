@@ -64,14 +64,14 @@ export function mapOrder(doc: {
 export function mapCart(doc: {
   id?: string;
   _id?: { toString(): string };
-  userId: { toString(): string };
+  owner: string;
   items: { productId: { toString(): string }; sku: string; quantity: number }[];
   createdAt: Date;
   updatedAt: Date;
 }): Cart {
   return {
     id: idOf(doc),
-    userId: doc.userId.toString(),
+    owner: doc.owner,
     items: doc.items.map((i) => ({
       productId: i.productId.toString(),
       sku: i.sku,

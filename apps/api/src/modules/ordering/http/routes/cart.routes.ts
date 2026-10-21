@@ -1,7 +1,12 @@
 import { Router } from 'express';
-import { authenticate, requirePermission } from '@modules/identity/http/middleware';
+import {
+  authenticate,
+  optionalAuthenticate,
+  requirePermission,
+} from '@modules/identity/http/middleware';
 import { validate } from '@shared/http/middleware/validate';
 import * as ctrl from '../controllers/cart.controller';
+import { resolveCartOwner } from '../middleware/cartOwner';
 import {
   addCartItemSchema,
   updateCartItemSchema,
@@ -10,19 +15,26 @@ import {
 } from '../validators/cart.validation';
 
 const router = Router();
-router.use(authenticate);
 
-router.get('/', ctrl.get);
-router.post('/items', validate({ body: addCartItemSchema }), ctrl.addItem);
+// Signed-in or guest cart.
+const owner = [optionalAuthenticate, resolveCartOwner];
+
+router.get('/', owner, ctrl.get);
+router.post('/items', owner, validate({ body: addCartItemSchema }), ctrl.addItem);
 router.patch(
   '/items/:productId/:sku',
+  owner,
   validate({ params: lineParamSchema, body: updateCartItemSchema }),
   ctrl.updateItem,
 );
-router.delete('/items/:productId/:sku', validate({ params: lineParamSchema }), ctrl.removeItem);
-router.delete('/', ctrl.clear);
+router.delete('/items/:productId/:sku', owner, validate({ params: lineParamSchema }), ctrl.removeItem);
+router.delete('/', owner, ctrl.clear);
+
+// Signed-in only.
+router.post('/merge', authenticate, ctrl.merge);
 router.post(
   '/checkout',
+  authenticate,
   requirePermission('orders:create'),
   validate({ body: checkoutSchema }),
   ctrl.checkout,

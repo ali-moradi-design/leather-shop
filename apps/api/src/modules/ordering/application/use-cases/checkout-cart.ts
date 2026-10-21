@@ -1,6 +1,7 @@
 import type { ICartRepository } from '@modules/ordering/domain/cart.repository';
 import type { IProductRepository } from '@modules/catalog';
 import type { IOrderRepository } from '@modules/ordering/domain/order.repository';
+import { cartOwner } from '@modules/ordering/domain/cart.entity';
 import type { Order, ShippingAddress } from '@modules/ordering/domain/order.entity';
 import type { DiscountService } from '@modules/promotions';
 import { DomainError } from '@shared/domain/DomainError';
@@ -24,7 +25,8 @@ export class CheckoutCartUseCase {
     shippingAddress: ShippingAddress,
     discountCode?: string,
   ): Promise<Order> {
-    const cart = await this.carts.getOrCreate(userId);
+    const owner = cartOwner.user(userId);
+    const cart = await this.carts.getOrCreate(owner);
     assertCartNotEmpty(cart.items);
 
     const productIds = [...new Set(cart.items.map((i) => i.productId))];
@@ -64,7 +66,7 @@ export class CheckoutCartUseCase {
       await this.discounts.recordUse(discount.id);
     }
 
-    await this.carts.clear(userId);
+    await this.carts.clear(owner);
     return order;
   }
 }

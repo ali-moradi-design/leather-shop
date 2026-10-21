@@ -1,9 +1,10 @@
 import type { Cart, CartItem } from './cart.entity';
 
 export interface ICartRepository {
-  findByUserId(userId: string): Promise<Cart | null>;
-  getOrCreate(userId: string): Promise<Cart>;
+  findByOwner(owner: string): Promise<Cart | null>;
+  getOrCreate(owner: string): Promise<Cart>;
   save(cart: Cart): Promise<Cart>;
-  setItems(userId: string, items: CartItem[]): Promise<Cart>;
-  clear(userId: string): Promise<Cart | null>;
+  setItems(owner: string, items: CartItem[]): Promise<Cart>;
+  clear(owner: string): Promise<Cart | null>;
+  delete(owner: string): Promise<void>;
 }

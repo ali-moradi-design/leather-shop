@@ -23,6 +23,21 @@ export const authenticate = asyncHandler(async (req: Request, _res: Response, ne
   next();
 });
 
+/** Sets req.user when a valid token is present; never rejects the request. */
+export const optionalAuthenticate = asyncHandler(
+  async (req: Request, _res: Response, next: NextFunction) => {
+    const token = resolveAccessToken(req);
+    if (token) {
+      try {
+        req.user = await authContextService.fromAccessToken(token);
+      } catch {
+        // expired or invalid token: continue as a visitor
+      }
+    }
+    next();
+  },
+);
+
 export function requirePermission(...required: string[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {

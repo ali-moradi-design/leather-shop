@@ -11,12 +11,12 @@ export class AddToCartUseCase {
     private readonly products: IProductRepository,
   ) {}
 
-  async execute(userId: string, productId: string, sku: string, quantity: number): Promise<Cart> {
+  async execute(owner: string, productId: string, sku: string, quantity: number): Promise<Cart> {
     assertPositiveQuantity(quantity);
     const product = await this.products.findById(productId);
     if (!product) throw new DomainError('Product not found', 'NOT_FOUND');
 
-    const cart = await this.carts.getOrCreate(userId);
+    const cart = await this.carts.getOrCreate(owner);
     const variant = findVariant(product, sku);
     const existing = cart.items.find((i) => i.productId === productId && i.sku === sku);
     const newQty = (existing?.quantity ?? 0) + quantity;
