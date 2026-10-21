@@ -14,7 +14,8 @@ test('browse → cart → fake payment → order visible in admin', async ({ bro
   await shopper.getByTestId('product-card').first().click();
 
   // pick a size and add to cart
-  await shopper.getByRole('radio', { name: '10', exact: true }).click();
+  // the listing is cached for a while, so take any size that is in stock right now
+  await shopper.locator('[role=radio]:not([disabled])').first().click();
   await shopper.getByTestId('add-to-cart').click();
   const drawer = shopper.getByTestId('cart-drawer');
   await expect(drawer).toBeVisible();

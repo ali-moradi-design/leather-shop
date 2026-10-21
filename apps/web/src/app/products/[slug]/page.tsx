@@ -150,7 +150,7 @@ export default async function ProductPage({ params }: Props) {
       <section id="reviews" className="scroll-mt-40 px-4 py-16 sm:px-[58px]">
         <h2 className="heading mb-6 text-[28px]">Reviews</h2>
         <Suspense fallback={<div className="h-40" />}>
-          <ReviewList productId={product.id} />
+          <ReviewList slug={product.slug} />
         </Suspense>
         <h3 className="heading mb-4 mt-12 text-[22px]">Write a review</h3>
         <ReviewForm productId={product.id} />

@@ -7,7 +7,7 @@ Prerendering and an Express + MongoDB API, in one pnpm workspace.
 | --- | --- |
 | `apps/web` | Next.js 16 (App Router, Cache Components / PPR), Tailwind CSS 4, Feature-Sliced Design |
 | `apps/api` | Express 5, Mongoose, modular monolith (catalog, ordering, identity, promotions, reviews, engagement, reporting) |
-| Database | MongoDB 8 |
+| Database | MongoDB 8.2 |
 | Tests | Vitest (API unit + integration on an in-memory MongoDB, web units), Playwright E2E with axe |
 
 Scope and decisions: [docs/brief.md](docs/brief.md). Approved design: [docs/mockups](docs/mockups).

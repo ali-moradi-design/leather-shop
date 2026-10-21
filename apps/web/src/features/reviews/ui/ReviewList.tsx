@@ -10,16 +10,13 @@ interface Review {
 }
 
 /** Latest reviews, read fresh on each visit (a dynamic hole in the product page). */
-export async function ReviewList({ productId }: { productId: string }) {
-  const [{ data }, { data: product }] = await Promise.all([
-    apiGetJson<{ data: Review[] }>(`/reviews?product=${productId}&limit=20`, {
-      cache: "no-store",
-    }),
-    apiGetJson<{ data: { ratingAvg: number; ratingCount: number } }>(
-      `/products/${productId}`,
-      { cache: "no-store" },
-    ),
-  ]);
+export async function ReviewList({ slug }: { slug: string }) {
+  // Read the product fresh (by slug, the stable key) so the id and rating are current.
+  const { data: product } = await apiGetJson<{ data: { id: string; ratingAvg: number; ratingCount: number } }>(
+    `/products/slug/${encodeURIComponent(slug)}`,
+    { cache: 'no-store' },
+  );
+  const { data } = await apiGetJson<{ data: Review[] }>(`/reviews?product=${product.id}&limit=20`, { cache: 'no-store' });
   if (data.length === 0)
     return (
       <p className="text-[14px] text-mute">
