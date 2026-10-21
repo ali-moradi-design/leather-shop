@@ -1,7 +1,7 @@
 {
   "name": "@wg/api",
   "version": "1.0.0",
-  "description": "Welt & Grain API — modular monolith (Express, MongoDB)",
+  "description": "Welt & Grain API \u2014 modular monolith (Express, MongoDB)",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -11,7 +11,9 @@
     "format": "prettier --write \"src/**/*.{ts,js,json}\" \"*.md\"",
     "seed": "tsx src/scripts/seed.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "reset-demo": "tsx src/scripts/reset-demo.ts",
+    "reset-demo:prod": "node dist/scripts/reset-demo.js"
   },
   "keywords": [
     "bookstore",
