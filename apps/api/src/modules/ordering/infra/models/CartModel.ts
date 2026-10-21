@@ -7,7 +7,8 @@ export interface ICartItemDoc {
 }
 
 export interface ICartDoc extends Document {
-  userId: Types.ObjectId;
+  /** `user:<id>` or `guest:<id>` */
+  owner: string;
   items: ICartItemDoc[];
   createdAt: Date;
   updatedAt: Date;
@@ -24,10 +25,16 @@ const cartItemSchema = new Schema<ICartItemDoc>(
 
 const cartSchema = new Schema<ICartDoc>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
+    owner: { type: String, required: true, unique: true },
     items: { type: [cartItemSchema], default: [] },
   },
   { timestamps: true },
+);
+
+// Guest carts that nobody touched for 30 days are removed by MongoDB.
+cartSchema.index(
+  { updatedAt: 1 },
+  { expireAfterSeconds: 30 * 24 * 3600, partialFilterExpression: { owner: { $regex: '^guest:' } } },
 );
 
 export const CartModel = model<ICartDoc>('Cart', cartSchema);

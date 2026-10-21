@@ -314,6 +314,46 @@ describe('Welt & Grain API (integration)', () => {
     });
   });
 
+  describe('Guest cart', () => {
+    it('visitor adds to cart, signs in, and the cart is merged', async () => {
+      const products = await ctx.request.get('/api/v1/products?limit=20&inStock=true').expect(200);
+      const product = products.body.data.find((p: { variants: { stock: number }[] }) =>
+        p.variants.some((v) => v.stock >= 1),
+      );
+      const sku = inStockSku(product, 1);
+
+      const visitor = request.agent(ctx.app);
+      const added = await visitor
+        .post('/api/v1/cart/items')
+        .send({ productId: product.id, sku, quantity: 1 })
+        .expect(201);
+      expect(added.headers['set-cookie']?.toString()).toMatch(/guestCart=/);
+      expect(added.body.data).toMatchObject({ count: 1, subtotal: product.price });
+      expect(added.body.data.items[0]).toMatchObject({ sku, slug: product.slug });
+
+      // the cookie keeps the same cart
+      const again = await visitor.get('/api/v1/cart').expect(200);
+      expect(again.body.data.count).toBe(1);
+
+      // checkout needs an account
+      await visitor.post('/api/v1/cart/checkout').send({ shippingAddress }).expect(401);
+
+      const email = `guest_${Date.now()}@test.local`;
+      await visitor
+        .post('/api/v1/auth/register')
+        .send({ name: 'Guest Buyer', email, password: 'Password123!' })
+        .expect(201);
+      await visitor.post('/api/v1/auth/login').send({ email, password: 'Password123!' }).expect(200);
+
+      const merged = await visitor.post('/api/v1/cart/merge').expect(200);
+      expect(merged.body.data.count).toBe(1);
+      expect(merged.headers['set-cookie']?.toString()).toMatch(/guestCart=;/);
+
+      const mine = await visitor.get('/api/v1/cart').expect(200);
+      expect(mine.body.data.items[0].sku).toBe(sku);
+    });
+  });
+
   describe('Favorites', () => {
     it('add → list → remove', async () => {
       const customer = await registerCustomer(ctx.request, `fav_${Date.now()}`);
