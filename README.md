@@ -1,7 +1,69 @@
 # Welt & Grain
 
-A demo leather-goods shop: Next.js storefront (Partial Prerendering) and an
-Express + MongoDB API, in one pnpm workspace.
+A demo leather-goods shop for a portfolio: a Next.js storefront with Partial
+Prerendering and an Express + MongoDB API, in one pnpm workspace.
 
-See [docs/brief.md](docs/brief.md) for scope and decisions, and
-[docs/mockups](docs/mockups) for the approved design.
+| Part | Stack |
+| --- | --- |
+| `apps/web` | Next.js 16 (App Router, Cache Components / PPR), Tailwind CSS 4, Feature-Sliced Design |
+| `apps/api` | Express 5, Mongoose, modular monolith (catalog, ordering, identity, promotions, reviews, engagement, reporting) |
+| Database | MongoDB 8 |
+| Tests | Vitest (API unit + integration on an in-memory MongoDB, web units), Playwright E2E with axe |
+
+Scope and decisions: [docs/brief.md](docs/brief.md). Approved design: [docs/mockups](docs/mockups).
+
+## Features
+
+- Catalog of 480 leather products: collections with style chips and size / width /
+  leather / color filters, search, product pages with color groups, per-size live
+  stock, features and leather facts
+- Cart as a side drawer for visitors (guest cookie) and customers (merged at sign-in)
+- Checkout with discount codes (`WELCOME10`, `FLAT20`) and a simulated payment
+  gateway (approve `4242 4242 4242 4242`, decline `4000 0000 0000 0002`)
+- Accounts with order history, favorites, reviews with product ratings
+- Small admin: dashboard, order status, price and per-size stock
+- SEO: metadata, JSON-LD (Product, BreadcrumbList), sitemap, robots, Open Graph image
+- Nightly demo reset (`pnpm --filter @wg/api reset-demo`)
+
+## Run locally
+
+Needs Node 22, pnpm 10 and Docker.
+
+```bash
+pnpm install
+docker compose up -d                      # MongoDB on 127.0.0.1:27017
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env.local
+pnpm --filter @wg/api seed                # 480 products, demo accounts, reviews
+pnpm dev:api                              # http://localhost:4000 (docs: /api/docs)
+pnpm dev:web                              # http://localhost:3000
+```
+
+Demo accounts:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Customer | `demo@weltandgrain.local` | `Demo123!` |
+| Admin | `admin@weltandgrain.local` | `Admin123!` |
+
+## Checks
+
+```bash
+pnpm lint && pnpm typecheck && pnpm test   # all workspaces
+pnpm --filter @wg/web build                # prerendering reads the API, so run the API first
+pnpm --filter @wg/web e2e                  # against the running API + web build
+```
+
+CI (`.github/workflows/ci.yml`) runs the API checks, the web checks and the E2E
+suite against a real MongoDB; the `ci` job is the single required check.
+
+## Production notes
+
+- The browser reaches the API through the storefront (`/api/*` rewrite); set
+  `TRUST_PROXY` on the API to the number of proxies in front of it (Nginx + Next.js = 2)
+  so rate limits count visitors.
+- Nightly reset: run `reset-demo:prod` from cron with `WEB_REVALIDATE_URL` and
+  `REVALIDATE_SECRET` set, so the storefront drops its cached catalog afterwards.
+
+Product names, photos and prices come from the public thursdayboots.com catalog and
+are used only as sample content for this non-commercial demo.

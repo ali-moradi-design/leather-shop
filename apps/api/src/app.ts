@@ -20,6 +20,7 @@ import {
 } from './modules';
 
 const app = express();
+if (env.TRUST_PROXY > 0) app.set('trust proxy', env.TRUST_PROXY);
 
 app.use(requestIdMiddleware);
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));

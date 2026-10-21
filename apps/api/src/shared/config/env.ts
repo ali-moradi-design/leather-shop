@@ -21,6 +21,9 @@ const envSchema = z.object({
   REFRESH_TOKEN_TTL: z.string().default('7d'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  // Express 'trust proxy': hops in front of the API (e.g. 2 = Nginx + the Next.js /api rewrite),
+  // so rate limits use the visitor's IP instead of the storefront's.
+  TRUST_PROXY: z.coerce.number().int().nonnegative().default(0),
   UPLOAD_DIR: z.string().default('uploads'),
   COOKIE_SECURE: optionalBool,
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
