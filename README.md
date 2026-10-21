@@ -11,6 +11,7 @@ Prerendering and an Express + MongoDB API, in one pnpm workspace.
 | Tests | Vitest (API unit + integration on an in-memory MongoDB, web units), Playwright E2E with axe |
 
 Scope and decisions: [docs/brief.md](docs/brief.md). Approved design: [docs/mockups](docs/mockups).
+What was built, PR by PR, and a code walkthrough plan: [docs/build-log.md](docs/build-log.md).
 
 ## Features
 
