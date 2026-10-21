@@ -6,6 +6,7 @@ import { SiteHeader } from '@/widgets/header';
 import { SiteFooter } from '@/widgets/footer';
 import { SITE } from '@/shared/config';
 import { Icon } from '@/shared/ui';
+import { CartButton, CartDrawer, CartProvider } from '@/features/cart';
 
 const serif = Source_Serif_4({
   subsets: ['latin'],
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable}`}>
       <body>
+        <CartProvider>
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-2">
           Skip to content
         </a>
@@ -35,14 +37,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Icon name="user" width={21} height={21} />
             </Link>
           }
-          cart={
-            <Link href="/cart" aria-label="Cart">
-              <Icon name="bag" width={21} height={21} />
-            </Link>
-          }
+          cart={<CartButton />}
         />
         <main id="main">{children}</main>
         <SiteFooter />
+        <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );

@@ -16,14 +16,16 @@
   color-scheme: light;
 }
 
-body {
-  @apply bg-paper text-ink font-sans antialiased;
-  font-size: 15px;
-  line-height: 1.6;
-}
+@layer base {
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-size: 15px;
+    line-height: 1.6;
+  }
 
-a {
-  @apply text-inherit no-underline;
+  a {
+    @apply text-inherit no-underline;
+  }
 }
 
 @layer components {
