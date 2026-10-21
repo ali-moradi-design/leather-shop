@@ -35,6 +35,7 @@ export class ReviewService {
       rating: input.rating,
       comment: input.comment,
     });
+    await this.syncRating(input.product);
     return this.toResponse(review);
   }
 
@@ -54,6 +55,7 @@ export class ReviewService {
     if (isOwn && !canUpdateOwn && !canUpdateAll) throw new AppError('Forbidden', 403);
 
     const updated = await this.reviews.update(id, body);
+    await this.syncRating(review.product);
     return this.toResponse(updated!);
   }
 
@@ -69,6 +71,13 @@ export class ReviewService {
     if (isOwn && !canDeleteOwn && !canDeleteAll) throw new AppError('Forbidden', 403);
 
     await this.reviews.softDelete(id);
+    await this.syncRating(review.product);
+  }
+
+  /** Keeps the product's ratingAvg / ratingCount in step with its reviews. */
+  private async syncRating(productId: string) {
+    const { avg, count } = await this.reviews.ratingSummary(productId);
+    await this.products.setRating(productId, avg, count);
   }
 
   private toResponse(review: {
@@ -91,7 +100,7 @@ export class ReviewService {
         ? { _id: review.product, ...review.populated.product }
         : review.product,
       user: review.populated?.user
-        ? { _id: review.user, ...review.populated.user }
+        ? { _id: review.user, name: review.populated.user.name }
         : review.user,
       rating: review.rating,
       comment: review.comment,

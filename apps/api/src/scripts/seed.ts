@@ -3,6 +3,7 @@ import { repos } from '../shared/composition/repos';
 import { seedIdentity } from './seed/identity';
 import { seedCatalog, FEATURED_COUNT } from './seed/catalog';
 import { seedPromotions } from './seed/promotions';
+import { seedReviews } from './seed/reviews';
 
 export type SeedOptions = {
   /** When true, seed only a handful of products (for automated tests). */
@@ -13,6 +14,7 @@ export async function runSeed(options: SeedOptions = {}): Promise<void> {
   await seedIdentity(repos);
   await seedCatalog(repos, options);
   await seedPromotions(repos);
+  if (!options.minimalProducts) await seedReviews(repos);
 }
 
 async function main() {

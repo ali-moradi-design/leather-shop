@@ -6,4 +6,6 @@ export interface IReviewRepository {
   create(input: CreateReviewInput): Promise<Review>;
   update(id: string, input: UpdateReviewInput): Promise<Review | null>;
   softDelete(id: string): Promise<Review | null>;
+  /** Average rating and count of the product's live reviews. */
+  ratingSummary(productId: string): Promise<{ avg: number; count: number }>;
 }
