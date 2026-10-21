@@ -1,31 +1,48 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Jost, Source_Serif_4 } from 'next/font/google';
 import './globals.css';
 import { SiteHeader } from '@/widgets/header';
-import { Suspense } from 'react';
-import { CartBadge } from '@/features/cart-badge';
-import { UserGreeting } from '@/features/user-greeting';
+import { SiteFooter } from '@/widgets/footer';
+import { SITE } from '@/shared/config';
+import { Icon } from '@/shared/ui';
+
+const serif = Source_Serif_4({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-source-serif',
+});
+const sans = Jost({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-jost' });
 
 export const metadata: Metadata = {
-  title: 'Niko Bookshop — PPR',
-  description: 'Niko Bookshop demo (PPR) against layered Bookshop API',
+  metadataBase: new URL(SITE.url),
+  title: { default: `${SITE.name} — Leather Boots, Shoes & Bags`, template: `%s | ${SITE.name}` },
+  description: SITE.description,
+  openGraph: { siteName: SITE.name, type: 'website' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${serif.variable} ${sans.variable}`}>
       <body>
-        <SiteHeader modeLabel="PPR" trailing={(
-              <Suspense fallback={<span className="text-xs text-slate-400">…</span>}>
-                <div className="flex items-center gap-3">
-                  <UserGreeting />
-                  <CartBadge />
-                </div>
-              </Suspense>
-            )} />
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-        <footer className="mx-auto max-w-6xl px-4 pb-10 text-center text-xs text-slate-400">
-          Layered API catalog · FSD · Next App Router · PPR
-        </footer>
+        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-2">
+          Skip to content
+        </a>
+        <SiteHeader
+          account={
+            <Link href="/account" aria-label="Account">
+              <Icon name="user" width={21} height={21} />
+            </Link>
+          }
+          cart={
+            <Link href="/cart" aria-label="Cart">
+              <Icon name="bag" width={21} height={21} />
+            </Link>
+          }
+        />
+        <main id="main">{children}</main>
+        <SiteFooter />
       </body>
     </html>
   );

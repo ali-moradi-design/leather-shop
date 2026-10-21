@@ -1,22 +1,11 @@
 'use client';
 
-import { ErrorPanel } from '@/shared/ui/ErrorPanel';
-
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
-    <div className="space-y-4">
-      <ErrorPanel title="Failed to render" message={error.message} />
-      <button
-        type="button"
-        onClick={reset}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
-      >
+    <div className="container-page py-28 text-center">
+      <h1 className="heading text-[32px]">Something went wrong</h1>
+      <p className="mt-3 text-mute">{error.message}</p>
+      <button type="button" onClick={reset} className="btn mt-8">
         Try again
       </button>
     </div>
