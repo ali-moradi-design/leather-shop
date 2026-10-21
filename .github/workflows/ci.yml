@@ -59,7 +59,7 @@ jobs:
     timeout-minutes: 25
     services:
       mongo:
-        image: mongo:8
+        image: mongo:8.2.6 # pinned: 8.3 refuses to start on Linux 6.19+ (SERVER-121912)
         ports: ['27017:27017']
         options: >-
           --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping:1})'"

@@ -4,7 +4,7 @@ name: leather-shop
 
 services:
   mongo:
-    image: mongo:8
+    image: mongo:8.2.6 # pinned: 8.3 refuses to start on Linux 6.19+ (SERVER-121912)
     command: ["--wiredTigerCacheSizeGB", "0.25", "--auth"]
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
