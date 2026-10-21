@@ -22,6 +22,7 @@ async function main() {
   const productCount = await repos.products.count();
   console.log(`Products upserted (catalog count: ${productCount}); featured: ${FEATURED_COUNT}`);
   console.log('Admin user: admin@weltandgrain.local / Admin123!');
+  console.log('Demo customer: demo@weltandgrain.local / Demo123!');
   console.log('Sample discounts: WELCOME10 (10%), FLAT20 ($20 off $150+)');
   console.log('Seed complete.');
   process.exit(0);

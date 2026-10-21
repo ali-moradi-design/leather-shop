@@ -33,6 +33,8 @@ export function basePermissions() {
   return [...perms, ...extras];
 }
 
+export const DEMO_CUSTOMER = { email: 'demo@weltandgrain.local', password: 'Demo123!' };
+
 export const CUSTOMER_SLUGS = [
   'products:read',
   'orders:create',
@@ -62,7 +64,7 @@ export async function seedIdentity(repos: Repos): Promise<void> {
   const customerPermIds = allPerms
     .filter((p) => CUSTOMER_SLUGS.includes(p.slug))
     .map((p) => p.id);
-  await repos.roles.upsertByName('customer', {
+  const customerRole = await repos.roles.upsertByName('customer', {
     name: 'customer',
     description: 'Default customer role',
     permissions: customerPermIds,
@@ -83,6 +85,21 @@ export async function seedIdentity(repos: Repos): Promise<void> {
       email: 'admin@weltandgrain.local',
       passwordHash,
       roles: [adminRole.id],
+      isActive: true,
+    });
+  }
+
+  // Demo customer shown on the sign-in page.
+  const demoHash = await passwordHasher.hash(DEMO_CUSTOMER.password);
+  const existingDemo = await repos.users.findByEmail(DEMO_CUSTOMER.email);
+  if (existingDemo) {
+    await repos.users.update(existingDemo.id, { passwordHash: demoHash, roles: [customerRole.id], isActive: true });
+  } else {
+    await repos.users.create({
+      name: 'Demo Customer',
+      email: DEMO_CUSTOMER.email,
+      passwordHash: demoHash,
+      roles: [customerRole.id],
       isActive: true,
     });
   }

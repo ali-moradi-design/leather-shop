@@ -12,6 +12,7 @@ import {
   updateCartItemSchema,
   lineParamSchema,
   checkoutSchema,
+  quoteSchema,
 } from '../validators/cart.validation';
 
 const router = Router();
@@ -29,6 +30,7 @@ router.patch(
 );
 router.delete('/items/:productId/:sku', owner, validate({ params: lineParamSchema }), ctrl.removeItem);
 router.delete('/', owner, ctrl.clear);
+router.post('/quote', owner, validate({ body: quoteSchema }), ctrl.quote);
 
 // Signed-in only.
 router.post('/merge', authenticate, ctrl.merge);

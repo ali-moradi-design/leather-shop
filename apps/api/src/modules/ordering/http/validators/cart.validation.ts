@@ -16,6 +16,10 @@ export const lineParamSchema = z.object({
   sku: z.string().min(1),
 });
 
+export const quoteSchema = z.object({
+  discountCode: z.string().min(1).max(50).optional(),
+});
+
 export const checkoutSchema = z.object({
   shippingAddress: shippingAddressSchema,
   discountCode: z.string().min(1).max(50).optional(),
