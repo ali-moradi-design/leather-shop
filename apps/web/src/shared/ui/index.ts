@@ -1,4 +1,3 @@
-export { Spinner } from './Spinner';
-export { EmptyState } from './EmptyState';
-export { ErrorPanel } from './ErrorPanel';
-export { CatalogSkeleton } from './CatalogSkeleton';
+export { Logo } from './Logo';
+export { Icon, type IconName } from './Icon';
+export { Stars } from './Stars';
