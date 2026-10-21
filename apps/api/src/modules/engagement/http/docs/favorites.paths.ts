@@ -5,6 +5,7 @@ export const favoritesPaths = {
         "Favorites"
       ],
       "summary": "List favorites",
+      "description": "Each item carries the product title, slug, price (cents) and first image.",
       "security": [
         {
           "bearerAuth": []

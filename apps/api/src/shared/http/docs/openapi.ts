@@ -11,18 +11,23 @@ import { reviewsPaths } from '@modules/reviews/http/docs/reviews.paths';
 import { reportsPaths } from '@modules/reporting/http/docs/reports.paths';
 import { adminPaths } from '@modules/reporting/http/docs/admin.paths';
 import { otherPaths } from './other.paths';
+import { shopSchemas } from './shop.schemas';
 
 export const openApiSpec = {
   openapi: "3.0.3",
   info: {
   "title": "Welt & Grain API",
   "version": "2.0.0",
-  "description": "Node.js + Express + Mongoose modular-monolith weltandgrain backend with JWT auth (Bearer header or httpOnly cookies), RBAC, cart, favorites, discounts, uploads, and admin dashboard. Business routes are under /api/v1. Cookie-based clients must send credentials (fetch credentials: include) and CORS_ORIGIN must be an explicit frontend origin — not *."
+  "description": "Leather shop API (Express 5 + MongoDB, modular monolith). Products are one style in one color with per-size variants and stock; all money is in minor units (cents). Auth: Bearer header or httpOnly cookies. Visitors get a guest cart (httpOnly guestCart cookie) that is merged at sign-in. Cookie-authenticated writes must come from an allowed origin (CORS_ORIGIN). Business routes are under /api/v1."
 },
   servers: [
   {
+    "url": "/",
+    "description": "This server"
+  },
+  {
     "url": "http://localhost:4000",
-    "description": "Local"
+    "description": "Local development"
   }
 ],
   components: {
@@ -33,6 +38,12 @@ export const openApiSpec = {
       "bearerFormat": "JWT",
       "description": "Preferred for API clients. Checked before the accessToken cookie."
     },
+    "guestCart": {
+      "type": "apiKey",
+      "in": "cookie",
+      "name": "guestCart",
+      "description": "httpOnly cookie the API sets for a visitor's cart (random UUID). Merged into the account by POST /cart/merge."
+    },
     "cookieAuth": {
       "type": "apiKey",
       "in": "cookie",
@@ -41,6 +52,7 @@ export const openApiSpec = {
     }
   },
   "schemas": {
+    ...shopSchemas,
     "Error": {
       "type": "object",
       "properties": {
@@ -86,76 +98,6 @@ export const openApiSpec = {
         }
       }
     },
-    "Product": {
-      "type": "object",
-      "properties": {
-        "title": {
-          "type": "string"
-        },
-        "author": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "isbn": {
-          "type": "string"
-        },
-        "price": {
-          "type": "number"
-        },
-        "currency": {
-          "type": "string"
-        },
-        "stock": {
-          "type": "integer"
-        },
-        "coverImageUrl": {
-          "type": "string"
-        },
-        "categories": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "featured": {
-          "type": "boolean"
-        },
-        "featuredOrder": {
-          "type": "integer"
-        }
-      }
-    },
-    "CreateOrder": {
-      "type": "object",
-      "required": [
-        "items",
-        "shippingAddress"
-      ],
-      "properties": {
-        "items": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "product": {
-                "type": "string"
-              },
-              "quantity": {
-                "type": "integer"
-              }
-            }
-          }
-        },
-        "shippingAddress": {
-          "$ref": "#/components/schemas/ShippingAddress"
-        },
-        "discountCode": {
-          "type": "string"
-        }
-      }
-    },
     "ShippingAddress": {
       "type": "object",
       "required": [
@@ -189,17 +131,6 @@ export const openApiSpec = {
         }
       }
     },
-    "CartItem": {
-      "type": "object",
-      "properties": {
-        "productId": {
-          "type": "string"
-        },
-        "quantity": {
-          "type": "integer"
-        }
-      }
-    },
     "Discount": {
       "type": "object",
       "properties": {
@@ -214,10 +145,12 @@ export const openApiSpec = {
           ]
         },
         "value": {
-          "type": "number"
+          "type": "number",
+          "description": "Percent (0–100) for percent codes; cents for fixed codes"
         },
         "minOrderAmount": {
-          "type": "number"
+          "type": "integer",
+          "description": "Minimum subtotal in cents"
         },
         "maxUses": {
           "type": "integer"

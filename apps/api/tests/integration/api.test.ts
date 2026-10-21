@@ -50,6 +50,17 @@ describe('Welt & Grain API (integration)', () => {
     });
   });
 
+  describe('API docs', () => {
+    it('describes the leather catalog, not the old bookshop', async () => {
+      const res = await ctx.request.get('/api/docs.json').expect(200);
+      expect(Object.keys(res.body.paths)).toEqual(
+        expect.arrayContaining(['/api/v1/products/facets', '/api/v1/cart/items/{productId}/{sku}', '/api/v1/cart/quote']),
+      );
+      expect(res.body.components.schemas.ProductInput.properties).toHaveProperty('variants');
+      expect(JSON.stringify(res.body)).not.toMatch(/\bisbn\b|"author"|coverImageUrl/i);
+    });
+  });
+
   describe('Auth', () => {
     it('register → login → refresh → logout', async () => {
       const email = `flow_${Date.now()}@test.local`;
