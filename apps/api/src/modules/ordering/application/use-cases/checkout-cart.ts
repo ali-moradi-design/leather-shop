@@ -1,5 +1,5 @@
 import type { ICartRepository } from '@modules/ordering/domain/cart.repository';
-import type { IBookRepository } from '@modules/catalog';
+import type { IProductRepository } from '@modules/catalog';
 import type { IOrderRepository } from '@modules/ordering/domain/order.repository';
 import type { Order, ShippingAddress } from '@modules/ordering/domain/order.entity';
 import type { DiscountService } from '@modules/promotions';
@@ -14,7 +14,7 @@ import {
 export class CheckoutCartUseCase {
   constructor(
     private readonly carts: ICartRepository,
-    private readonly books: IBookRepository,
+    private readonly products: IProductRepository,
     private readonly orders: IOrderRepository,
     private readonly discounts: DiscountService,
   ) {}
@@ -27,27 +27,27 @@ export class CheckoutCartUseCase {
     const cart = await this.carts.getOrCreate(userId);
     assertCartNotEmpty(cart.items);
 
-    const bookIds = cart.items.map((i) => i.bookId);
-    const books = await this.books.findByIds(bookIds);
-    if (books.length !== new Set(bookIds).size) {
-      throw new DomainError('One or more books in cart not found', 'NOT_FOUND');
+    const productIds = cart.items.map((i) => i.productId);
+    const products = await this.products.findByIds(productIds);
+    if (products.length !== new Set(productIds).size) {
+      throw new DomainError('One or more products in cart not found', 'NOT_FOUND');
     }
 
-    const bookMap = new Map(books.map((b) => [b.id, b]));
+    const productMap = new Map(products.map((b) => [b.id, b]));
     const orderItems = cart.items.map((item) => {
-      const book = bookMap.get(item.bookId)!;
-      assertSufficientStock(book.stock, item.quantity, book.title);
+      const product = productMap.get(item.productId)!;
+      assertSufficientStock(product.stock, item.quantity, product.title);
       return {
-        book: book.id,
-        title: book.title,
-        price: book.price,
+        product: product.id,
+        title: product.title,
+        price: product.price,
         quantity: item.quantity,
       };
     });
 
     const subtotalAmount = computeSubtotal(
       orderItems.map((i) => ({
-        bookId: i.book,
+        productId: i.product,
         title: i.title,
         price: i.price,
         quantity: i.quantity,

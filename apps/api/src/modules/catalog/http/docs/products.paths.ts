@@ -1,10 +1,10 @@
-export const booksPaths = {
-  "/api/v1/books": {
+export const productsPaths = {
+  "/api/v1/products": {
     "get": {
       "tags": [
-        "Books"
+        "Products"
       ],
-      "summary": "List/search books",
+      "summary": "List/search products",
       "description": "Search uses case-insensitive regex on title/author/description (text index also defined for future $text). Query: q, category, minPrice, maxPrice, inStock, featured, page, limit, sort (price|title|createdAt), order (asc|desc).",
       "parameters": [
         {
@@ -95,9 +95,9 @@ export const booksPaths = {
     },
     "post": {
       "tags": [
-        "Books"
+        "Products"
       ],
-      "summary": "Create book",
+      "summary": "Create product",
       "security": [
         {
           "bearerAuth": []
@@ -107,7 +107,7 @@ export const booksPaths = {
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Book"
+              "$ref": "#/components/schemas/Product"
             }
           }
         }
@@ -119,12 +119,12 @@ export const booksPaths = {
       }
     }
   },
-  "/api/v1/books/featured": {
+  "/api/v1/products/featured": {
     "get": {
       "tags": [
-        "Books"
+        "Products"
       ],
-      "summary": "List featured books",
+      "summary": "List featured products",
       "responses": {
         "200": {
           "description": "OK"
@@ -132,12 +132,12 @@ export const booksPaths = {
       }
     }
   },
-  "/api/v1/books/{id}": {
+  "/api/v1/products/{id}": {
     "get": {
       "tags": [
-        "Books"
+        "Products"
       ],
-      "summary": "Get book",
+      "summary": "Get product",
       "parameters": [
         {
           "name": "id",
@@ -156,9 +156,9 @@ export const booksPaths = {
     },
     "patch": {
       "tags": [
-        "Books"
+        "Products"
       ],
-      "summary": "Update book (incl. featured flags)",
+      "summary": "Update product (incl. featured flags)",
       "security": [
         {
           "bearerAuth": []
@@ -182,9 +182,9 @@ export const booksPaths = {
     },
     "delete": {
       "tags": [
-        "Books"
+        "Products"
       ],
-      "summary": "Soft-delete book",
+      "summary": "Soft-delete product",
       "security": [
         {
           "bearerAuth": []

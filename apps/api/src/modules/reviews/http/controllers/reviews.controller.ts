@@ -4,7 +4,7 @@ import { asyncHandler } from '@shared/http/asyncHandler';
 
 export const list = asyncHandler(async (req: Request, res: Response) => {
   const result = await reviewService.list({
-    book: req.query.book as string | undefined,
+    product: req.query.product as string | undefined,
     user: req.query.user as string | undefined,
     page: Number(req.query.page) || 1,
     limit: Number(req.query.limit) || 20,
@@ -19,7 +19,7 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
   const review = await reviewService.create({
-    book: req.body.book,
+    product: req.body.product,
     userId: req.user!.id,
     rating: req.body.rating,
     comment: req.body.comment,

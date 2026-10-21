@@ -14,7 +14,7 @@ export function assertSufficientStock(
   title?: string,
 ): void {
   if (available < requested) {
-    const label = title ? `"${title}"` : 'book';
+    const label = title ? `"${title}"` : 'product';
     throw new DomainError(
       `Insufficient stock for ${label} (available: ${available})`,
       'INSUFFICIENT_STOCK',

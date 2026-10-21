@@ -6,7 +6,7 @@
 process.env.NODE_ENV = 'test';
 process.env.PORT = '4000';
 process.env.MONGODB_URI =
-  process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/bookstore-test-placeholder';
+  process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/weltandgrain-test-placeholder';
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-min8';
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min8';
 process.env.ACCESS_TOKEN_TTL = '15m';

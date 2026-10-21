@@ -7,7 +7,7 @@ function coverUrl(isbn: string): string {
   return `https://covers.openlibrary.org/b/isbn/${clean}-L.jpg`;
 }
 
-/** 40 distinct books with real/public ISBNs for Open Library covers */
+/** 40 distinct products with real/public ISBNs for Open Library covers */
 export const FEATURED_ISBNS = new Set([
   '9780201616224', // The Pragmatic Programmer
   '9780132350884', // Clean Code
@@ -17,7 +17,7 @@ export const FEATURED_ISBNS = new Set([
   '9780441172719', // Dune
 ]);
 
-export const SEED_BOOKS: {
+export const SEED_PRODUCTS: {
   title: string;
   author: string;
   description: string;
@@ -308,7 +308,7 @@ export const SEED_BOOKS: {
   {
     title: 'The Fellowship of the Ring',
     author: 'J.R.R. Tolkien',
-    description: 'Book one of The Lord of the Rings.',
+    description: 'Product one of The Lord of the Rings.',
     isbn: '9780547928210',
     price: 16.99,
     stock: 36,
@@ -335,7 +335,7 @@ export const SEED_BOOKS: {
   {
     title: 'Fahrenheit 451',
     author: 'Ray Bradbury',
-    description: 'A future where books are outlawed and burned.',
+    description: 'A future where products are outlawed and burned.',
     isbn: '9781451673319',
     price: 13.49,
     stock: 31,
@@ -391,17 +391,17 @@ export const SEED_BOOKS: {
 
 export async function seedCatalog(
   repos: Repos,
-  options: { minimalBooks?: boolean } = {},
+  options: { minimalProducts?: boolean } = {},
 ): Promise<void> {
-  const booksToSeed = options.minimalBooks ? SEED_BOOKS.slice(0, 5) : SEED_BOOKS;
-  if (!options.minimalBooks && SEED_BOOKS.length !== 40) {
-    throw new Error(`Expected exactly 40 seed books, got ${SEED_BOOKS.length}`);
+  const productsToSeed = options.minimalProducts ? SEED_PRODUCTS.slice(0, 5) : SEED_PRODUCTS;
+  if (!options.minimalProducts && SEED_PRODUCTS.length !== 40) {
+    throw new Error(`Expected exactly 40 seed products, got ${SEED_PRODUCTS.length}`);
   }
 
   let featuredOrder = 1;
-  for (const b of booksToSeed) {
+  for (const b of productsToSeed) {
     const featured = FEATURED_ISBNS.has(b.isbn);
-    await repos.books.upsertByIsbn(b.isbn, {
+    await repos.products.upsertByIsbn(b.isbn, {
       ...b,
       coverImageUrl: coverUrl(b.isbn),
       currency: 'USD',

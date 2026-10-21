@@ -29,7 +29,7 @@ export class MongooseOrderRepository implements IOrderRepository {
     const doc = await OrderModel.create({
       user: input.userId,
       items: input.items.map((i) => ({
-        book: i.book,
+        product: i.product,
         title: i.title,
         price: i.price,
         quantity: i.quantity,
@@ -104,13 +104,13 @@ export class MongooseOrderRepository implements IOrderRepository {
     ]);
   }
 
-  async aggregateTopBooks(match: Record<string, unknown>, limit: number) {
+  async aggregateTopProducts(match: Record<string, unknown>, limit: number) {
     return OrderModel.aggregate([
       { $match: match },
       { $unwind: '$items' },
       {
         $group: {
-          _id: '$items.book',
+          _id: '$items.product',
           title: { $first: '$items.title' },
           quantitySold: { $sum: '$items.quantity' },
           revenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },

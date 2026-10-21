@@ -10,7 +10,7 @@ export function mapOrder(doc: {
   _id?: { toString(): string };
   user: { toString(): string };
   items: {
-    book: { toString(): string };
+    product: { toString(): string };
     title: string;
     price: number;
     quantity: number;
@@ -28,7 +28,7 @@ export function mapOrder(doc: {
   updatedAt: Date;
 }): Order {
   const items: OrderItem[] = doc.items.map((i) => ({
-    book: i.book.toString(),
+    product: i.product.toString(),
     title: i.title,
     price: i.price,
     quantity: i.quantity,
@@ -57,7 +57,7 @@ export function mapCart(doc: {
   id?: string;
   _id?: { toString(): string };
   userId: { toString(): string };
-  items: { bookId: { toString(): string }; quantity: number }[];
+  items: { productId: { toString(): string }; quantity: number }[];
   createdAt: Date;
   updatedAt: Date;
 }): Cart {
@@ -65,7 +65,7 @@ export function mapCart(doc: {
     id: idOf(doc),
     userId: doc.userId.toString(),
     items: doc.items.map((i) => ({
-      bookId: i.bookId.toString(),
+      productId: i.productId.toString(),
       quantity: i.quantity,
     })),
     createdAt: doc.createdAt,

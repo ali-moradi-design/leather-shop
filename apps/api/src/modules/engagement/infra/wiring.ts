@@ -1,6 +1,6 @@
 import { MongooseFavoriteRepository } from './FavoriteRepository';
 import { FavoriteService } from '../application/favorite.service';
-import { bookRepo } from '../../catalog';
+import { productRepo } from '../../catalog';
 
 export const favoriteRepo = new MongooseFavoriteRepository();
-export const favoriteService = new FavoriteService(favoriteRepo, bookRepo);
+export const favoriteService = new FavoriteService(favoriteRepo, productRepo);

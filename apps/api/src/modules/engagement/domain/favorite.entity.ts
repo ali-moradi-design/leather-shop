@@ -1,11 +1,11 @@
 export interface Favorite {
   id: string;
   userId: string;
-  bookId: string;
+  productId: string;
   createdAt: Date;
   updatedAt: Date;
   populated?: {
-    book?: {
+    product?: {
       id: string;
       title: string;
       author: string;
@@ -17,5 +17,5 @@ export interface Favorite {
 
 export interface CreateFavoriteInput {
   userId: string;
-  bookId: string;
+  productId: string;
 }

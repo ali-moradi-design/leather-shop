@@ -1,7 +1,7 @@
 import { Schema, model, Document, Types, Query } from 'mongoose';
 
 export interface IReviewDoc extends Document {
-  book: Types.ObjectId;
+  product: Types.ObjectId;
   user: Types.ObjectId;
   rating: number;
   comment?: string;
@@ -12,7 +12,7 @@ export interface IReviewDoc extends Document {
 
 const reviewSchema = new Schema<IReviewDoc>(
   {
-    book: { type: Schema.Types.ObjectId, ref: 'Book', required: true, index: true },
+    product: { type: Schema.Types.ObjectId, ref: 'Product', required: true, index: true },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, trim: true },

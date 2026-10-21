@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { shippingAddressSchema } from './orders.validation';
 
 export const addCartItemSchema = z.object({
-  bookId: z.string().min(1),
+  productId: z.string().min(1),
   quantity: z.number().int().positive(),
 });
 
@@ -10,7 +10,7 @@ export const updateCartItemSchema = z.object({
   quantity: z.number().int().positive(),
 });
 
-export const bookIdParamSchema = z.object({ bookId: z.string().min(1) });
+export const productIdParamSchema = z.object({ productId: z.string().min(1) });
 
 export const checkoutSchema = z.object({
   shippingAddress: shippingAddressSchema,

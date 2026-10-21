@@ -3,7 +3,7 @@ import { DomainError } from '@shared/domain/DomainError';
 import type { CartItem } from '../cart.entity';
 
 export interface PricedLine {
-  bookId: string;
+  productId: string;
   title: string;
   price: number;
   quantity: number;
@@ -15,20 +15,20 @@ export function assertCartNotEmpty(items: CartItem[]): void {
   }
 }
 
-export function mergeCartItem(items: CartItem[], bookId: string, quantity: number): CartItem[] {
+export function mergeCartItem(items: CartItem[], productId: string, quantity: number): CartItem[] {
   const next = items.map((i) => ({ ...i }));
-  const existing = next.find((i) => i.bookId === bookId);
+  const existing = next.find((i) => i.productId === productId);
   if (existing) {
     existing.quantity += quantity;
   } else {
-    next.push({ bookId, quantity });
+    next.push({ productId, quantity });
   }
   return next;
 }
 
-export function setCartItemQuantity(items: CartItem[], bookId: string, quantity: number): CartItem[] {
+export function setCartItemQuantity(items: CartItem[], productId: string, quantity: number): CartItem[] {
   const next = items.map((i) => ({ ...i }));
-  const item = next.find((i) => i.bookId === bookId);
+  const item = next.find((i) => i.productId === productId);
   if (!item) {
     throw new DomainError('Item not in cart', 'NOT_FOUND');
   }
@@ -36,8 +36,8 @@ export function setCartItemQuantity(items: CartItem[], bookId: string, quantity:
   return next;
 }
 
-export function removeCartItem(items: CartItem[], bookId: string): CartItem[] {
-  const next = items.filter((i) => i.bookId !== bookId);
+export function removeCartItem(items: CartItem[], productId: string): CartItem[] {
+  const next = items.filter((i) => i.productId !== productId);
   if (next.length === items.length) {
     throw new DomainError('Item not in cart', 'NOT_FOUND');
   }

@@ -32,10 +32,10 @@ export const favoritesPaths = {
             "schema": {
               "type": "object",
               "required": [
-                "bookId"
+                "productId"
               ],
               "properties": {
-                "bookId": {
+                "productId": {
                   "type": "string"
                 }
               }
@@ -50,7 +50,7 @@ export const favoritesPaths = {
       }
     }
   },
-  "/api/v1/favorites/{bookId}": {
+  "/api/v1/favorites/{productId}": {
     "delete": {
       "tags": [
         "Favorites"
@@ -63,7 +63,7 @@ export const favoritesPaths = {
       ],
       "parameters": [
         {
-          "name": "bookId",
+          "name": "productId",
           "in": "path",
           "required": true,
           "schema": {

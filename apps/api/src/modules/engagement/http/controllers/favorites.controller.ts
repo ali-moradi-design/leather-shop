@@ -8,11 +8,11 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const add = asyncHandler(async (req: Request, res: Response) => {
-  const fav = await favoriteService.add(req.user!.id, req.body.bookId);
+  const fav = await favoriteService.add(req.user!.id, req.body.productId);
   res.status(201).json({ data: fav });
 });
 
 export const remove = asyncHandler(async (req: Request, res: Response) => {
-  await favoriteService.remove(req.user!.id, String(req.params.bookId));
+  await favoriteService.remove(req.user!.id, String(req.params.productId));
   res.json({ message: 'Favorite removed' });
 });

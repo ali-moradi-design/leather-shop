@@ -1,5 +1,5 @@
-import { MongooseBookRepository } from './BookRepository';
-import { BookService } from '../application/book.service';
+import { MongooseProductRepository } from './ProductRepository';
+import { ProductService } from '../application/product.service';
 
-export const bookRepo = new MongooseBookRepository();
-export const bookService = new BookService(bookRepo);
+export const productRepo = new MongooseProductRepository();
+export const productService = new ProductService(productRepo);

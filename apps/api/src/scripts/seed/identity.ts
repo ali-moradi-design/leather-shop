@@ -3,7 +3,7 @@ import { passwordHasher } from '../../modules/identity';
 
 type Repos = typeof repos;
 
-const SECTIONS = ['books', 'users', 'roles', 'permissions', 'orders', 'reviews', 'reports', 'discounts'] as const;
+const SECTIONS = ['products', 'users', 'roles', 'permissions', 'orders', 'reviews', 'reports', 'discounts'] as const;
 const CRUD = ['create', 'read', 'update', 'delete'] as const;
 
 export function basePermissions() {
@@ -34,7 +34,7 @@ export function basePermissions() {
 }
 
 export const CUSTOMER_SLUGS = [
-  'books:read',
+  'products:read',
   'orders:create',
   'orders:read-own',
   'reviews:create',
@@ -69,7 +69,7 @@ export async function seedIdentity(repos: Repos): Promise<void> {
   });
 
   const passwordHash = await passwordHasher.hash('Admin123!');
-  const existingAdmin = await repos.users.findByEmail('admin@bookstore.local');
+  const existingAdmin = await repos.users.findByEmail('admin@weltandgrain.local');
   if (existingAdmin) {
     await repos.users.update(existingAdmin.id, {
       name: 'Admin',
@@ -80,7 +80,7 @@ export async function seedIdentity(repos: Repos): Promise<void> {
   } else {
     await repos.users.create({
       name: 'Admin',
-      email: 'admin@bookstore.local',
+      email: 'admin@weltandgrain.local',
       passwordHash,
       roles: [adminRole.id],
       isActive: true,

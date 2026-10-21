@@ -11,7 +11,7 @@ export const ORDER_STATUSES = [
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export interface OrderItem {
-  book: string;
+  product: string;
   title: string;
   price: number;
   quantity: number;

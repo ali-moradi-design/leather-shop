@@ -49,7 +49,7 @@ export const adminPaths = {
       "tags": [
         "Admin"
       ],
-      "summary": "Low-stock books",
+      "summary": "Low-stock products",
       "security": [
         {
           "bearerAuth": []

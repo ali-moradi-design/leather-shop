@@ -31,7 +31,7 @@ async function startMongo(): Promise<{ uri: string; mongod: MongoMemoryServer | 
     });
     return { uri: mongod.getUri(), mongod };
   } catch (err) {
-    const fallback = 'mongodb://127.0.0.1:27017/bookstore-test';
+    const fallback = 'mongodb://127.0.0.1:27017/weltandgrain-test';
     console.warn(
       `[tests] MongoMemoryServer failed (binary ${MEMORY_MONGO_VERSION}). Falling back to ${fallback}.`,
       err instanceof Error ? err.message : err,
@@ -61,14 +61,14 @@ export async function setupTestApp(): Promise<TestContext> {
   }
 
   const { runSeed } = await import('../../src/scripts/seed');
-  await runSeed({ minimalBooks: true });
+  await runSeed({ minimalProducts: true });
 
   const { default: app } = await import('../../src/app');
   const agent = request(app);
 
   const login = await agent
     .post('/api/v1/auth/login')
-    .send({ email: 'admin@bookstore.local', password: 'Admin123!' })
+    .send({ email: 'admin@weltandgrain.local', password: 'Admin123!' })
     .expect(200);
 
   shared = {

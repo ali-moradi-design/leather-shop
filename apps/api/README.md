@@ -1,6 +1,6 @@
-# Bookstore API — Modular Monolith
+# Welt & Grain API — Modular Monolith
 
-Node.js + TypeScript + Express + **MongoDB/Mongoose** bookstore backend: JWT auth, RBAC, books, reviews, orders (fake payments + stock), cart, favorites, discount codes, local image uploads, and admin dashboard.
+Node.js + TypeScript + Express + **MongoDB/Mongoose** weltandgrain backend: JWT auth, RBAC, products, reviews, orders (fake payments + stock), cart, favorites, discount codes, local image uploads, and admin dashboard.
 
 > Business routes remain under **`/api/v1/...`**. Health: `/api/health`. Swagger: `/api/docs`.
 
@@ -13,7 +13,7 @@ src/
   shared/                 # errors, pagination, logger, middleware, config
   modules/
     identity/             # auth, users, rbac
-    catalog/              # books, featured, uploads
+    catalog/              # products, featured, uploads
     ordering/             # cart, orders, checkout, pay
     reviews/
     engagement/           # favorites
@@ -42,7 +42,7 @@ npm run seed
 npm run dev
 ```
 
-Default admin: `admin@bookstore.local` / `Admin123!`  
+Default admin: `admin@weltandgrain.local` / `Admin123!`  
 Sample discounts: `WELCOME10`, `FLAT5`.
 
 

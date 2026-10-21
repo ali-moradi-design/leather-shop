@@ -1,7 +1,7 @@
 import { authPaths } from '@modules/identity/http/docs/auth.paths';
 import { usersPaths } from '@modules/identity/http/docs/users.paths';
 import { rbacPaths } from '@modules/identity/http/docs/rbac.paths';
-import { booksPaths } from '@modules/catalog/http/docs/books.paths';
+import { productsPaths } from '@modules/catalog/http/docs/products.paths';
 import { uploadsPaths } from '@modules/catalog/http/docs/uploads.paths';
 import { cartPaths } from '@modules/ordering/http/docs/cart.paths';
 import { ordersPaths } from '@modules/ordering/http/docs/orders.paths';
@@ -15,9 +15,9 @@ import { otherPaths } from './other.paths';
 export const openApiSpec = {
   openapi: "3.0.3",
   info: {
-  "title": "Bookstore API",
+  "title": "Welt & Grain API",
   "version": "2.0.0",
-  "description": "Node.js + Express + Mongoose modular-monolith bookstore backend with JWT auth (Bearer header or httpOnly cookies), RBAC, cart, favorites, discounts, uploads, and admin dashboard. Business routes are under /api/v1. Cookie-based clients must send credentials (fetch credentials: include) and CORS_ORIGIN must be an explicit frontend origin — not *."
+  "description": "Node.js + Express + Mongoose modular-monolith weltandgrain backend with JWT auth (Bearer header or httpOnly cookies), RBAC, cart, favorites, discounts, uploads, and admin dashboard. Business routes are under /api/v1. Cookie-based clients must send credentials (fetch credentials: include) and CORS_ORIGIN must be an explicit frontend origin — not *."
 },
   servers: [
   {
@@ -86,7 +86,7 @@ export const openApiSpec = {
         }
       }
     },
-    "Book": {
+    "Product": {
       "type": "object",
       "properties": {
         "title": {
@@ -139,7 +139,7 @@ export const openApiSpec = {
           "items": {
             "type": "object",
             "properties": {
-              "book": {
+              "product": {
                 "type": "string"
               },
               "quantity": {
@@ -192,7 +192,7 @@ export const openApiSpec = {
     "CartItem": {
       "type": "object",
       "properties": {
-        "bookId": {
+        "productId": {
           "type": "string"
         },
         "quantity": {
@@ -242,7 +242,7 @@ export const openApiSpec = {
 },
   paths: {
     ...authPaths,
-    ...booksPaths,
+    ...productsPaths,
     ...cartPaths,
     ...ordersPaths,
     ...discountsPaths,

@@ -16,12 +16,12 @@ function toQuery(params: BookListParams = {}): string {
 
 /** Public catalog list — layered API GET /api/v1/books */
 export async function fetchBooks(params: BookListParams = {}): Promise<ApiPaginated<Book>> {
-  return apiGetJson<ApiPaginated<Book>>(`/books${toQuery({ limit: 40, ...params })}`, defaultInit);
+  return apiGetJson<ApiPaginated<Book>>(`/products${toQuery({ limit: 40, ...params })}`, defaultInit);
 }
 
 /** Public book detail — layered API GET /api/v1/books/:id */
 export async function fetchBook(id: string): Promise<Book> {
-  const res = await apiGetJson<ApiData<Book>>(`/books/${id}`, defaultInit);
+  const res = await apiGetJson<ApiData<Book>>(`/products/${id}`, defaultInit);
   return res.data;
 }
 
@@ -29,6 +29,6 @@ export async function fetchBook(id: string): Promise<Book> {
 export async function fetchBookStock(
   id: string,
 ): Promise<BookStockSnapshot> {
-  const book = await apiGetJson<ApiData<Book>>(`/books/${id}`, { cache: 'no-store' });
+  const book = await apiGetJson<ApiData<Book>>(`/products/${id}`, { cache: 'no-store' });
   return { id: book.data.id, stock: book.data.stock, updatedAt: book.data.updatedAt };
 }

@@ -7,7 +7,7 @@ function idOf(doc: { id?: string; _id?: { toString(): string } }): string {
 export function mapReview(doc: {
   id?: string;
   _id?: { toString(): string };
-  book: unknown;
+  product: unknown;
   user: unknown;
   rating: number;
   comment?: string;
@@ -15,13 +15,13 @@ export function mapReview(doc: {
   createdAt: Date;
   updatedAt: Date;
 }): Review {
-  const bookObj = doc.book as { _id?: { toString(): string }; id?: string; title?: string; author?: string; toString?: () => string };
+  const productObj = doc.product as { _id?: { toString(): string }; id?: string; title?: string; author?: string; toString?: () => string };
   const userObj = doc.user as { _id?: { toString(): string }; id?: string; name?: string; email?: string; toString?: () => string };
 
-  const bookId =
-    bookObj && typeof bookObj === 'object' && (bookObj._id || bookObj.id)
-      ? (bookObj.id ?? bookObj._id!.toString())
-      : String(doc.book);
+  const productId =
+    productObj && typeof productObj === 'object' && (productObj._id || productObj.id)
+      ? (productObj.id ?? productObj._id!.toString())
+      : String(doc.product);
   const userId =
     userObj && typeof userObj === 'object' && (userObj._id || userObj.id)
       ? (userObj.id ?? userObj._id!.toString())
@@ -29,7 +29,7 @@ export function mapReview(doc: {
 
   const review: Review = {
     id: idOf(doc),
-    book: bookId,
+    product: productId,
     user: userId,
     rating: doc.rating,
     comment: doc.comment,
@@ -38,13 +38,13 @@ export function mapReview(doc: {
     updatedAt: doc.updatedAt,
   };
 
-  if (bookObj?.title || userObj?.name) {
+  if (productObj?.title || userObj?.name) {
     review.populated = {};
     if (userObj?.name) {
       review.populated.user = { name: userObj.name, email: userObj.email ?? '' };
     }
-    if (bookObj?.title) {
-      review.populated.book = { title: bookObj.title, author: bookObj.author ?? '' };
+    if (productObj?.title) {
+      review.populated.product = { title: productObj.title, author: productObj.author ?? '' };
     }
   }
   return review;

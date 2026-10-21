@@ -54,10 +54,10 @@ router.get(
   ctrl.ordersByStatus,
 );
 router.get(
-  '/analytics/top-books',
+  '/analytics/top-products',
   requirePermission('reports:analytics'),
   validate({ query: dateRangeQuerySchema }),
-  ctrl.topBooks,
+  ctrl.topProducts,
 );
 router.get(
   '/analytics/sales-by-date',

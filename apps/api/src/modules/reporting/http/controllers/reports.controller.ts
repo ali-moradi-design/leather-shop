@@ -55,8 +55,8 @@ export const ordersByStatus = asyncHandler(async (_req: Request, res: Response) 
   res.json({ data });
 });
 
-export const topBooks = asyncHandler(async (req: Request, res: Response) => {
-  const data = await reportService.topBooks(
+export const topProducts = asyncHandler(async (req: Request, res: Response) => {
+  const data = await reportService.topProducts(
     req.query.from as string | undefined,
     req.query.to as string | undefined,
     Number(req.query.limit) || 10,

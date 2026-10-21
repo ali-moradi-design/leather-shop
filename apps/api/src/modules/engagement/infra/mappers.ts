@@ -8,11 +8,11 @@ export function mapFavorite(doc: {
   id?: string;
   _id?: { toString(): string };
   userId: { toString(): string };
-  bookId: unknown;
+  productId: unknown;
   createdAt: Date;
   updatedAt: Date;
 }): Favorite {
-  const bookObj = doc.bookId as {
+  const productObj = doc.productId as {
     _id?: { toString(): string };
     id?: string;
     title?: string;
@@ -21,27 +21,27 @@ export function mapFavorite(doc: {
     coverImageUrl?: string;
     toString?: () => string;
   };
-  const bookId =
-    bookObj && typeof bookObj === 'object' && (bookObj._id || bookObj.id)
-      ? (bookObj.id ?? bookObj._id!.toString())
-      : String(doc.bookId);
+  const productId =
+    productObj && typeof productObj === 'object' && (productObj._id || productObj.id)
+      ? (productObj.id ?? productObj._id!.toString())
+      : String(doc.productId);
 
   const fav: Favorite = {
     id: idOf(doc),
     userId: doc.userId.toString(),
-    bookId,
+    productId,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
 
-  if (bookObj?.title) {
+  if (productObj?.title) {
     fav.populated = {
-      book: {
-        id: bookId,
-        title: bookObj.title,
-        author: bookObj.author ?? '',
-        price: bookObj.price ?? 0,
-        coverImageUrl: bookObj.coverImageUrl,
+      product: {
+        id: productId,
+        title: productObj.title,
+        author: productObj.author ?? '',
+        price: productObj.price ?? 0,
+        coverImageUrl: productObj.coverImageUrl,
       },
     };
   }

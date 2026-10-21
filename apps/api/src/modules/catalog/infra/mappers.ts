@@ -1,10 +1,10 @@
-import type { Book } from '../domain/book.entity';
+import type { Product } from '../domain/product.entity';
 
 function idOf(doc: { id?: string; _id?: { toString(): string } }): string {
   return doc.id ?? doc._id!.toString();
 }
 
-export function mapBook(doc: {
+export function mapProduct(doc: {
   id?: string;
   _id?: { toString(): string };
   title: string;
@@ -21,7 +21,7 @@ export function mapBook(doc: {
   deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
-}): Book {
+}): Product {
   return {
     id: idOf(doc),
     title: doc.title,

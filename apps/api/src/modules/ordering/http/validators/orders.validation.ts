@@ -15,7 +15,7 @@ export const createOrderSchema = z.object({
   items: z
     .array(
       z.object({
-        book: z.string().min(1),
+        product: z.string().min(1),
         quantity: z.number().int().positive(),
       }),
     )

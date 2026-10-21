@@ -7,7 +7,7 @@ const coverImageUrlSchema = z
     message: 'coverImageUrl must be a URL or absolute path starting with /',
   });
 
-export const createBookSchema = z.object({
+export const createProductSchema = z.object({
   title: z.string().min(1).max(300),
   author: z.string().min(1).max(200),
   description: z.string().min(1),
@@ -21,11 +21,11 @@ export const createBookSchema = z.object({
   featuredOrder: z.number().int().optional(),
 });
 
-export const updateBookSchema = createBookSchema.partial();
+export const updateProductSchema = createProductSchema.partial();
 
 export const idParamSchema = z.object({ id: z.string().min(1) });
 
-export const listBooksQuerySchema = z.object({
+export const listProductsQuerySchema = z.object({
   q: z.string().optional(),
   category: z.string().optional(),
   minPrice: z.coerce.number().nonnegative().optional(),
