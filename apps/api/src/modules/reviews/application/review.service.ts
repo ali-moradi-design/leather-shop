@@ -81,7 +81,7 @@ export class ReviewService {
     updatedAt: Date;
     populated?: {
       user?: { name: string; email: string };
-      product?: { title: string; author: string };
+      product?: { title: string; slug: string };
     };
   }) {
     return {

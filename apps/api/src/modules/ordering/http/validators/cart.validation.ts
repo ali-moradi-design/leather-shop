@@ -3,6 +3,7 @@ import { shippingAddressSchema } from './orders.validation';
 
 export const addCartItemSchema = z.object({
   productId: z.string().min(1),
+  sku: z.string().min(1),
   quantity: z.number().int().positive(),
 });
 
@@ -10,7 +11,10 @@ export const updateCartItemSchema = z.object({
   quantity: z.number().int().positive(),
 });
 
-export const productIdParamSchema = z.object({ productId: z.string().min(1) });
+export const lineParamSchema = z.object({
+  productId: z.string().min(1),
+  sku: z.string().min(1),
+});
 
 export const checkoutSchema = z.object({
   shippingAddress: shippingAddressSchema,

@@ -30,7 +30,11 @@ export class MongooseOrderRepository implements IOrderRepository {
       user: input.userId,
       items: input.items.map((i) => ({
         product: i.product,
+        sku: i.sku,
+        size: i.size,
+        width: i.width,
         title: i.title,
+        image: i.image,
         price: i.price,
         quantity: i.quantity,
       })),

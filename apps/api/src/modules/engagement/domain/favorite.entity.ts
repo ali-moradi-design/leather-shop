@@ -8,9 +8,9 @@ export interface Favorite {
     product?: {
       id: string;
       title: string;
-      author: string;
+      slug: string;
       price: number;
-      coverImageUrl?: string;
+      image?: string;
     };
   };
 }

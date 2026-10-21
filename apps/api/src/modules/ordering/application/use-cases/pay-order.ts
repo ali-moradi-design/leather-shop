@@ -33,7 +33,7 @@ export class PayOrderUseCase {
 
     assertTransition(order.status, 'paid');
 
-    const decremented: { productId: string; quantity: number }[] = [];
+    const decremented: { productId: string; sku: string; quantity: number }[] = [];
     const run = this.uow
       ? <T>(fn: () => Promise<T>) => this.uow!.runInTransaction(async () => fn())
       : <T>(fn: () => Promise<T>) => fn();
@@ -41,14 +41,14 @@ export class PayOrderUseCase {
     try {
       await run(async () => {
         for (const item of order.items) {
-          const ok = await this.products.decrementStock(item.product, item.quantity);
+          const ok = await this.products.decrementStock(item.product, item.sku, item.quantity);
           if (!ok) {
             throw new DomainError(
               `Insufficient stock for product ${item.title}`,
               'INSUFFICIENT_STOCK',
             );
           }
-          decremented.push({ productId: item.product, quantity: item.quantity });
+          decremented.push({ productId: item.product, sku: item.sku, quantity: item.quantity });
         }
       });
 
@@ -99,7 +99,7 @@ export class PayOrderUseCase {
       return saved;
     } catch (err) {
       for (const d of decremented) {
-        await this.products.incrementStock(d.productId, d.quantity);
+        await this.products.incrementStock(d.productId, d.sku, d.quantity);
       }
 
       if (err instanceof DomainError && err.code === 'INSUFFICIENT_STOCK') {

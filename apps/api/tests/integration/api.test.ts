@@ -9,6 +9,28 @@ import {
   type TestContext,
 } from '../helpers/testApp';
 
+function newProduct(slug: string, stock: number) {
+  return {
+    slug: `${slug}-${Date.now()}`,
+    title: 'Test Boot | Black',
+    name: 'Test Boot',
+    style: `test-${slug}`,
+    color: 'Black',
+    colorFamily: 'Black',
+    category: 'boots',
+    gender: 'men',
+    description: 'Created in integration test',
+    price: 1999,
+    variants: [{ sku: 'TEST-10', size: '10', stock }],
+  };
+}
+
+function inStockSku(product: { variants: { sku: string; stock: number }[] }, qty: number): string {
+  const variant = product.variants.find((v) => v.stock >= qty);
+  if (!variant) throw new Error('No variant with enough stock in seed data');
+  return variant.sku;
+}
+
 describe('Welt & Grain API (integration)', () => {
   let ctx: TestContext;
 
@@ -149,8 +171,26 @@ describe('Welt & Grain API (integration)', () => {
       const list = await ctx.request.get('/api/v1/products').expect(200);
       expect(list.body.data.length).toBeGreaterThan(0);
 
-      const search = await ctx.request.get('/api/v1/products?q=Clean').expect(200);
-      expect(search.body.data.some((b: { title: string }) => /clean/i.test(b.title))).toBe(true);
+      const first = list.body.data[0] as { name: string; slug: string; style: string };
+      const search = await ctx.request.get(`/api/v1/products?q=${encodeURIComponent(first.name)}`).expect(200);
+      expect(search.body.data.some((b: { name: string }) => b.name === first.name)).toBe(true);
+
+      const bySlug = await ctx.request.get(`/api/v1/products/slug/${first.slug}`).expect(200);
+      expect(bySlug.body.data.slug).toBe(first.slug);
+      const colors = await ctx.request.get(`/api/v1/products/slug/${first.slug}/colors`).expect(200);
+      expect(colors.body.data.every((b: { style: string }) => b.style === first.style)).toBe(true);
+
+      const facets = await ctx.request.get('/api/v1/products/facets?category=boots').expect(200);
+      expect(facets.body.data.sizes.length).toBeGreaterThan(0);
+      expect(facets.body.data.price.max).toBeGreaterThan(0);
+
+      const size = facets.body.data.sizes[0].value as string;
+      const bySize = await ctx.request.get(`/api/v1/products?category=boots&size=${size}`).expect(200);
+      expect(
+        bySize.body.data.every((b: { variants: { size: string; stock: number }[] }) =>
+          b.variants.some((v) => v.size === size && v.stock > 0),
+        ),
+      ).toBe(true);
 
       const featured = await ctx.request.get('/api/v1/products/featured').expect(200);
       expect(featured.body.data.length).toBeGreaterThan(0);
@@ -161,15 +201,7 @@ describe('Welt & Grain API (integration)', () => {
       const created = await ctx.request
         .post('/api/v1/products')
         .set(authHeader(ctx.adminToken))
-        .send({
-          title: 'Test Product Create',
-          author: 'Tester',
-          description: 'Created in integration test',
-          isbn: `978${Date.now().toString().slice(-10)}`,
-          price: 19.99,
-          stock: 5,
-          categories: ['test'],
-        })
+        .send(newProduct('test-create', 5))
         .expect(201);
 
       const id = created.body.data.id as string;
@@ -177,19 +209,20 @@ describe('Welt & Grain API (integration)', () => {
       const updated = await ctx.request
         .patch(`/api/v1/products/${id}`)
         .set(authHeader(ctx.adminToken))
-        .send({ price: 21.5, stock: 8 })
+        .send({ price: 2150, variants: [{ sku: 'TEST-10', size: '10', stock: 8 }] })
         .expect(200);
 
-      expect(updated.body.data.price).toBe(21.5);
+      expect(updated.body.data.price).toBe(2150);
       expect(updated.body.data.stock).toBe(8);
     });
   });
 
   describe('Cart & orders', () => {
     it('add → update → checkout → pending_payment; pay decrements stock', async () => {
-      const products = await ctx.request.get('/api/v1/products?limit=1').expect(200);
+      const products = await ctx.request.get('/api/v1/products?limit=1&inStock=true').expect(200);
       const productId = products.body.data[0].id as string;
       const productPrice = products.body.data[0].price as number;
+      const sku = inStockSku(products.body.data[0], 2);
 
       const customer = await registerCustomer(ctx.request, `cart_${Date.now()}`);
       const token = customer.accessToken;
@@ -200,11 +233,11 @@ describe('Welt & Grain API (integration)', () => {
       await ctx.request
         .post('/api/v1/cart/items')
         .set(authHeader(token))
-        .send({ productId, quantity: 1 })
+        .send({ productId, sku, quantity: 1 })
         .expect(201);
 
       await ctx.request
-        .patch(`/api/v1/cart/items/${productId}`)
+        .patch(`/api/v1/cart/items/${productId}/${sku}`)
         .set(authHeader(token))
         .send({ quantity: 2 })
         .expect(200);
@@ -217,7 +250,8 @@ describe('Welt & Grain API (integration)', () => {
 
       const order = checkout.body.data;
       expect(order.status).toBe('pending_payment');
-      expect(order.totalAmount).toBeCloseTo(productPrice * 2, 2);
+      expect(order.totalAmount).toBe(productPrice * 2);
+      expect(order.items[0]).toMatchObject({ sku, quantity: 2 });
 
       const paid = await ctx.request
         .post(`/api/v1/orders/${order.id}/pay`)
@@ -234,14 +268,7 @@ describe('Welt & Grain API (integration)', () => {
       const created = await ctx.request
         .post('/api/v1/products')
         .set(authHeader(ctx.adminToken))
-        .send({
-          title: 'Scarce Product',
-          author: 'Limited',
-          description: 'Only one copy',
-          isbn: `979${Date.now().toString().slice(-10)}`,
-          price: 25,
-          stock: 1,
-        })
+        .send(newProduct('scarce', 1))
         .expect(201);
 
       const scarceId = created.body.data.id as string;
@@ -252,7 +279,7 @@ describe('Welt & Grain API (integration)', () => {
         await ctx.request
           .post('/api/v1/cart/items')
           .set(authHeader(c.accessToken))
-          .send({ productId: scarceId, quantity: 1 })
+          .send({ productId: scarceId, sku: 'TEST-10', quantity: 1 })
           .expect(201);
 
         await ctx.request
@@ -323,16 +350,16 @@ describe('Welt & Grain API (integration)', () => {
   describe('Discounts', () => {
     it('applies WELCOME10 on checkout and rejects invalid codes', async () => {
       const customer = await registerCustomer(ctx.request, `disc_${Date.now()}`);
-      const products = await ctx.request.get('/api/v1/products?limit=20').expect(200);
-      const product =
-        products.body.data.find((b: { price: number; stock: number }) => b.price >= 20 && b.stock > 0) ??
-        products.body.data[0];
-      const qty = product.price >= 20 ? 1 : 2;
+      const products = await ctx.request.get('/api/v1/products?limit=20&inStock=true').expect(200);
+      // WELCOME10 needs a $50 subtotal
+      const product = products.body.data.find((b: { price: number }) => b.price >= 5000);
+      const sku = inStockSku(product, 1);
+      const qty = 1;
 
       await ctx.request
         .post('/api/v1/cart/items')
         .set(authHeader(customer.accessToken))
-        .send({ productId: product.id, quantity: qty })
+        .send({ productId: product.id, sku, quantity: qty })
         .expect(201);
 
       const checkout = await ctx.request
@@ -349,7 +376,7 @@ describe('Welt & Grain API (integration)', () => {
       await ctx.request
         .post('/api/v1/cart/items')
         .set(authHeader(customer2.accessToken))
-        .send({ productId: product.id, quantity: 1 })
+        .send({ productId: product.id, sku, quantity: 1 })
         .expect(201);
 
       const bad = await ctx.request

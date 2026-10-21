@@ -16,9 +16,9 @@ export function mapFavorite(doc: {
     _id?: { toString(): string };
     id?: string;
     title?: string;
-    author?: string;
+    slug?: string;
     price?: number;
-    coverImageUrl?: string;
+    images?: string[];
     toString?: () => string;
   };
   const productId =
@@ -39,9 +39,9 @@ export function mapFavorite(doc: {
       product: {
         id: productId,
         title: productObj.title,
-        author: productObj.author ?? '',
+        slug: productObj.slug ?? '',
         price: productObj.price ?? 0,
-        coverImageUrl: productObj.coverImageUrl,
+        image: productObj.images?.[0],
       },
     };
   }

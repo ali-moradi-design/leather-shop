@@ -3,7 +3,11 @@ import { ORDER_STATUSES, type OrderStatus } from '@modules/ordering/domain/order
 
 export interface IOrderItemDoc {
   product: Types.ObjectId;
+  sku: string;
+  size: string;
+  width?: string;
   title: string;
+  image?: string;
   price: number;
   quantity: number;
 }
@@ -40,7 +44,11 @@ export interface IOrderDoc extends Document {
 const orderItemSchema = new Schema<IOrderItemDoc>(
   {
     product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+    sku: { type: String, required: true },
+    size: { type: String, required: true },
+    width: { type: String },
     title: { type: String, required: true },
+    image: { type: String },
     price: { type: Number, required: true, min: 0 },
     quantity: { type: Number, required: true, min: 1 },
   },

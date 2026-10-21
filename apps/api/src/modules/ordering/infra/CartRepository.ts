@@ -21,7 +21,7 @@ export class MongooseCartRepository implements ICartRepository {
     const doc = await CartModel.findByIdAndUpdate(
       cart.id,
       {
-        items: cart.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+        items: cart.items.map((i) => ({ productId: i.productId, sku: i.sku, quantity: i.quantity })),
       },
       { returnDocument: 'after' },
     );
@@ -33,7 +33,7 @@ export class MongooseCartRepository implements ICartRepository {
     const doc = await CartModel.findOneAndUpdate(
       { userId },
       {
-        items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+        items: items.map((i) => ({ productId: i.productId, sku: i.sku, quantity: i.quantity })),
         $setOnInsert: { userId },
       },
       { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true },

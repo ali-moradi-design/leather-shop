@@ -1,5 +1,6 @@
 export interface CartItem {
   productId: string;
+  sku: string;
   quantity: number;
 }
 
@@ -13,6 +14,7 @@ export interface Cart {
 
 export interface AddCartItemInput {
   productId: string;
+  sku: string;
   quantity: number;
 }
 

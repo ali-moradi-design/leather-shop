@@ -7,7 +7,7 @@ export class MongooseFavoriteRepository implements IFavoriteRepository {
   async listByUser(userId: string, populate = true): Promise<Favorite[]> {
     let q = FavoriteModel.find({ userId }).sort({ createdAt: -1 });
     if (populate) {
-      q = q.populate('productId', 'title author price coverImageUrl');
+      q = q.populate('productId', 'title slug price images');
     }
     const docs = await q;
     return docs.map(mapFavorite);

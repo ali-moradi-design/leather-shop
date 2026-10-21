@@ -5,8 +5,8 @@ import { normalizeIsbn, isValidIsbn } from '../../../src/shared/domain/Isbn';
 import { DomainError } from '../../../src/shared/domain/DomainError';
 
 describe('value helpers', () => {
-  it('Money rounds and subtracts', () => {
-    expect(Money.of(10.125).amount).toBe(10.13);
+  it('Money keeps integer cents and subtracts', () => {
+    expect(Money.of(1012.5).amount).toBe(1013);
     expect(Money.of(10).subtract(Money.of(3)).amount).toBe(7);
   });
 

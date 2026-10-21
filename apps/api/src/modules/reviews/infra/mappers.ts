@@ -15,7 +15,7 @@ export function mapReview(doc: {
   createdAt: Date;
   updatedAt: Date;
 }): Review {
-  const productObj = doc.product as { _id?: { toString(): string }; id?: string; title?: string; author?: string; toString?: () => string };
+  const productObj = doc.product as { _id?: { toString(): string }; id?: string; title?: string; slug?: string; toString?: () => string };
   const userObj = doc.user as { _id?: { toString(): string }; id?: string; name?: string; email?: string; toString?: () => string };
 
   const productId =
@@ -44,7 +44,7 @@ export function mapReview(doc: {
       review.populated.user = { name: userObj.name, email: userObj.email ?? '' };
     }
     if (productObj?.title) {
-      review.populated.product = { title: productObj.title, author: productObj.author ?? '' };
+      review.populated.product = { title: productObj.title, slug: productObj.slug ?? '' };
     }
   }
   return review;
