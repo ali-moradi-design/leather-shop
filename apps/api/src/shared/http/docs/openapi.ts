@@ -1,0 +1,258 @@
+import { authPaths } from '@modules/identity/http/docs/auth.paths';
+import { usersPaths } from '@modules/identity/http/docs/users.paths';
+import { rbacPaths } from '@modules/identity/http/docs/rbac.paths';
+import { booksPaths } from '@modules/catalog/http/docs/books.paths';
+import { uploadsPaths } from '@modules/catalog/http/docs/uploads.paths';
+import { cartPaths } from '@modules/ordering/http/docs/cart.paths';
+import { ordersPaths } from '@modules/ordering/http/docs/orders.paths';
+import { discountsPaths } from '@modules/promotions/http/docs/discounts.paths';
+import { favoritesPaths } from '@modules/engagement/http/docs/favorites.paths';
+import { reviewsPaths } from '@modules/reviews/http/docs/reviews.paths';
+import { reportsPaths } from '@modules/reporting/http/docs/reports.paths';
+import { adminPaths } from '@modules/reporting/http/docs/admin.paths';
+import { otherPaths } from './other.paths';
+
+export const openApiSpec = {
+  openapi: "3.0.3",
+  info: {
+  "title": "Bookstore API",
+  "version": "2.0.0",
+  "description": "Node.js + Express + Mongoose modular-monolith bookstore backend with JWT auth (Bearer header or httpOnly cookies), RBAC, cart, favorites, discounts, uploads, and admin dashboard. Business routes are under /api/v1. Cookie-based clients must send credentials (fetch credentials: include) and CORS_ORIGIN must be an explicit frontend origin — not *."
+},
+  servers: [
+  {
+    "url": "http://localhost:4000",
+    "description": "Local"
+  }
+],
+  components: {
+  "securitySchemes": {
+    "bearerAuth": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT",
+      "description": "Preferred for API clients. Checked before the accessToken cookie."
+    },
+    "cookieAuth": {
+      "type": "apiKey",
+      "in": "cookie",
+      "name": "accessToken",
+      "description": "httpOnly accessToken cookie set on register/login/refresh. Use with credentials: include."
+    }
+  },
+  "schemas": {
+    "Error": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "errors": {}
+      }
+    },
+    "RegisterRequest": {
+      "type": "object",
+      "required": [
+        "name",
+        "email",
+        "password"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "password": {
+          "type": "string",
+          "minLength": 8
+        }
+      }
+    },
+    "LoginRequest": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "Book": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "isbn": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "stock": {
+          "type": "integer"
+        },
+        "coverImageUrl": {
+          "type": "string"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "featured": {
+          "type": "boolean"
+        },
+        "featuredOrder": {
+          "type": "integer"
+        }
+      }
+    },
+    "CreateOrder": {
+      "type": "object",
+      "required": [
+        "items",
+        "shippingAddress"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "book": {
+                "type": "string"
+              },
+              "quantity": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "shippingAddress": {
+          "$ref": "#/components/schemas/ShippingAddress"
+        },
+        "discountCode": {
+          "type": "string"
+        }
+      }
+    },
+    "ShippingAddress": {
+      "type": "object",
+      "required": [
+        "fullName",
+        "line1",
+        "city",
+        "postalCode",
+        "country"
+      ],
+      "properties": {
+        "fullName": {
+          "type": "string"
+        },
+        "line1": {
+          "type": "string"
+        },
+        "line2": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "postalCode": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        }
+      }
+    },
+    "CartItem": {
+      "type": "object",
+      "properties": {
+        "bookId": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        }
+      }
+    },
+    "Discount": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "percent",
+            "fixed"
+          ]
+        },
+        "value": {
+          "type": "number"
+        },
+        "minOrderAmount": {
+          "type": "number"
+        },
+        "maxUses": {
+          "type": "integer"
+        },
+        "usedCount": {
+          "type": "integer"
+        },
+        "startsAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endsAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "isActive": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+},
+  paths: {
+    ...authPaths,
+    ...booksPaths,
+    ...cartPaths,
+    ...ordersPaths,
+    ...discountsPaths,
+    ...favoritesPaths,
+    ...reviewsPaths,
+    ...usersPaths,
+    ...rbacPaths,
+    ...reportsPaths,
+    ...adminPaths,
+    ...uploadsPaths,
+    ...otherPaths,
+  },
+} as const;
