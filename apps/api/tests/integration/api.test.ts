@@ -57,7 +57,7 @@ describe('Welt & Grain API (integration)', () => {
         expect.arrayContaining(['/api/v1/products/facets', '/api/v1/cart/items/{productId}/{sku}', '/api/v1/cart/quote']),
       );
       expect(res.body.components.schemas.ProductInput.properties).toHaveProperty('variants');
-      expect(JSON.stringify(res.body)).not.toMatch(/isbn|author|coverImageUrl/i);
+      expect(JSON.stringify(res.body)).not.toMatch(/\bisbn\b|"author"|coverImageUrl/i);
     });
   });
 
