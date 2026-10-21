@@ -44,7 +44,7 @@ Demo accounts:
 | Role | Email | Password |
 | --- | --- | --- |
 | Customer | `demo@weltandgrain.local` | `Demo123!` |
-| Admin | `admin@weltandgrain.local` | `Admin123!` |
+| Admin | `admin@weltandgrain.local` | `Admin123!` (development only; production reads `ADMIN_PASSWORD`) |
 
 ## Checks
 
@@ -59,9 +59,11 @@ suite against a real MongoDB; the `ci` job is the single required check.
 
 ## Production notes
 
-- The browser reaches the API through the storefront (`/api/*` rewrite); set
-  `TRUST_PROXY` on the API to the number of proxies in front of it (Nginx + Next.js = 2)
-  so rate limits count visitors.
+- The browser reaches the API through the storefront's `/api/*` proxy route, which
+  passes the visitor's IP on; set `TRUST_PROXY=1` on the API so rate limits count
+  visitors, and keep the API port private.
+- Production refuses weak JWT secrets and a wildcard CORS origin, and the seed
+  needs `ADMIN_PASSWORD`. See [deploy/](deploy) and [docs/security.md](docs/security.md).
 - Nightly reset: run `reset-demo:prod` from cron with `WEB_REVALIDATE_URL` and
   `REVALIDATE_SECRET` set, so the storefront drops its cached catalog afterwards.
 

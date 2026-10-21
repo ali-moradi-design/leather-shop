@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "reset-demo": "tsx src/scripts/reset-demo.ts",
-    "reset-demo:prod": "node dist/scripts/reset-demo.js"
+    "reset-demo:prod": "node dist/scripts/reset-demo.js",
+    "seed:prod": "node dist/scripts/seed.js"
   },
   "keywords": [
     "bookstore",
@@ -61,6 +62,6 @@
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.12"
   }
 }

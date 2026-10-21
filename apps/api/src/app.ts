@@ -9,6 +9,7 @@ import { openApiSpec } from './shared/http/docs/openapi';
 import { errorHandler, notFoundHandler } from './shared/http/middleware/errorHandler';
 import { requestIdMiddleware } from './shared/http/middleware/requestId';
 import { globalRateLimiter } from './shared/http/middleware/rate-limit';
+import { originCheck } from './shared/http/middleware/originCheck';
 import {
   registerIdentityRoutes,
   registerCatalogRoutes,
@@ -32,6 +33,7 @@ app.use(
 );
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
+app.use(originCheck);
 if (env.NODE_ENV !== 'test') {
   app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 }
@@ -49,7 +51,19 @@ app.get('/api/docs.json', (_req, res) => {
   res.json(openApiSpec);
 });
 
-app.use('/uploads', express.static(env.UPLOAD_DIR_ABS));
+// Uploaded images only: no directory listing, no sniffing, and a CSP that keeps any
+// file from running script if it is opened directly.
+app.use(
+  '/uploads',
+  express.static(env.UPLOAD_DIR_ABS, {
+    index: false,
+    dotfiles: 'deny',
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; sandbox");
+    },
+  }),
+);
 
 const apiV1 = express.Router();
 registerIdentityRoutes(apiV1);

@@ -14,6 +14,7 @@ import { RefreshTokenModel } from '../modules/identity/infra/models/RefreshToken
 import { DiscountModel } from '../modules/promotions/infra/models/DiscountModel';
 import { ProductModel } from '../modules/catalog/infra/models/ProductModel';
 import { runSeed } from './seed';
+import { adminCredentials } from './seed/identity';
 
 /** Accounts created by the seed keep existing; every other account is a visitor's. */
 const SEED_ACCOUNTS = /@weltandgrain\.local$/;
@@ -25,7 +26,7 @@ export async function resetDemo(): Promise<void> {
     FavoriteModel.deleteMany({}),
     ReviewModel.deleteMany({}),
     RefreshTokenModel.deleteMany({}),
-    UserModel.deleteMany({ email: { $not: SEED_ACCOUNTS } }),
+    UserModel.deleteMany({ $and: [{ email: { $not: SEED_ACCOUNTS } }, { email: { $ne: adminCredentials().email } }] }),
     DiscountModel.updateMany({}, { usedCount: 0 }),
     // prices, stock and ratings come back from the seed below
     ProductModel.updateMany({}, { ratingAvg: 0, ratingCount: 0 }),

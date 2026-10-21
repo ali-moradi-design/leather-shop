@@ -21,7 +21,7 @@ const envSchema = z.object({
   REFRESH_TOKEN_TTL: z.string().default('7d'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
-  // Express 'trust proxy': hops in front of the API (e.g. 2 = Nginx + the Next.js /api rewrite),
+  // Express 'trust proxy': hops in front of the API (e.g. 1 = the storefront's /api proxy route),
   // so rate limits use the visitor's IP instead of the storefront's.
   TRUST_PROXY: z.coerce.number().int().nonnegative().default(0),
   UPLOAD_DIR: z.string().default('uploads'),
@@ -44,6 +44,24 @@ if (!parsed.success) {
 }
 
 const data = parsed.data;
+
+// Production refuses guessable secrets and a wildcard CORS origin.
+if (data.NODE_ENV === 'production') {
+  const problems: string[] = [];
+  for (const key of ['JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET'] as const) {
+    if (data[key].length < 32 || /change-me|secret|example/i.test(data[key])) {
+      problems.push(`${key} must be a random value of at least 32 characters`);
+    }
+  }
+  if (data.JWT_ACCESS_SECRET === data.JWT_REFRESH_SECRET) {
+    problems.push('JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must differ');
+  }
+  if (data.CORS_ORIGIN.trim() === '*') problems.push('CORS_ORIGIN must list the storefront origin');
+  if (problems.length) {
+    console.error('Unsafe production configuration:\n- ' + problems.join('\n- '));
+    process.exit(1);
+  }
+}
 
 /**
  * CORS with credentials cannot use `Access-Control-Allow-Origin: *`.

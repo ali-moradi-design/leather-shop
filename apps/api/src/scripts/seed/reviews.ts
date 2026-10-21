@@ -1,4 +1,5 @@
 import type { repos } from '../../shared/composition/repos';
+import { randomBytes } from 'node:crypto';
 import { passwordHasher } from '../../modules/identity';
 import { FEATURED_COUNT } from './catalog';
 
@@ -20,7 +21,8 @@ export async function seedReviews(repos: Repos): Promise<void> {
   if (total > 0) return;
 
   const customerRole = (await repos.roles.list()).find((r) => r.name === 'customer');
-  const passwordHash = await passwordHasher.hash('Reviewer123!');
+  // nobody signs in as a reviewer: a random password keeps these accounts closed
+  const passwordHash = await passwordHasher.hash(randomBytes(24).toString('base64url'));
   const users = [];
   for (const [i, name] of REVIEWERS.entries()) {
     const email = `reviewer${i + 1}@weltandgrain.local`;

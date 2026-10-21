@@ -490,5 +490,28 @@ describe('Welt & Grain API (integration)', () => {
         .set(authHeader(customer.accessToken))
         .expect(403);
     });
+
+    it('stores real images under a safe name and rejects disguised files', async () => {
+      const png = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+        'base64',
+      );
+      const ok = await ctx.request
+        .post('/api/v1/uploads/product-cover')
+        .set(authHeader(ctx.adminToken))
+        .attach('file', png, { filename: 'evil.html', contentType: 'image/png' })
+        .expect(201);
+      expect(ok.body.url).toMatch(/\/[0-9]+-[0-9a-f]{12}\.png$/);
+
+      const served = await ctx.request.get(new URL(ok.body.url, 'http://x').pathname).expect(200);
+      expect(served.headers['x-content-type-options']).toBe('nosniff');
+      expect(served.headers['content-security-policy']).toContain('sandbox');
+
+      await ctx.request
+        .post('/api/v1/uploads/product-cover')
+        .set(authHeader(ctx.adminToken))
+        .attach('file', Buffer.from('<script>alert(1)</script>'), { filename: 'x.png', contentType: 'image/png' })
+        .expect(400);
+    });
   });
 });
