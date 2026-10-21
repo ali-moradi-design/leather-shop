@@ -7,8 +7,9 @@ and catalog reads are cached (`'use cache'`, tag `products`); per-visitor parts
 Structure follows Feature-Sliced Design: `app` (routes) → `widgets` → `features`
 → `entities` → `shared`.
 
-The browser reaches the API through the same origin (`/api/*` is rewritten to
-`API_URL`), so the API's httpOnly cookies are first-party.
+The browser reaches the API through the same origin: the `/api/[...path]` route
+handler proxies to `API_URL` (read at runtime), so the API's httpOnly cookies are
+first-party and the visitor's IP is passed on for rate limits.
 
 ```bash
 cp .env.example .env.local   # API_URL=http://localhost:4000

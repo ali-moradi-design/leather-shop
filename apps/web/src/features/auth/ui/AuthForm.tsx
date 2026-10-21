@@ -8,8 +8,15 @@ import { clientApi } from '@/shared/api/client';
 
 export const DEMO = { email: 'demo@weltandgrain.local', password: 'Demo123!' };
 
-function safeNext(next: string | undefined): string {
-  return next && next.startsWith('/') && !next.startsWith('//') ? next : '/account';
+/** Only same-site paths: no "//host", no "/\\host" (browsers read both as another host). */
+export function safeNext(next: string | undefined): string {
+  if (!next || !next.startsWith('/') || next.startsWith('//') || next.includes('\\')) return '/account';
+  try {
+    const url = new URL(next, 'http://local.invalid');
+    return url.origin === 'http://local.invalid' ? url.pathname + url.search + url.hash : '/account';
+  } catch {
+    return '/account';
+  }
 }
 
 /** Sign in / create account. After success the guest cart is merged into the account. */

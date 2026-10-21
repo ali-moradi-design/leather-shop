@@ -5,6 +5,9 @@ import { DomainError } from '@shared/domain/DomainError';
 import { assertPositiveQuantity, assertSufficientStock, findVariant } from '@modules/catalog';
 import { mergeCartItem } from '@modules/ordering/domain/rules/cart.totals';
 
+/** Keeps one visitor from growing a cart document without limit. */
+export const MAX_CART_LINES = 50;
+
 export class AddToCartUseCase {
   constructor(
     private readonly carts: ICartRepository,
@@ -22,7 +25,11 @@ export class AddToCartUseCase {
     const newQty = (existing?.quantity ?? 0) + quantity;
     assertSufficientStock(variant.stock, newQty, product.title);
 
-    cart.items = mergeCartItem(cart.items, productId, sku, quantity);
+    const items = mergeCartItem(cart.items, productId, sku, quantity);
+    if (items.length > MAX_CART_LINES) {
+      throw new DomainError(`A cart can hold up to ${MAX_CART_LINES} different items`, 'VALIDATION');
+    }
+    cart.items = items;
     return this.carts.save(cart);
   }
 }

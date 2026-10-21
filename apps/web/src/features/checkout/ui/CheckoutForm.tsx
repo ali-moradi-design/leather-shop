@@ -63,6 +63,9 @@ export function CheckoutForm({ name }: { name: string }) {
     <div className="grid gap-12 lg:grid-cols-[1fr_420px]">
       <form id="checkout" onSubmit={onSubmit} className="grid grid-cols-2 gap-4 text-[14px]">
         <h2 className="heading col-span-2 text-[22px]">Shipping address</h2>
+        <p className="col-span-2 border border-line bg-soft px-3 py-2 text-[13px]">
+          Demo shop: please don’t enter real personal data. The demo account is shared and all orders are deleted every night.
+        </p>
         <label className="col-span-2">Full name<input name="fullName" required defaultValue={name} autoComplete="name" className={field} /></label>
         <label className="col-span-2">Address<input name="line1" required autoComplete="address-line1" className={field} /></label>
         <label className="col-span-2">Apartment, suite (optional)<input name="line2" autoComplete="address-line2" className={field} /></label>

@@ -42,7 +42,7 @@ npm run seed
 npm run dev
 ```
 
-Default admin: `admin@weltandgrain.local` / `Admin123!`  
+Default admin (development only): `admin@weltandgrain.local` / `Admin123!`; production sets `ADMIN_EMAIL` / `ADMIN_PASSWORD`  
 Sample discounts: `WELCOME10`, `FLAT5`.
 
 

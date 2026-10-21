@@ -33,6 +33,23 @@ export function basePermissions() {
   return [...perms, ...extras];
 }
 
+/**
+ * Admin sign-in. Development and tests use a well-known default; production must
+ * set ADMIN_PASSWORD (12+ characters) so the live admin is not public.
+ */
+export function adminCredentials(): { email: string; password: string } {
+  const email = process.env.ADMIN_EMAIL ?? 'admin@weltandgrain.local';
+  const password = process.env.ADMIN_PASSWORD;
+  if (password) {
+    if (password.length < 12) throw new Error('ADMIN_PASSWORD must be at least 12 characters');
+    return { email, password };
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Set ADMIN_PASSWORD (12+ characters) before seeding in production');
+  }
+  return { email, password: 'Admin123!' };
+}
+
 export const DEMO_CUSTOMER = { email: 'demo@weltandgrain.local', password: 'Demo123!' };
 
 export const CUSTOMER_SLUGS = [
@@ -70,8 +87,9 @@ export async function seedIdentity(repos: Repos): Promise<void> {
     permissions: customerPermIds,
   });
 
-  const passwordHash = await passwordHasher.hash('Admin123!');
-  const existingAdmin = await repos.users.findByEmail('admin@weltandgrain.local');
+  const admin = adminCredentials();
+  const passwordHash = await passwordHasher.hash(admin.password);
+  const existingAdmin = await repos.users.findByEmail(admin.email);
   if (existingAdmin) {
     await repos.users.update(existingAdmin.id, {
       name: 'Admin',
@@ -82,7 +100,7 @@ export async function seedIdentity(repos: Repos): Promise<void> {
   } else {
     await repos.users.create({
       name: 'Admin',
-      email: 'admin@weltandgrain.local',
+      email: admin.email,
       passwordHash,
       roles: [adminRole.id],
       isActive: true,

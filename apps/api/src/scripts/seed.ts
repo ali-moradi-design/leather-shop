@@ -1,6 +1,6 @@
 import { connectDb } from '../shared/config/db';
 import { repos } from '../shared/composition/repos';
-import { seedIdentity } from './seed/identity';
+import { seedIdentity, adminCredentials } from './seed/identity';
 import { seedCatalog, FEATURED_COUNT } from './seed/catalog';
 import { seedPromotions } from './seed/promotions';
 import { seedReviews } from './seed/reviews';
@@ -23,7 +23,7 @@ async function main() {
   await runSeed();
   const productCount = await repos.products.count();
   console.log(`Products upserted (catalog count: ${productCount}); featured: ${FEATURED_COUNT}`);
-  console.log('Admin user: admin@weltandgrain.local / Admin123!');
+  console.log(`Admin user: ${adminCredentials().email}${process.env.ADMIN_PASSWORD ? '' : ' / Admin123! (development default)'}`);
   console.log('Demo customer: demo@weltandgrain.local / Demo123!');
   console.log('Sample discounts: WELCOME10 (10%), FLAT20 ($20 off $150+)');
   console.log('Seed complete.');
