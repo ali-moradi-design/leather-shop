@@ -28,7 +28,7 @@ What was built, PR by PR, and a code walkthrough plan: [docs/build-log.md](docs/
 
 ## Run locally
 
-Needs Node 22, pnpm 12 and Docker.
+Needs Node 24, pnpm 12 and Docker.
 
 ```bash
 pnpm install
