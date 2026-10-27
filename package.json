@@ -1,7 +1,7 @@
 {
   "name": "welt-and-grain",
   "private": true,
-  "packageManager": "pnpm@10.28.0",
+  "packageManager": "pnpm@12.15.0",
   "engines": { "node": ">=22" },
   "scripts": {
     "dev:api": "pnpm --filter @wg/api dev",

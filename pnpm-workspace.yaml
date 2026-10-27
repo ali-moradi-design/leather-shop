@@ -1,5 +1,7 @@
 packages:
   - apps/*
-onlyBuiltDependencies:
-  - esbuild
-  - mongodb-memory-server
+allowBuilds:
+  '@scarf/scarf': false
+  esbuild: true
+  mongodb-memory-server: true
+  unrs-resolver: false
