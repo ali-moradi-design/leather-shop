@@ -14,7 +14,7 @@ export function Split({ tiles, className }: { tiles: [SplitTile, SplitTile]; cla
   return (
     <section className={`grid gap-1.5 sm:grid-cols-2 sm:gap-0 ${className ?? ''}`}>
       {tiles.map((t) => (
-        <div key={t.title} className="group relative h-[440px] overflow-hidden text-white sm:h-[520px] lg:h-[655px]">
+        <div key={t.title} className="group relative h-[440px] overflow-hidden text-white sm:h-[520px] lg:h-[45.5vw]">
           <Link href={t.href} aria-label={t.title} className="absolute inset-0">
             <Image src={t.image} alt={t.alt} fill sizes="(min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" />
             <span className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent to-45%" />

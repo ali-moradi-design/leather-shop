@@ -21,14 +21,14 @@ export function HomeSkeleton() {
       <Status label="Loading the shop…" />
       <Skeleton className="h-[calc(100svh-var(--announce-h)-var(--header-h)-var(--subnav-h))] min-h-[460px] w-full" />
       <div className="mt-[5px] grid gap-1.5 sm:grid-cols-2 sm:gap-0">
-        <Skeleton className="h-[440px] sm:h-[520px] lg:h-[655px]" />
-        <Skeleton className="hidden h-[520px] sm:block lg:h-[655px]" />
+        <Skeleton className="h-[440px] sm:h-[520px] lg:h-[45.5vw]" />
+        <Skeleton className="hidden h-[520px] sm:block lg:h-[45.5vw]" />
       </div>
       <div className="px-4 pt-[60px] sm:px-[25px]">
         <Skeleton className="h-8 w-64" />
         <div className="mt-5 flex gap-2 overflow-hidden">
           {Array.from({ length: 6 }, (_, i) => (
-            <Skeleton key={i} className="h-[291px] w-[62vw] shrink-0 sm:w-[245px]" />
+            <Skeleton key={i} className="aspect-[245/290] w-[62vw] shrink-0 sm:w-[max(245px,calc(18.21vw-17px))]" />
           ))}
         </div>
       </div>

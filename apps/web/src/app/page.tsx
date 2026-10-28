@@ -1,10 +1,11 @@
 import { Suspense } from 'react';
 import { fetchProducts, ProductCard } from '@/entities/product';
-import { GridSkeleton, ProductGridLayout } from '@/widgets/catalog';
+import { Skeleton } from '@/shared/ui';
 import {
   Hero,
   Split,
   SectionHead,
+  ProductRail,
   CategoryRail,
   Reviews,
   Why,
@@ -12,15 +13,29 @@ import {
   CtaBand,
 } from '@/widgets/home';
 
-/** Bestsellers sit inside the shop container, as a grid like the collection pages. */
+/** Bestsellers scroll in the same fluid row and edges as the category rails. */
 async function Bestsellers() {
-  const { data } = await fetchProducts({ featured: true, limit: 8 });
+  const { data } = await fetchProducts({ featured: true, limit: 12 });
   return (
-    <ProductGridLayout>
+    <ProductRail>
       {data.map((p) => (
         <ProductCard key={p.id} product={p} />
       ))}
-    </ProductGridLayout>
+    </ProductRail>
+  );
+}
+
+function BestsellersSkeleton() {
+  return (
+    <ProductRail>
+      {Array.from({ length: 6 }, (_, i) => (
+        <div key={i} aria-hidden>
+          <Skeleton className="aspect-square w-full" />
+          <Skeleton className="mt-3 h-4 w-2/3" />
+          <Skeleton className="mt-2 h-4 w-1/3" />
+        </div>
+      ))}
+    </ProductRail>
   );
 }
 
@@ -46,9 +61,9 @@ export default function HomePage() {
           { image: '/media/men-racerjacket-blackmatte.jpg', label: 'Belts', href: '/collections/belts' },
         ]}
       />
-      <section aria-label="Bestsellers" className="container-shop">
-        <SectionHead title="Bestsellers" href="/collections/mens-boots" linkLabel="Shop all" flush />
-        <Suspense fallback={<GridSkeleton count={8} toolbar={false} />}>
+      <section aria-label="Bestsellers">
+        <SectionHead title="Bestsellers" href="/collections/mens-boots" linkLabel="Shop all" />
+        <Suspense fallback={<BestsellersSkeleton />}>
           <Bestsellers />
         </Suspense>
       </section>
