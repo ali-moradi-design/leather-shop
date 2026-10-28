@@ -8,6 +8,7 @@ import { requireUser } from '@/features/auth/server';
 import { ApiError } from '@/shared/api';
 import { serverApi } from '@/shared/api/server';
 import { formatMoney } from '@/shared/lib/money';
+import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Order', robots: { index: false } };
 
@@ -65,7 +66,7 @@ async function OrderView({ params, searchParams }: Props) {
 export default function OrderPage(props: Props) {
   return (
     <div className="container-page max-w-3xl py-14">
-      <Suspense fallback={<div className="h-64" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
         <OrderView {...props} />
       </Suspense>
     </div>

@@ -10,3 +10,6 @@ coverage/
 graphify-out/
 playwright-report/
 test-results/
+
+# graphify knowledge graph (local only)
+graphify-out/

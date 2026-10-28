@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { AuthForm } from '@/features/auth';
+import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Create Account', robots: { index: false } };
 
@@ -12,7 +13,7 @@ async function Form({ searchParams }: Props) {
 
 export default function RegisterPage({ searchParams }: Props) {
   return (
-    <Suspense fallback={<div className="h-[520px]" />}>
+    <Suspense fallback={<Skeleton className="h-[520px] w-full" />}>
       <Form searchParams={searchParams} />
     </Suspense>
   );

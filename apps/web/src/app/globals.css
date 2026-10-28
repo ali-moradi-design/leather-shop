@@ -1,48 +1,112 @@
 @import "tailwindcss";
 
-/* Welt & Grain: light and monochrome. */
+/*
+ * Welt & Grain: light, editorial, with a deep teal brand color and a blue
+ * action color (add to cart, newsletter), like the reference store.
+ */
 @theme {
-  --color-ink: #111111;
+  --color-ink: #231f20;
+  --color-body: #4a4a4a;
   --color-paper: #ffffff;
-  --color-soft: #f6f6f6;
-  --color-line: #e3e3e3;
+  --color-soft: #f8f8f8;
+  --color-line: #e5e5e5;
+  /* the reference uses #9b9b9b, which fails WCAG AA; #6f6f6f passes on white and on the soft grey */
   --color-mute: #6f6f6f;
+  --color-brand: #243a3e;
+  --color-accent: #2374ab;
+  --color-accent-dark: #1d5f8c;
   --color-danger: #b42318;
-  --font-serif: var(--font-source-serif), Georgia, serif;
-  --font-sans: var(--font-jost), system-ui, sans-serif;
+  --font-serif: var(--font-frank-ruhl), Georgia, serif;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  --animate-drawer-left: drawer-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-drawer-right: drawer-right 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-slide-down: slide-down 0.2s ease-out;
+  @keyframes drawer-left {
+    from { transform: translateX(-100%); }
+  }
+  @keyframes drawer-right {
+    from { transform: translateX(100%); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+  }
+  @keyframes slide-down {
+    from { opacity: 0; transform: translateY(-8px); }
+  }
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
 }
 
+/*
+ * Heights of the site chrome above the hero, so the hero fills exactly the
+ * rest of the viewport. Mobile: announcement + header + category circles;
+ * desktop: announcement + header + category links.
+ */
 :root {
   color-scheme: light;
+  --announce-h: 33px;
+  --header-h: 56px;
+  --subnav-h: 104px;
+}
+@media (min-width: 1024px) {
+  :root {
+    --header-h: 78px;
+    --subnav-h: 48px;
+  }
 }
 
 @layer base {
   body {
-    @apply bg-paper text-ink font-sans antialiased;
-    font-size: 15px;
-    line-height: 1.6;
+    @apply bg-paper font-sans text-body antialiased;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  h1, h2, h3, h4 {
+    @apply text-ink;
   }
 
   a {
     @apply text-inherit no-underline;
   }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 }
 
 @layer components {
+  /* Dark brand button; .btn-light (white) and .btn-accent (blue) are variants. */
   .btn {
-    @apply inline-flex h-11 items-center justify-center gap-2 bg-ink px-10 text-[13px] font-medium uppercase tracking-[0.16em] text-white transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex h-11 items-center justify-center gap-2 bg-brand px-10 text-[14px] font-semibold uppercase tracking-[2px] text-white transition-colors hover:bg-[#1a2b2e] disabled:cursor-not-allowed disabled:opacity-40;
   }
   .eyebrow {
-    @apply text-[13px] font-medium uppercase tracking-[0.16em];
+    @apply text-[13px] font-medium uppercase tracking-[2px];
   }
   .heading {
-    @apply font-serif font-bold;
+    @apply font-serif font-bold text-ink;
   }
   .link-underline {
     @apply underline underline-offset-4;
   }
+  /* Wide pages (header, hero rails). */
   .container-page {
     @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8;
+  }
+  /* Shop pages: collections, search and product pages keep their products in here. */
+  .container-shop {
+    @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-[58px];
+  }
+  /* Grey block that shimmers while content loads. */
+  .skeleton {
+    @apply animate-shimmer bg-[linear-gradient(90deg,#f1f1f1_25%,#e8e8e8_37%,#f1f1f1_63%)] bg-[length:400%_100%];
   }
 }
 
@@ -50,6 +114,15 @@
 .btn.btn-light {
   background: var(--color-paper);
   color: var(--color-ink);
+}
+.btn.btn-light:hover {
+  background: #f2f2f2;
+}
+.btn.btn-accent {
+  background: var(--color-accent-dark);
+}
+.btn.btn-accent:hover {
+  background: #174d73;
 }
 .btn.btn-outline {
   border: 1px solid var(--color-ink);
@@ -63,4 +136,13 @@
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

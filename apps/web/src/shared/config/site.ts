@@ -25,6 +25,8 @@ export const COLLECTIONS: Collection[] = [
   { slug: 'womens-boots', title: "Women's Boots", tagline: 'Made for every step.', category: 'boots', gender: 'women', hero: '/media/women-legendplatform-blackmatte.jpg', chips: ['Legend', 'Captain', 'Duchess', 'Arden', 'Knee-high', 'Suede'] },
   { slug: 'mens-shoes', title: "Men's Shoes", tagline: 'Loafers, oxfords and more.', category: 'shoes', gender: 'men', hero: '/media/men-lincoln-richmahogany.jpg' },
   { slug: 'womens-shoes', title: "Women's Shoes", tagline: 'Loafers, flats and heels.', category: 'shoes', gender: 'women', hero: '/media/women-penny-blackgold.jpg' },
+  { slug: 'mens-bags', title: "Men's Bags", tagline: 'Built to carry for decades.', category: 'bags', gender: 'men', hero: '/media/men-weekender-oldenglish.jpg', chips: ['Weekender', 'Commuter', 'Backpack', 'Dopp Kit'] },
+  { slug: 'womens-handbags', title: "Women's Handbags", tagline: 'Everyday leather, made to last.', category: 'bags', gender: 'women', hero: '/media/women-bucketbag-toscanello.jpg', chips: ['Tote', 'Bucket', 'Crossbody', 'Crescent'] },
   { slug: 'bags', title: 'Bags', tagline: 'Built to carry for decades.', category: 'bags', hero: '/media/men-weekender-oldenglish.jpg' },
   { slug: 'belts', title: 'Belts', tagline: 'One strip of full-grain leather.', category: 'belts', hero: '/media/women-westernbelt-black.jpg' },
   { slug: 'wallets', title: 'Wallets', tagline: 'Small goods, built to last.', category: 'wallets', hero: '/media/men-captain-arizona.jpg' },
@@ -36,9 +38,3 @@ export function findCollection(slug: string): Collection | undefined {
   return COLLECTIONS.find((c) => c.slug === slug);
 }
 
-export const SUB_NAV = COLLECTIONS.filter((c) => c.slug !== 'accessories');
-
-export const MAIN_NAV = [
-  { label: 'Men', links: ['mens-boots', 'mens-shoes', 'bags', 'belts', 'wallets', 'leather-care'] },
-  { label: 'Women', links: ['womens-boots', 'womens-shoes', 'bags', 'belts', 'wallets', 'leather-care'] },
-] as const;

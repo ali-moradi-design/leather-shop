@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { requireUser } from '@/features/auth/server';
 import { serverApi } from '@/shared/api/server';
 import { formatMoney } from '@/shared/lib/money';
+import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Favorites', robots: { index: false } };
 
@@ -42,7 +43,7 @@ export default function FavoritesPage() {
     <div className="container-page py-14">
       <Link href="/account" className="text-[13px] text-mute underline">← My account</Link>
       <h1 className="heading mb-8 mt-3 text-[32px]">Favorites</h1>
-      <Suspense fallback={<div className="h-64" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
         <Favorites />
       </Suspense>
     </div>

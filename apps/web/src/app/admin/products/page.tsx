@@ -7,6 +7,7 @@ import { requireAdmin } from '@/features/auth/server';
 import type { ApiPaginated } from '@/shared/api';
 import { serverApi } from '@/shared/api/server';
 import { formatMoney } from '@/shared/lib/money';
+import { Skeleton } from '@/shared/ui';
 
 type Props = { searchParams: Promise<{ q?: string; page?: string }> };
 
@@ -53,7 +54,7 @@ export default function AdminProductsPage(props: Props) {
     <>
       <h1 className="heading mb-6 text-[32px]">Admin</h1>
       <AdminNav current="products" />
-      <Suspense fallback={<div className="h-64" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
         <Products {...props} />
       </Suspense>
     </>
