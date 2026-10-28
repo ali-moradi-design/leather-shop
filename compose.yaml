@@ -16,7 +16,7 @@ services:
     image: mongo:8.2.6 # pinned: 8.3 refuses to start on Linux 6.19+ (SERVER-121912)
     command: ["--wiredTigerCacheSizeGB", "0.25"]
     ports:
-      - "127.0.0.1:27017:27017"
+      - "127.0.0.1:27100:27017" # 27100 so it never clashes with a MongoDB already on 27017
     volumes:
       - mongo-data:/data/db
     healthcheck:

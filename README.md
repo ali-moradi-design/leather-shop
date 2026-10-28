@@ -47,7 +47,7 @@ Needs Node 24, pnpm 12 and Docker.
 
 ```bash
 pnpm install
-pnpm db:up                                # MongoDB in Docker on 127.0.0.1:27017 (stop: pnpm db:down)
+pnpm db:up                                # MongoDB in Docker on 127.0.0.1:27100 (stop: pnpm db:down)
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 pnpm seed                                 # 480 products, demo accounts, reviews
@@ -74,7 +74,7 @@ binary once, on the first run. To skip that download, point them at the Docker
 MongoDB instead:
 
 ```bash
-TEST_MONGODB_URI=mongodb://127.0.0.1:27017/weltandgrain-test pnpm --filter @wg/api test
+TEST_MONGODB_URI=mongodb://127.0.0.1:27100/weltandgrain-test pnpm --filter @wg/api test
 ```
 
 CI (`.github/workflows/ci.yml`) runs the API checks, the web checks and the E2E
