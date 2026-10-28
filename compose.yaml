@@ -1,4 +1,16 @@
-# Local development database. Production compose lives on the server (roadmap phase 8).
+# Local stack: `docker compose up -d --build` runs MongoDB, the API and the storefront
+# (http://localhost:3000). For `pnpm dev`, start only the database: `docker compose up -d mongo`.
+# Production compose lives in deploy/.
+x-api-env: &api-env
+  NODE_ENV: development # plain-http cookies and the default demo admin password
+  MONGODB_URI: mongodb://mongo:27017/leather
+  JWT_ACCESS_SECRET: local-access-secret
+  JWT_REFRESH_SECRET: local-refresh-secret
+  CORS_ORIGIN: http://localhost:3000
+  TRUST_PROXY: 1 # the storefront's /api route
+  WEB_REVALIDATE_URL: http://web:3000/hooks/revalidate
+  REVALIDATE_SECRET: local-revalidate-secret
+
 services:
   mongo:
     image: mongo:8.2.6 # pinned: 8.3 refuses to start on Linux 6.19+ (SERVER-121912)
@@ -14,5 +26,40 @@ services:
       retries: 5
     mem_limit: 512m
 
+  # loads the demo catalog and accounts on every start (upserts, so it is safe to repeat)
+  seed:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    image: leather-shop-api:local
+    command: ["node", "dist/scripts/seed.js"]
+    environment: *api-env
+    depends_on:
+      mongo: { condition: service_healthy }
+
+  api:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    image: leather-shop-api:local
+    environment: *api-env
+    ports:
+      - "127.0.0.1:4000:4000"
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      seed: { condition: service_completed_successfully }
+    restart: unless-stopped
+
+  web:
+    build: { context: ., dockerfile: apps/web/Dockerfile, target: local }
+    image: leather-shop-web:local
+    environment:
+      API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      REVALIDATE_SECRET: local-revalidate-secret
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api: { condition: service_healthy }
+    restart: unless-stopped
+
 volumes:
   mongo-data:
+  uploads:

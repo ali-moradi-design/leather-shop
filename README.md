@@ -28,16 +28,30 @@ What was built, PR by PR, and a code walkthrough plan: [docs/build-log.md](docs/
 
 ## Run locally
 
+### Everything in Docker
+
+Needs only Docker.
+
+```bash
+docker compose up -d --build              # MongoDB, API and storefront
+```
+
+The demo data loads on every start. The storefront builds when its container
+starts, so http://localhost:3000 answers a minute or two after `up`; follow it
+with `docker compose logs -f web`. The API docs are at http://localhost:4000/api/docs.
+`docker compose down` stops everything (add `-v` to also delete the data).
+
+### With pnpm (hot reload)
+
 Needs Node 24, pnpm 12 and Docker.
 
 ```bash
 pnpm install
-docker compose up -d                      # MongoDB on 127.0.0.1:27017
+pnpm db                                   # MongoDB in Docker on 127.0.0.1:27017
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
-pnpm --filter @wg/api seed                # 480 products, demo accounts, reviews
-pnpm dev:api                              # http://localhost:4000 (docs: /api/docs)
-pnpm dev:web                              # http://localhost:3000
+pnpm seed                                 # 480 products, demo accounts, reviews
+pnpm dev                                  # API on :4000 (docs: /api/docs) + web on :3000
 ```
 
 Demo accounts:

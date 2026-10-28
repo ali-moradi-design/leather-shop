@@ -4,6 +4,9 @@
   "packageManager": "pnpm@12.15.0",
   "engines": { "node": ">=24" },
   "scripts": {
+    "db": "docker compose up -d mongo",
+    "seed": "pnpm --filter @wg/api seed",
+    "dev": "pnpm --parallel --filter @wg/api --filter @wg/web dev",
     "dev:api": "pnpm --filter @wg/api dev",
     "dev:web": "pnpm --filter @wg/web dev",
     "build": "pnpm -r build",
