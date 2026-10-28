@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { DragScroll } from '@/shared/ui';
 
 export function SectionHead({ title, href, linkLabel, flush }: { title: string; href?: string; linkLabel?: string; flush?: boolean }) {
   return (
@@ -26,24 +27,24 @@ const TILE_SIZES = '(min-width: 640px) max(245px, 18vw), 62vw';
 /** Horizontally scrolling row of lifestyle category tiles. */
 export function CategoryRail({ items }: { items: { image: string; label: string; href: string }[] }) {
   return (
-    <div className="no-scrollbar flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-2 sm:scroll-px-[25px] sm:px-[25px]">
+    <DragScroll className="gap-2 px-4 pb-2 sm:px-[25px]">
       {items.map((it) => (
-        <Link key={it.label} href={it.href} className={`group shrink-0 snap-start text-center ${TILE_W}`}>
+        <Link key={it.label} href={it.href} className={`group shrink-0 text-center ${TILE_W}`}>
           <div className="relative aspect-[245/290] overflow-hidden bg-soft">
             <Image src={it.image} alt="" fill sizes={TILE_SIZES} className="object-cover transition-transform duration-500 group-hover:scale-105" />
           </div>
           <span className="mt-[15px] block text-[12px] font-semibold uppercase tracking-[1.68px] text-ink">{it.label}</span>
         </Link>
       ))}
-    </div>
+    </DragScroll>
   );
 }
 
 /** Product cards in the same fluid row as the category tiles. */
 export function ProductRail({ children }: { children: ReactNode }) {
   return (
-    <div className="no-scrollbar flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-2 sm:scroll-px-[25px] sm:px-[25px] [&>*]:w-[62vw] [&>*]:shrink-0 [&>*]:snap-start sm:[&>*]:w-[max(245px,calc(18.21vw-17px))]">
+    <DragScroll className="gap-2 px-4 pb-2 sm:px-[25px] [&>*]:w-[62vw] [&>*]:shrink-0 sm:[&>*]:w-[max(245px,calc(18.21vw-17px))]">
       {children}
-    </div>
+    </DragScroll>
   );
 }

@@ -49,3 +49,22 @@ test('mobile menu drawer and filter drawer', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(filters).toBeHidden();
 });
+
+test('home rail can be dragged with the mouse; a drag does not open a tile', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const rail = page.getByRole('link', { name: "Men's Boots" }).filter({ has: page.locator('img') }).first().locator('xpath=..');
+  await rail.scrollIntoViewIfNeeded();
+  const box = (await rail.boundingBox())!;
+  const y = box.y + 120;
+  await page.mouse.move(box.x + 900, y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 400, y, { steps: 10 });
+  await page.mouse.up();
+  await expect.poll(() => rail.evaluate((el) => el.scrollLeft)).toBeGreaterThan(100);
+  await expect(page).toHaveURL(/\/$/);
+
+  // a plain click still opens the tile
+  await rail.getByRole('link').first().click();
+  await expect(page).toHaveURL(/\/collections\//);
+});
