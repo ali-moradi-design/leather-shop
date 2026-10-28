@@ -47,7 +47,7 @@ Needs Node 24, pnpm 12 and Docker.
 
 ```bash
 pnpm install
-pnpm db                                   # MongoDB in Docker on 127.0.0.1:27017
+pnpm db:up                                # MongoDB in Docker on 127.0.0.1:27017 (stop: pnpm db:down)
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 pnpm seed                                 # 480 products, demo accounts, reviews
