@@ -118,3 +118,52 @@ jobs:
       - name: API logs
         if: failure()
         run: docker logs build-api || true
+
+  deploy:
+    name: Deploy to the VPS
+    needs: images
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://shop-leather.ali-moradi-develop.com
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    steps:
+      - name: Write the SSH key and known hosts
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Pull the new images and restart
+        env:
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          SSH_PORT: ${{ vars.SSH_PORT }}
+          SSH_USER: ${{ vars.SSH_USER }}
+        run: |
+          # the tag goes into a shell command on the server: allow only a commit SHA
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "unexpected SHA: $SHA"; exit 1; }
+          # .env also holds the secrets, so only the IMAGE_TAG line is replaced;
+          # .env.previous keeps the last tag for a quick rollback
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" \
+            "cd /srv/apps/leather-shop && cp -p .env .env.previous \
+             && sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=$SHA/' .env \
+             && docker compose pull --quiet && docker compose up -d --wait --wait-timeout 180"
+
+      - name: Smoke test through Nginx
+        run: |
+          # /api/health goes Nginx -> web -> api, so it checks the whole chain
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 --retry-all-errors \
+            https://shop-leather.ali-moradi-develop.com/api/health
+          curl --fail --silent --show-error -o /dev/null https://shop-leather.ali-moradi-develop.com/
+
+      - name: Remove the key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
