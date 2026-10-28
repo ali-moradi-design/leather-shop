@@ -55,6 +55,14 @@ pnpm --filter @wg/web build                # prerendering reads the API, so run 
 pnpm --filter @wg/web e2e                  # against the running API + web build
 ```
 
+API tests start a throwaway MongoDB (`mongodb-memory-server`) and download its
+binary once, on the first run. To skip that download, point them at the Docker
+MongoDB instead:
+
+```bash
+TEST_MONGODB_URI=mongodb://127.0.0.1:27017/weltandgrain-test pnpm --filter @wg/api test
+```
+
 CI (`.github/workflows/ci.yml`) runs the API checks, the web checks and the E2E
 suite against a real MongoDB; the `ci` job is the single required check.
 
