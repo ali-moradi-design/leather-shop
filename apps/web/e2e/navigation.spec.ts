@@ -4,7 +4,9 @@ test('hero fills the rest of the first screen', async ({ page }) => {
   for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
     await page.goto('/');
-    const box = await page.locator('section[aria-labelledby="hero-title"]').boundingBox();
+    const hero = page.locator('section[aria-labelledby="hero-title"]');
+    await expect(hero).toBeVisible();
+    const box = await hero.boundingBox();
     expect(box).not.toBeNull();
     expect(Math.round(box!.y + box!.height)).toBe(viewport.height);
   }
