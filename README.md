@@ -47,12 +47,11 @@ Needs Node 24, pnpm 12 and Docker.
 
 ```bash
 pnpm install
-docker compose up -d mongo                # MongoDB on 127.0.0.1:27017
+pnpm db                                   # MongoDB in Docker on 127.0.0.1:27017
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 pnpm --filter @wg/api seed                # 480 products, demo accounts, reviews
-pnpm dev:api                              # http://localhost:4000 (docs: /api/docs)
-pnpm dev:web                              # http://localhost:3000
+pnpm dev                                  # API on :4000 (docs: /api/docs) + web on :3000
 ```
 
 Demo accounts:
