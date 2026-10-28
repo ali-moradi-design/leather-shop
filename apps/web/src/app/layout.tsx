@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable}`}>
-      <body>
+      <body className="flex min-h-svh flex-col">
         <CartProvider>
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[60] focus:bg-white focus:p-2">
           Skip to content
@@ -45,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
           cart={<CartButton />}
         />
-        <main id="main">{children}</main>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter />
         <CartDrawer />
         </CartProvider>
