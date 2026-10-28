@@ -1,0 +1,120 @@
+name: Docker images
+
+# Runs only after CI passed on main (or by hand), so untested code never
+# reaches the registry. Every image gets two tags: `main` and the commit SHA.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: docker-images
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  # workflow_run: the commit CI tested; manual run: the current commit
+  SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+  API_IMAGE: ghcr.io/ali-moradi-design/leather-shop-api
+  WEB_IMAGE: ghcr.io/ali-moradi-design/leather-shop-web
+  SITE_URL: https://shop-leather.ali-moradi-develop.com
+
+jobs:
+  images:
+    name: Build and push images
+    # only a green CI run from a push to main in this repository
+    # (a fork's pull request from a branch named "main" must not count)
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    services:
+      # temporary database: the web build prerenders pages from the catalog
+      mongo:
+        image: mongo:8.2.6 # pinned: 8.3 refuses to start on Linux 6.19+ (SERVER-121912)
+        ports: ['127.0.0.1:27017:27017']
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping:1})'"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.SHA }}
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@v4
+        with:
+          # the web build must reach the API on 127.0.0.1:4000
+          driver-opts: network=host
+          buildkitd-flags: --allow-insecure-entitlement network.host
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: API image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ${{ env.API_IMAGE }}:main
+            ${{ env.API_IMAGE }}:${{ env.SHA }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,scope=api,mode=max
+
+      - name: Seed the temporary database and start the API
+        env:
+          # build-only values: this API lives for a few minutes inside the runner
+          NODE_ENV: development
+          MONGODB_URI: mongodb://127.0.0.1:27017/leather
+          JWT_ACCESS_SECRET: build-only-access-secret
+          JWT_REFRESH_SECRET: build-only-refresh-secret
+        run: |
+          image="$API_IMAGE:$SHA"
+          docker run --rm --network host -e NODE_ENV -e MONGODB_URI -e JWT_ACCESS_SECRET -e JWT_REFRESH_SECRET \
+            "$image" node dist/scripts/seed.js
+          docker run -d --name build-api --network host -e NODE_ENV -e MONGODB_URI -e JWT_ACCESS_SECRET -e JWT_REFRESH_SECRET \
+            "$image"
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4000/api/health; then echo; exit 0; fi
+            sleep 2
+          done
+          docker logs build-api
+          exit 1
+
+      - name: Web image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          network: host
+          allow: network.host
+          build-args: |
+            API_URL=http://127.0.0.1:4000
+            SITE_URL=${{ env.SITE_URL }}
+          push: true
+          tags: |
+            ${{ env.WEB_IMAGE }}:main
+            ${{ env.WEB_IMAGE }}:${{ env.SHA }}
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,scope=web,mode=max
+          # always prerender again: the catalog is not part of the cache key
+          no-cache-filters: build
+
+      - name: API logs
+        if: failure()
+        run: docker logs build-api || true

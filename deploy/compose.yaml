@@ -1,5 +1,6 @@
 # Production stack for /srv/apps/leather-shop/compose.yaml (roadmap phase 8).
-# Images are built in CI and pulled here; secrets live in .env next to this file.
+# Images are built in CI and pulled here; secrets and IMAGE_TAG (the commit SHA to run)
+# live in .env next to this file.
 name: leather-shop
 
 services:
@@ -22,7 +23,7 @@ services:
     restart: unless-stopped
 
   api:
-    image: ghcr.io/ali-moradi-design/leather-shop-api:${TAG:-latest}
+    image: ghcr.io/ali-moradi-design/leather-shop-api:${IMAGE_TAG:?IMAGE_TAG is not set}
     env_file: .env
     environment:
       NODE_ENV: production
@@ -45,7 +46,7 @@ services:
     restart: unless-stopped
 
   web:
-    image: ghcr.io/ali-moradi-design/leather-shop-web:${TAG:-latest}
+    image: ghcr.io/ali-moradi-design/leather-shop-web:${IMAGE_TAG:?IMAGE_TAG is not set}
     environment:
       API_URL: http://api:4000
       NEXT_PUBLIC_SITE_URL: https://shop-leather.ali-moradi-develop.com
@@ -54,7 +55,16 @@ services:
     ports:
       - "127.0.0.1:3104:3000"
     networks: [frontend]
-    depends_on: [api]
+    depends_on:
+      api:
+        condition: service_healthy # the API image has its own HEALTHCHECK
+    # node:slim has no curl; robots.txt is a cheap static route
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/robots.txt').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     security_opt: [no-new-privileges:true]
     mem_limit: 384m
     restart: unless-stopped
