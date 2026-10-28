@@ -65,7 +65,7 @@ async function OrderView({ params, searchParams }: Props) {
 
 export default function OrderPage(props: Props) {
   return (
-    <div className="container-page max-w-3xl py-14">
+    <div className="container-content py-14">
       <Suspense fallback={<Skeleton className="h-64 w-full" />}>
         <OrderView {...props} />
       </Suspense>

@@ -40,7 +40,7 @@ async function Favorites() {
 
 export default function FavoritesPage() {
   return (
-    <div className="container-page py-14">
+    <div className="container-content py-14">
       <Link href="/account" className="text-[13px] text-mute underline">← My account</Link>
       <h1 className="heading mb-8 mt-3 text-[32px]">Favorites</h1>
       <Suspense fallback={<Skeleton className="h-64 w-full" />}>

@@ -51,7 +51,7 @@ async function Account() {
 
 export default function AccountPage() {
   return (
-    <div className="container-page max-w-4xl py-14">
+    <div className="container-content py-14">
       <Suspense fallback={<Skeleton className="h-64 w-full" />}>
         <Account />
       </Suspense>

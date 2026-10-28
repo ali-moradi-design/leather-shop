@@ -111,9 +111,9 @@ export function SearchSkeleton() {
 }
 
 /** Account, order and admin pages: a heading and a few rows. */
-export function ListSkeleton({ wide = false, rows = 5 }: { wide?: boolean; rows?: number }) {
+export function ListSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className={`container-page py-14 ${wide ? '' : 'max-w-4xl'}`}>
+    <div className="container-content py-14">
       <Status label="Loading…" />
       <Skeleton className="h-9 w-56" />
       <Skeleton className="mt-3 h-4 w-40" />
@@ -133,7 +133,7 @@ export function ListSkeleton({ wide = false, rows = 5 }: { wide?: boolean; rows?
 /** Sign-in, register, checkout and payment forms. */
 export function FormSkeleton({ fields = 3, wide = false }: { fields?: number; wide?: boolean }) {
   return (
-    <div className={`mx-auto px-4 py-14 ${wide ? 'max-w-6xl' : 'max-w-md'}`}>
+    <div className={wide ? 'container-content py-14' : 'mx-auto max-w-md px-4 py-14'}>
       <Status label="Loading…" />
       <Skeleton className="mx-auto h-9 w-48" />
       <div className="mt-8 space-y-5">
