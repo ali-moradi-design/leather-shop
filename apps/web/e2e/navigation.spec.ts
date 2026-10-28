@@ -4,7 +4,8 @@ test('hero fills the rest of the first screen', async ({ page }) => {
   for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
     await page.goto('/');
-    const hero = page.locator('section[aria-labelledby="hero-title"]');
+    // by role, so a hidden copy that is still streaming in is not counted
+    const hero = page.getByRole('region', { name: /Full-Grain Leather/ });
     await expect(hero).toBeVisible();
     const box = await hero.boundingBox();
     expect(box).not.toBeNull();

@@ -14,7 +14,7 @@ const SOCIAL: { icon: IconName; label: string }[] = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-line bg-white">
-      <div className="mx-auto grid max-w-[1160px] gap-x-10 px-5 py-9 text-[14px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.8fr)] lg:gap-x-6 lg:px-10 lg:py-10 xl:grid-cols-[233px_207px_264px_minmax(0,1fr)] xl:gap-x-0 xl:px-0">
+      <div className="container-content grid gap-x-10 py-9 text-[14px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.8fr)] lg:gap-x-6 lg:py-10 xl:grid-cols-[233px_207px_264px_minmax(0,1fr)] xl:gap-x-0">
         {FOOTER_COLUMNS.map((col) => (
           <div key={col.title}>
             {/* desktop */}

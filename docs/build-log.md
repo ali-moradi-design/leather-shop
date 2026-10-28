@@ -9,10 +9,10 @@ plan for explaining the code step by step in the next session.
 | --- | --- |
 | Shop | Leather goods: boots, shoes, bags, belts, wallets, accessories, leather care |
 | Name / logo | **Welt & Grain** (Leather Co.); serif wordmark, italic `&`, dashed "welt stitch" line; `W&G` monogram |
-| Look | Very close to thursdayboots.com; light and monochrome (white, light grey, black); Source Serif 4 + Jost |
+| Look | Classic leather-goods store layout; light and monochrome (white, light grey, black); Source Serif 4 + Jost |
 | Language | English only (the shared brief's five languages were dropped for this shop) |
 | Stack | MongoDB + Next.js PPR; backend from `nodejs-bookshop-modular-monolith`, storefront from `nodejs-bookshop-web-next-ppr` (plain copies, no history) |
-| Data | 480 products (≤ 500) from the public thursdayboots.com catalog, demo use only; stock generated |
+| Data | 480 products (≤ 500) from a public online store catalog, demo use only; stock generated |
 | Money | Minor units (cents) everywhere, formatted with `Intl` |
 | Workflow | One small PR per step, checked locally (lint, types, tests, build, browser) before a squash merge; CI added at the end |
 

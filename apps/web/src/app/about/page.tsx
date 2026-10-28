@@ -31,7 +31,7 @@ export default function AboutPage() {
           cobbler replace the sole again and again, so a good pair lasts for decades.
         </p>
         <p className="rounded border border-line bg-soft p-4 text-[14px] leading-7">
-          This is a portfolio demo shop. Product names, photos and prices come from the public thursdayboots.com
+          This is a portfolio demo shop. Product names, photos and prices come from a public online store
           catalog and are used only as sample content; nothing here is for sale.
         </p>
         <Link href="/collections/mens-boots" className="btn">Shop the collection</Link>

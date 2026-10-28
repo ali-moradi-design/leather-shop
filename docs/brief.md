@@ -38,7 +38,7 @@ English only. The shared brief asked for five languages; this shop drops that.
 - Name: **Welt & Grain** (Leather Co.). Logo: serif wordmark with an italic
   ampersand, a dashed "welt stitch" line and `LEATHER CO.` between rules.
   Monogram `W&G` in a stitched ring for favicon and stamps.
-- Close to the layout of thursdayboots.com: full-bleed lifestyle hero, bold serif
+- Layout of a classic leather-goods store: full-bleed lifestyle hero, bold serif
   headings (Source Serif 4), clean sans text (Jost), light grey product tiles,
   pill filter bar, grouped color thumbnails, 10-column size grid, cart as a right
   side drawer with "Customers also bought".
@@ -48,8 +48,8 @@ English only. The shared brief asked for five languages; this shop drops that.
 ## Demo data **(leather)**
 
 At most 500 products, leather goods only (boots, shoes, bags, belts, wallets,
-keychains, leather care). Product names, prices, sizes and images come from the
-thursdayboots.com public catalog, used only as demo content for this
+keychains, leather care). Product names, prices, sizes and images come from a
+public online store catalog, used only as demo content for this
 non-commercial portfolio project.
 
 ## Quality

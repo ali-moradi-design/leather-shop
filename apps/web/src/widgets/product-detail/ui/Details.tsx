@@ -43,27 +43,29 @@ export function Editorial({ product }: { product: Product }) {
   const image = product.images.at(-1) ?? '/media/men-captain-arizona.jpg';
   return (
     <>
-      <section className="relative mx-4 h-[540px] max-w-[1404px] sm:mx-[18px] min-[1440px]:mx-auto">
-        <Image src={image} alt="" fill sizes="100vw" className="object-cover" />
-        <div className="absolute inset-x-4 top-10 bg-white/95 px-6 py-12 text-center sm:left-[88px] sm:right-auto sm:top-[72px] sm:w-[526px] sm:px-10">
-          <h2 className="heading mb-4 text-[27px] leading-snug">The {product.name}, built to last</h2>
+      <div className="container-shop">
+        <section className="relative h-[420px] sm:h-[540px]">
+          <Image src={image} alt="" fill sizes="(min-width: 1440px) 1324px, 100vw" className="object-cover" />
+          <div className="absolute inset-x-4 top-10 bg-white/95 px-6 py-12 text-center sm:left-[88px] sm:right-auto sm:top-[72px] sm:w-[526px] sm:px-10">
+            <h2 className="heading mb-4 text-[27px] leading-snug">The {product.name}, built to last</h2>
+            <p className="text-[14px] leading-8">
+              {product.leather ? `${product.leather} upper` : 'Premium leather'}
+              {product.construction ? `, ${product.construction.toLowerCase()} construction` : ''} and a shape
+              refined over years of wear. Every detail is chosen so it looks better the longer you own it.
+            </p>
+          </div>
+        </section>
+        <section className="my-[18px] grid items-center gap-10 bg-soft px-6 py-14 sm:px-16 lg:grid-cols-2 lg:px-24">
+          <h2 className="heading text-center text-[27px] lg:col-span-2">Highest Quality. Honest Prices.</h2>
+          <div className="relative h-[300px]">
+            {product.images[0] && <Image src={product.images[0]} alt="" fill sizes="(min-width: 1024px) 560px, 100vw" className="object-contain" />}
+          </div>
           <p className="text-[14px] leading-8">
-            {product.leather ? `${product.leather} upper` : 'Premium leather'}
-            {product.construction ? `, ${product.construction.toLowerCase()} construction` : ''} and a shape
-            refined over years of wear. Every detail is chosen so it looks better the longer you own it.
+            Our leather goods are handcrafted alongside products from brands that charge $300–600. We make zero
+            compromises on materials or craftsmanship — we simply skip the retail mark-up.
           </p>
-        </div>
-      </section>
-      <section className="mx-4 my-[18px] grid max-w-[1404px] items-center gap-10 bg-soft px-6 py-14 sm:mx-[18px] sm:px-24 lg:grid-cols-2 min-[1440px]:mx-auto">
-        <h2 className="heading text-center text-[27px] lg:col-span-2">Highest Quality. Honest Prices.</h2>
-        <div className="relative h-[300px]">
-          {product.images[0] && <Image src={product.images[0]} alt="" fill sizes="50vw" className="object-contain" />}
-        </div>
-        <p className="text-[14px] leading-8">
-          Our leather goods are handcrafted alongside products from brands that charge $300–600. We make zero
-          compromises on materials or craftsmanship — we simply skip the retail mark-up.
-        </p>
-      </section>
+        </section>
+      </div>
     </>
   );
 }

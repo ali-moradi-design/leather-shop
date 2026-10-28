@@ -100,6 +100,10 @@
   .container-page {
     @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8;
   }
+  /* Account, order, checkout and admin pages: same edges as the footer columns. */
+  .container-content {
+    @apply mx-auto w-full max-w-[1160px] px-5 lg:px-10 xl:px-0;
+  }
   /* Shop pages: collections, search and product pages keep their products in here. */
   .container-shop {
     @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-[58px];

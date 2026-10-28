@@ -15,6 +15,7 @@ import { DiscountModel } from '../modules/promotions/infra/models/DiscountModel'
 import { ProductModel } from '../modules/catalog/infra/models/ProductModel';
 import { runSeed } from './seed';
 import { adminCredentials } from './seed/identity';
+import { SEED_PRODUCTS } from './seed/catalog';
 
 /** Accounts created by the seed keep existing; every other account is a visitor's. */
 const SEED_ACCOUNTS = /@weltandgrain\.local$/;
@@ -30,6 +31,8 @@ export async function resetDemo(): Promise<void> {
     DiscountModel.updateMany({}, { usedCount: 0 }),
     // prices, stock and ratings come back from the seed below
     ProductModel.updateMany({}, { ratingAvg: 0, ratingCount: 0 }),
+    // products that were renamed or dropped from the seed catalog
+    ProductModel.deleteMany({ slug: { $nin: SEED_PRODUCTS.map((p) => p.slug) } }),
   ]);
   await runSeed();
   await revalidateWeb();

@@ -13,7 +13,7 @@ async function Checkout() {
 
 export default function CheckoutPage() {
   return (
-    <div className="container-page max-w-6xl py-14">
+    <div className="container-content py-14">
       <h1 className="heading mb-8 text-[32px]">Checkout</h1>
       <Suspense fallback={<Skeleton className="h-96 w-full" />}>
         <Checkout />

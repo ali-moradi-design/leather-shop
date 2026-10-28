@@ -15,7 +15,7 @@ What was built, PR by PR, and a code walkthrough plan: [docs/build-log.md](docs/
 
 ## Features
 
-- Storefront modeled on thursdayboots.com: full-viewport hero on every screen
+- Editorial storefront: full-viewport hero on every screen
   size, desktop mega menu (hover, click and keyboard), phone menu drawer and
   round category thumbnails, sticky header, products inside a centered container
   with a collection/filter sidebar (a drawer on phones)
@@ -96,5 +96,5 @@ suite against a real MongoDB; the `ci` job is the single required check.
 - Nightly reset: run `reset-demo:prod` from cron with `WEB_REVALIDATE_URL` and
   `REVALIDATE_SECRET` set, so the storefront drops its cached catalog afterwards.
 
-Product names, photos and prices come from the public thursdayboots.com catalog and
+Product names, photos and prices come from a public online store catalog and
 are used only as sample content for this non-commercial demo.
