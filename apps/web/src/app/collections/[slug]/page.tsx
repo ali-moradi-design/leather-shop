@@ -5,7 +5,8 @@ import { Suspense } from 'react';
 import { fetchFacets } from '@/entities/product';
 import { FilterSidebar, readFilters, toProductQuery, type SidebarCollection } from '@/features/catalog-filters';
 import { ProductGrid, GridSkeleton } from '@/widgets/catalog';
-import { COLLECTIONS, findCollection, type Collection } from '@/shared/config';
+import { COLLECTIONS, findCollection, findLanding, type Collection } from '@/shared/config';
+import { CollectionLanding } from '@/widgets/landing';
 import { SidebarSkeleton } from './SidebarSkeleton';
 
 type Props = {
@@ -31,7 +32,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /** Collections for the sidebar tree: same gender first, then the unisex ones. */
 function sidebarCollections(current: Collection): SidebarCollection[] {
   const fits = (c: Collection) =>
-    !current.gender ? true : c.gender === current.gender || (!c.gender && c.slug !== 'bags');
+    !findLanding(c.slug) &&
+    (!current.gender ? true : c.gender === current.gender || (!c.gender && c.slug !== 'bags'));
   return COLLECTIONS.filter(fits).map((c) => ({
     title: c.title,
     href: `/collections/${c.slug}`,
@@ -42,7 +44,7 @@ function sidebarCollections(current: Collection): SidebarCollection[] {
 
 function breadcrumb(c: Collection) {
   const parent = c.gender === 'men' ? 'Men' : c.gender === 'women' ? 'Women' : 'Shop';
-  const parentHref = c.gender === 'women' ? '/collections/womens-boots' : '/collections/mens-boots';
+  const parentHref = c.gender === 'women' ? '/collections/womens' : '/collections/mens';
   return [{ label: parent, href: parentHref }, { label: c.title.replace(/^(Men|Women)'s /, '') }];
 }
 
@@ -61,6 +63,11 @@ async function Results({ collection, searchParams }: { collection: Collection; s
 export default async function CollectionPage({ params, searchParams }: Props) {
   const collection = findCollection((await params).slug);
   if (!collection) notFound();
+  const landing = findLanding(collection.slug);
+  if (landing) {
+    const links = sidebarCollections(collection).map(({ title, href }) => ({ title, href }));
+    return <CollectionLanding collection={collection} landing={landing} links={links} />;
+  }
   const facets = await fetchFacets({ category: collection.category, gender: collection.gender });
 
   return (

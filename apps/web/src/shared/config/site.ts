@@ -21,6 +21,9 @@ export interface Collection {
 
 /** Collection pages: /collections/<slug>. */
 export const COLLECTIONS: Collection[] = [
+  // landing pages (/collections/mens, /collections/womens): see landings.ts
+  { slug: 'mens', title: "Men's Collection", tagline: 'Full-Grain Leather. Honest Prices.', gender: 'men', hero: '/media/dualgender.jpg' },
+  { slug: 'womens', title: "Women's Collection", tagline: 'Made for every step.', gender: 'women', hero: '/media/women-legendplatform-blackmatte.jpg' },
   { slug: 'mens-boots', title: "Men's Boots", tagline: 'Full-Grain Leather. Honest Prices.', category: 'boots', gender: 'men', hero: '/media/dualgender.jpg', chips: ['Captain', 'President', 'Cavalier', 'Logger', 'StormKing', 'Suede'] },
   { slug: 'womens-boots', title: "Women's Boots", tagline: 'Made for every step.', category: 'boots', gender: 'women', hero: '/media/women-legendplatform-blackmatte.jpg', chips: ['Legend', 'Captain', 'Duchess', 'Arden', 'Knee-high', 'Suede'] },
   { slug: 'mens-shoes', title: "Men's Shoes", tagline: 'Loafers, oxfords and more.', category: 'shoes', gender: 'men', hero: '/media/men-lincoln-richmahogany.jpg' },
