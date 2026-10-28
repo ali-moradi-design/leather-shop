@@ -1,25 +1,26 @@
 import { Suspense } from 'react';
 import { fetchProducts, ProductCard } from '@/entities/product';
+import { GridSkeleton, ProductGridLayout } from '@/widgets/catalog';
 import {
   Hero,
   Split,
   SectionHead,
   CategoryRail,
-  ProductRail,
   Reviews,
   Why,
   PressBar,
   CtaBand,
 } from '@/widgets/home';
 
+/** Bestsellers sit inside the shop container, as a grid like the collection pages. */
 async function Bestsellers() {
-  const { data } = await fetchProducts({ featured: true, limit: 12 });
+  const { data } = await fetchProducts({ featured: true, limit: 8 });
   return (
-    <ProductRail>
+    <ProductGridLayout>
       {data.map((p) => (
         <ProductCard key={p.id} product={p} />
       ))}
-    </ProductRail>
+    </ProductGridLayout>
   );
 }
 
@@ -28,7 +29,7 @@ export default function HomePage() {
     <>
       <Hero />
       <Split
-        className="mt-1.5"
+        className="mt-[5px]"
         tiles={[
           { image: '/media/men-captain-blackcoffee.jpg', alt: "Men's lace-up boots", title: "Shop Men's", href: '/collections/mens-boots' },
           { image: '/media/women-legendplatform-blackmatte.jpg', alt: "Women's Chelsea boots", title: "Shop Women's", href: '/collections/womens-boots' },
@@ -45,12 +46,14 @@ export default function HomePage() {
           { image: '/media/men-racerjacket-blackmatte.jpg', label: 'Belts', href: '/collections/belts' },
         ]}
       />
-      <SectionHead title="Bestsellers" href="/collections/mens-boots" linkLabel="Shop all" />
-      <Suspense fallback={<div className="h-[380px]" />}>
-        <Bestsellers />
-      </Suspense>
+      <section aria-label="Bestsellers" className="container-shop">
+        <SectionHead title="Bestsellers" href="/collections/mens-boots" linkLabel="Shop all" flush />
+        <Suspense fallback={<GridSkeleton count={8} toolbar={false} />}>
+          <Bestsellers />
+        </Suspense>
+      </section>
       <Split
-        className="mt-24"
+        className="mt-[72px]"
         tiles={[
           {
             image: '/media/men-racerjacket-blackmatte.jpg',

@@ -6,6 +6,7 @@ import { SignOutButton } from '@/features/auth';
 import { requireUser } from '@/features/auth/server';
 import { serverApi } from '@/shared/api/server';
 import { formatMoney } from '@/shared/lib/money';
+import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'My Account', robots: { index: false } };
 
@@ -51,7 +52,7 @@ async function Account() {
 export default function AccountPage() {
   return (
     <div className="container-page max-w-4xl py-14">
-      <Suspense fallback={<div className="h-64" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
         <Account />
       </Suspense>
     </div>

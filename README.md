@@ -15,6 +15,12 @@ What was built, PR by PR, and a code walkthrough plan: [docs/build-log.md](docs/
 
 ## Features
 
+- Storefront modeled on thursdayboots.com: full-viewport hero on every screen
+  size, desktop mega menu (hover, click and keyboard), phone menu drawer and
+  round category thumbnails, sticky header, products inside a centered container
+  with a collection/filter sidebar (a drawer on phones)
+- A `loading.tsx` skeleton for every route, `useLinkStatus` hints on nav links,
+  `next/form` search, web manifest, generated icons, `global-error.tsx`
 - Catalog of 480 leather products: collections with style chips and size / width /
   leather / color filters, search, product pages with color groups, per-size live
   stock, features and leather facts

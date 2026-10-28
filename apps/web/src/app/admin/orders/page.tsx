@@ -5,6 +5,7 @@ import { AdminNav, OrderStatusSelect } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
 import { serverApi } from '@/shared/api/server';
 import { formatMoney } from '@/shared/lib/money';
+import { Skeleton } from '@/shared/ui';
 
 async function Orders() {
   await requireAdmin('/admin/orders');
@@ -36,7 +37,7 @@ export default function AdminOrdersPage() {
     <>
       <h1 className="heading mb-6 text-[32px]">Admin</h1>
       <AdminNav current="orders" />
-      <Suspense fallback={<div className="h-64" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
         <Orders />
       </Suspense>
     </>

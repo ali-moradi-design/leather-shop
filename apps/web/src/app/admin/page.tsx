@@ -6,6 +6,7 @@ import { AdminNav } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
 import { serverApi } from '@/shared/api/server';
 import { formatMoney } from '@/shared/lib/money';
+import { Skeleton } from '@/shared/ui';
 
 interface Summary {
   users: number;
@@ -58,7 +59,7 @@ export default function AdminPage() {
     <>
       <h1 className="heading mb-6 text-[32px]">Admin</h1>
       <AdminNav current="dashboard" />
-      <Suspense fallback={<div className="h-64" />}>
+      <Suspense fallback={<Skeleton className="h-64 w-full" />}>
         <Dashboard />
       </Suspense>
     </>

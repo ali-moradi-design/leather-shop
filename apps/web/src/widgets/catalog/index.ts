@@ -1,1 +1,1 @@
-export { ProductGrid, GridSkeleton } from './ui/ProductGrid';
+export { ProductGrid, ProductGridLayout, GridSkeleton } from './ui/ProductGrid';

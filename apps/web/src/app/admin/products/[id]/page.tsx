@@ -7,6 +7,7 @@ import { AdminNav, ProductEditor } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
 import { ApiError } from '@/shared/api';
 import { serverApi } from '@/shared/api/server';
+import { Skeleton } from '@/shared/ui';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -41,7 +42,7 @@ export default function AdminProductPage(props: Props) {
       <AdminNav current="products" />
       <Link href="/admin/products" className="text-[13px] text-mute underline">← All products</Link>
       <div className="mt-4">
-        <Suspense fallback={<div className="h-64" />}>
+        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
           <Editor {...props} />
         </Suspense>
       </div>

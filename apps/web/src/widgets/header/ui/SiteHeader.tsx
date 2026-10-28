@@ -1,78 +1,84 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { COLLECTIONS, MAIN_NAV, SUB_NAV } from '@/shared/config';
-import { Icon, Logo } from '@/shared/ui';
-
-const titleOf = (slug: string) => COLLECTIONS.find((c) => c.slug === slug)?.title ?? slug;
+import { CATEGORY_CIRCLES, MEGA_MENU, SECONDARY_NAV, SUB_NAV } from '@/shared/config';
+import { Logo } from '@/shared/ui';
+import { MegaNav } from './MegaNav';
+import { MobileMenu } from './MobileMenu';
+import { PendingHint } from './PendingHint';
+import { SearchToggle } from './SearchToggle';
 
 /**
- * Static header (part of the PPR shell). `cart` and `account` are slots for the
- * dynamic, per-visitor parts.
+ * Announcement bar, sticky main header (mega menu on desktop, drawer on phones)
+ * and the category row. Only the main header sticks, like the reference: the
+ * announcement and category rows scroll away. `cart` and `account` are slots
+ * for the per-visitor parts.
  */
 export function SiteHeader({ cart, account }: { cart: ReactNode; account: ReactNode }) {
   return (
-    <header className="sticky top-0 z-40 bg-white">
-      <div className="h-[33px] bg-ink text-center text-[11px] font-medium leading-[33px] tracking-[0.14em] text-white">
-        FREE SHIPPING AND RETURNS ON EVERY ORDER
-        <Link href="/help" className="ml-2 underline underline-offset-[3px]">
-          DETAILS
-        </Link>
+    <>
+      <div className="flex h-[var(--announce-h)] items-center justify-center bg-brand px-4 text-center text-[11px] font-medium uppercase tracking-[1.5px] text-white">
+        <p className="truncate">
+          <span className="sm:hidden">Free shipping &amp; returns</span>
+          <span className="hidden sm:inline">Free shipping and returns on every order</span>
+          <Link href="/help#shipping" className="ml-1.5 underline underline-offset-[3px]">
+            Details
+          </Link>
+        </p>
       </div>
-      <div className="grid h-[78px] grid-cols-[1fr_auto_1fr] items-center border-b border-line px-4 sm:px-[30px]">
-        <nav aria-label="Main" className="flex items-center gap-6 text-[13px] font-medium tracking-[0.1em]">
-          <details className="group relative lg:hidden">
-            <summary className="flex cursor-pointer list-none items-center" aria-label="Menu">
-              <Icon name="menu" />
-            </summary>
-            <div className="absolute left-0 top-10 z-50 w-64 border border-line bg-white p-4 shadow-sm">
-              {COLLECTIONS.map((c) => (
-                <Link key={c.slug} href={`/collections/${c.slug}`} className="block py-1.5 text-sm tracking-normal">
-                  {c.title}
-                </Link>
-              ))}
-              <Link href="/about" className="block py-1.5 text-sm tracking-normal">About</Link>
-            </div>
-          </details>
-          {MAIN_NAV.map((menu) => (
-            <div key={menu.label} className="group relative hidden lg:block">
-              <button type="button" className="flex items-center gap-1 py-6 uppercase" aria-haspopup="true">
-                {menu.label}
-                <Icon name="chevron" width={12} height={12} />
-              </button>
-              <div className="invisible absolute left-0 top-full z-50 w-56 border border-line bg-white p-4 opacity-0 shadow-sm transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                {menu.links.map((slug) => (
-                  <Link key={slug} href={`/collections/${slug}`} className="block py-1.5 text-sm font-normal tracking-normal hover:underline">
-                    {titleOf(slug)}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
-          <Link href="/about" className="hidden uppercase lg:block">
-            About
+
+      <header className="sticky top-0 z-40 h-[var(--header-h)] border-b border-line bg-white">
+        <div className="grid h-full grid-cols-[1fr_auto_1fr] items-stretch px-4 sm:px-[30px]">
+          <div className="flex items-center gap-3">
+            <MobileMenu menus={MEGA_MENU} links={SECONDARY_NAV} />
+            <SearchToggle className="hidden p-1 sm:block lg:hidden" />
+            <MegaNav menus={MEGA_MENU} links={[{ label: 'About', href: '/about' }]} />
+          </div>
+          <Link href="/" aria-label="Welt & Grain home" className="flex items-center">
+            <Logo className="scale-[0.8] lg:scale-100" />
           </Link>
-        </nav>
-        <Link href="/" aria-label="Welt & Grain home">
-          <Logo />
-        </Link>
-        <div className="flex items-center justify-end gap-5 text-[13px] font-medium tracking-[0.1em]">
-          <Link href="/help" className="hidden uppercase lg:block">
-            Help
-          </Link>
-          {account}
-          <Link href="/search" aria-label="Search">
-            <Icon name="search" width={21} height={21} />
-          </Link>
-          {cart}
+          <div className="flex items-center justify-end gap-[22px] text-[13px] font-medium uppercase tracking-[1.04px] text-black">
+            <Link href="/collections/leather-care" className="relative hidden hover:text-mute lg:block">
+              Leather Care
+              <PendingHint />
+            </Link>
+            <Link href="/help" className="relative hidden hover:text-mute lg:block">
+              Help
+              <PendingHint />
+            </Link>
+            <span className="hidden lg:contents">{account}</span>
+            <SearchToggle className="hidden lg:block" />
+            {cart}
+          </div>
         </div>
-      </div>
-      <nav aria-label="Categories" className="hidden h-12 items-center justify-center gap-8 border-b border-line bg-soft text-[13.5px] lg:flex">
-        {SUB_NAV.map((c) => (
-          <Link key={c.slug} href={`/collections/${c.slug}`} className="hover:underline">
-            {c.title}
-          </Link>
-        ))}
+      </header>
+
+      <nav aria-label="Categories" className="h-[var(--subnav-h)] bg-soft">
+        {/* desktop: one line of text links */}
+        <ul className="hidden h-full items-center justify-center gap-8 px-6 lg:flex">
+          {SUB_NAV.map((l) => (
+            <li key={l.href}>
+              <Link href={l.href} className="relative text-[13px] text-black hover:underline">
+                {l.label}
+                <PendingHint />
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {/* phones and tablets: round product thumbnails that scroll sideways */}
+        <ul className="no-scrollbar flex h-full snap-x items-center gap-1 overflow-x-auto bg-white px-2 lg:hidden">
+          {CATEGORY_CIRCLES.map((c) => (
+            <li key={c.href} className="snap-start">
+              <Link href={c.href} className="flex w-[66px] flex-col items-center text-center">
+                <span className="relative h-[50px] w-[50px] overflow-hidden rounded-full border border-line bg-soft">
+                  <Image src={c.image} alt="" fill sizes="50px" className="scale-125 object-contain" />
+                </span>
+                <span className="mt-1.5 text-[12px] leading-[14px] text-ink">{c.label}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </nav>
-    </header>
+    </>
   );
 }

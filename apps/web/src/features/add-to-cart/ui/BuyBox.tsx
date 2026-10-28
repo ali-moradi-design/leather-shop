@@ -43,26 +43,27 @@ export function BuyBox({
   return (
     <div>
       {widths.length > 1 && (
-        <fieldset className="mt-5">
-          <legend className="text-[14.5px]">Width</legend>
-          <div className="mt-2 grid grid-cols-2 border border-line">
-            {widths.map((w) => (
-              <button
-                key={w}
-                type="button"
-                aria-pressed={w === width}
-                onClick={() => { setWidth(w); setSku(undefined); }}
-                className={cn('py-2.5 text-[13px]', w === width && 'bg-ink text-white')}
-              >
-                {w}
-              </button>
-            ))}
-          </div>
+        <fieldset className="mt-4 flex flex-wrap items-end gap-x-3 border-b border-line text-[14.5px]">
+          <legend className="float-left mr-1 pb-2 text-ink">Width:</legend>
+          {widths.map((w) => (
+            <button
+              key={w}
+              type="button"
+              aria-pressed={w === width}
+              onClick={() => { setWidth(w); setSku(undefined); }}
+              className={cn(
+                '-mb-px border-b-2 pb-2 transition-colors',
+                w === width ? 'border-ink text-ink' : 'border-transparent text-mute hover:text-ink',
+              )}
+            >
+              {w}
+            </button>
+          ))}
         </fieldset>
       )}
       {!oneSize && (
         <fieldset className="mt-5">
-          <legend className={cn('text-[14.5px]', missing && 'text-danger')}>
+          <legend className={cn('text-[14.5px] text-ink', missing && 'text-danger')}>
             Size{sizeNote ? `: ${sizeNote}` : ''}
           </legend>
           <div className="mt-2.5 grid grid-cols-5 gap-1 sm:grid-cols-10" role="radiogroup" aria-label="Size">
@@ -78,7 +79,7 @@ export function BuyBox({
                   disabled={out}
                   onClick={() => { setSku(v.sku); setMissing(false); }}
                   className={cn(
-                    'h-[50px] border border-line text-[14px]',
+                    'h-[50px] border border-line text-[14px] text-ink transition-colors',
                     v.sku === sku && 'border-ink outline outline-1 outline-ink',
                     out ? 'cursor-not-allowed text-[#c4c4c4] line-through' : 'hover:border-ink',
                   )}
@@ -99,10 +100,10 @@ export function BuyBox({
       {addError && (
         <p role="alert" className="mt-3 text-[13px] text-danger">{addError}</p>
       )}
-      <button type="button" onClick={onAdd} disabled={busy || soldOut} className="btn mt-5 w-full text-[16px]" data-testid="add-to-cart">
+      <button type="button" onClick={onAdd} disabled={busy || soldOut} className="btn btn-accent mt-5 h-[46px] w-full text-[16px]" data-testid="add-to-cart">
         {soldOut ? 'Sold out' : `Add to cart — ${formatMoney(price)}`}
       </button>
-      <p className="mt-4 text-center text-[14px]">
+      <p className="mt-[22px] text-center text-[14px] leading-6 text-ink">
         Free Shipping &amp; Returns
         <span className="block text-mute">on every order</span>
       </p>
@@ -113,11 +114,11 @@ export function BuyBox({
 export function BuyBoxSkeleton() {
   return (
     <div aria-hidden className="mt-5">
-      <div className="h-4 w-40 bg-soft" />
+      <div className="skeleton h-4 w-40" />
       <div className="mt-3 grid grid-cols-10 gap-1">
-        {Array.from({ length: 10 }, (_, i) => <div key={i} className="h-[50px] bg-soft" />)}
+        {Array.from({ length: 10 }, (_, i) => <div key={i} className="skeleton h-[50px]" />)}
       </div>
-      <div className="mt-5 h-11 bg-soft" />
+      <div className="skeleton mt-5 h-[46px]" />
     </div>
   );
 }

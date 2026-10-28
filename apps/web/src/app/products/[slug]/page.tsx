@@ -15,7 +15,7 @@ import { ReviewForm, ReviewList } from '@/features/reviews';
 import { ColorPicker, Details, Editorial, Gallery } from '@/widgets/product-detail';
 import { COLLECTIONS, SITE } from '@/shared/config';
 import { formatMoney } from '@/shared/lib/money';
-import { Icon, Stars } from '@/shared/ui';
+import { Icon, Skeleton, Stars } from '@/shared/ui';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -105,56 +105,75 @@ export default async function ProductPage({ params }: Props) {
   return (
     <>
       <JsonLd product={product} />
-      <nav aria-label="Breadcrumb" className="px-4 py-4 text-[13px] text-mute sm:px-[58px]">
-        <Link href="/" className="text-ink underline underline-offset-[3px]">Home</Link>
-        {collection && (
-          <>
-            {' › '}
-            <Link href={`/collections/${collection.slug}`} className="text-ink underline underline-offset-[3px]">{collection.title}</Link>
-          </>
-        )}
-        {' › '}
-        <span aria-current="page">{product.name}</span>
-      </nav>
-      <section className="grid gap-10 px-4 sm:px-[58px] lg:grid-cols-[730px_1fr] lg:gap-[50px]">
-        <Gallery images={product.images} title={product.title} />
-        <div className="lg:sticky lg:top-[180px] lg:self-start">
-          <div className="flex items-start justify-between gap-4">
-            <h1 className="heading text-[30px]">{product.name}</h1>
-            <FavoriteButton productId={product.id} />
+      <div className="container-shop">
+        <section className="grid gap-6 pt-4 lg:grid-cols-[minmax(0,730px)_minmax(0,1fr)] lg:gap-[50px] lg:pt-[18px]">
+          <div>
+            <nav aria-label="Breadcrumb" className="pb-4 text-[13px] text-mute lg:pb-6">
+              <Link href="/" className="underline underline-offset-2 hover:text-ink">Home</Link>
+              {collection && (
+                <>
+                  <span className="mx-1">›</span>
+                  <Link href={`/collections/${collection.slug}`} className="underline underline-offset-2 hover:text-ink">{collection.title}</Link>
+                </>
+              )}
+              <span className="mx-1">›</span>
+              <span aria-current="page">{product.name}</span>
+            </nav>
+            <Gallery images={product.images} title={product.title} />
           </div>
-          <p className="my-2 text-[16px]">
-            {product.compareAtPrice && <s className="mr-2 text-mute">{formatMoney(product.compareAtPrice)}</s>}
-            {formatMoney(product.price)} or 4 payments of {formatMoney(Math.round(product.price / 4))}
-          </p>
-          <p className="flex items-center gap-2 text-[14.5px]">
-            <span className="grid h-4 w-4 place-items-center rounded-full bg-ink text-white">
-              <Icon name="check" width={10} height={10} strokeWidth={3} />
-            </span>
-            Honest Pricing Guarantee
-          </p>
-          {product.ratingCount > 0 && (
-            <a href="#reviews" className="mt-2 flex items-center gap-2 text-[14px]">
-              <Stars value={product.ratingAvg} />
-              <span className="underline">{product.ratingAvg.toFixed(1)} ({product.ratingCount} reviews)</span>
-            </a>
-          )}
-          <ColorPicker current={product} colors={colors} />
-          <Suspense fallback={<BuyBoxSkeleton />}>
-            <LiveBuyBox product={product} />
-          </Suspense>
-        </div>
-      </section>
+          <div className="lg:sticky lg:top-[calc(var(--header-h)+18px)] lg:self-start lg:pt-1">
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="heading text-[28px] leading-[1.25] sm:text-[30px]">{product.name}</h1>
+              <FavoriteButton productId={product.id} />
+            </div>
+            <p className="mb-3 mt-2 text-[16px] text-body">
+              {product.compareAtPrice && <s className="mr-2 text-mute">{formatMoney(product.compareAtPrice)}</s>}
+              <span className="text-ink">{formatMoney(product.price)}</span> or 4 payments of {formatMoney(Math.round(product.price / 4))}
+            </p>
+            <p className="flex items-center gap-2 text-[14.5px] text-accent">
+              <span className="grid h-4 w-4 place-items-center rounded-full bg-accent text-white">
+                <Icon name="check" width={10} height={10} strokeWidth={3} />
+              </span>
+              Honest Pricing Guarantee
+              <Link href="/about" className="text-mute underline underline-offset-2">More info</Link>
+            </p>
+            {product.ratingCount > 0 && (
+              <a href="#reviews" className="mt-2.5 flex items-center gap-2 text-[14px] text-accent">
+                <Stars value={product.ratingAvg} />
+                <span className="underline underline-offset-2">{product.ratingAvg.toFixed(1)} ({product.ratingCount} reviews)</span>
+              </a>
+            )}
+            <ColorPicker current={product} colors={colors} />
+            <Suspense fallback={<BuyBoxSkeleton />}>
+              <LiveBuyBox product={product} />
+            </Suspense>
+          </div>
+        </section>
+      </div>
       <Details product={product} />
       <Editorial product={product} />
-      <section id="reviews" className="scroll-mt-40 px-4 py-16 sm:px-[58px]">
+      <section id="reviews" className="container-shop scroll-mt-28 py-16">
         <h2 className="heading mb-6 text-[28px]">Reviews</h2>
-        <Suspense fallback={<div className="h-40" />}>
+        <Suspense fallback={<ReviewsSkeleton />}>
           <ReviewList slug={product.slug} />
         </Suspense>
         <h3 className="heading mb-4 mt-12 text-[22px]">Write a review</h3>
         <ReviewForm productId={product.id} />
       </section>
     </>
+  );
+}
+
+function ReviewsSkeleton() {
+  return (
+    <div aria-hidden className="space-y-6">
+      {Array.from({ length: 3 }, (_, i) => (
+        <div key={i} className="space-y-2 border-b border-line pb-6">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      ))}
+    </div>
   );
 }

@@ -1,54 +1,67 @@
 import Link from 'next/link';
-import { COLLECTIONS, SITE } from '@/shared/config';
+import { NewsletterForm } from '@/features/newsletter';
+import { FOOTER_COLUMNS, SITE } from '@/shared/config';
+import { Icon, type IconName } from '@/shared/ui';
 
-const columns = [
-  { title: 'Shop', links: COLLECTIONS.map((c) => ({ href: `/collections/${c.slug}`, label: c.title })) },
-  {
-    title: 'About',
-    links: [
-      { href: '/about', label: 'Our Story' },
-      { href: '/about#leather', label: 'Our Leathers' },
-      { href: '/about#craft', label: 'Craft' },
-    ],
-  },
-  {
-    title: 'Support',
-    links: [
-      { href: '/help', label: 'FAQ' },
-      { href: '/help#shipping', label: 'Shipping & Returns' },
-      { href: '/help#sizing', label: 'Size Guide' },
-      { href: '/account', label: 'My Account' },
-    ],
-  },
+const SOCIAL: { icon: IconName; label: string }[] = [
+  { icon: 'instagram', label: 'Instagram' },
+  { icon: 'facebook', label: 'Facebook' },
+  { icon: 'pinterest', label: 'Pinterest' },
+  { icon: 'youtube', label: 'YouTube' },
 ];
 
+/** Link columns on desktop; on phones each column folds into an accordion. */
 export function SiteFooter() {
   return (
-    <footer className="border-t border-line">
-      <div className="container-page grid gap-10 py-14 text-[13.5px] sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1.6fr] lg:px-32">
-        {columns.map((col) => (
+    <footer className="border-t border-line bg-white">
+      <div className="mx-auto grid max-w-[1160px] gap-x-10 px-5 py-9 text-[14px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.8fr)] lg:gap-x-6 lg:px-10 lg:py-10 xl:grid-cols-[233px_207px_264px_minmax(0,1fr)] xl:gap-x-0 xl:px-0">
+        {FOOTER_COLUMNS.map((col) => (
           <div key={col.title}>
-            <h2 className="mb-3 text-[14px]">{col.title}</h2>
-            <ul className="space-y-1.5">
+            {/* desktop */}
+            <h2 className="mb-1 hidden text-[14px] font-medium text-body lg:block">{col.title}</h2>
+            <ul className="hidden lg:block">
               {col.links.map((l) => (
                 <li key={l.href + l.label}>
-                  <Link href={l.href} className="text-mute hover:text-ink">
+                  <Link href={l.href} className="leading-7 text-mute transition-colors hover:text-ink">
                     {l.label}
                   </Link>
                 </li>
               ))}
             </ul>
+            {/* phones */}
+            <details className="group border-b border-line lg:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between py-3.5 text-[14px] text-body">
+                {col.title}
+                <Icon name="plus" width={16} height={16} className="group-open:hidden" />
+                <Icon name="minus" width={16} height={16} className="hidden group-open:block" />
+              </summary>
+              <ul className="pb-3">
+                {col.links.map((l) => (
+                  <li key={l.href + l.label}>
+                    <Link href={l.href} className="block py-1 leading-7 text-mute">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </details>
           </div>
         ))}
-        <div>
-          <h2 className="text-[14px]">Sign Up For Early Access &amp; Exclusive Events</h2>
-          <form action="/help" className="mt-5 flex border-b border-ink">
-            <label htmlFor="newsletter" className="sr-only">Email address</label>
-            <input id="newsletter" type="email" placeholder="Email address" className="min-w-0 flex-1 bg-transparent py-2.5 outline-none placeholder:text-mute" />
-            <button type="submit" aria-label="Sign up">→</button>
-          </form>
-          <p className="mt-6 text-mute">
-            © 2026 {SITE.legalName}. A demo shop — no real orders or payments.
+
+        <div className="mt-8 lg:mt-0">
+          <h2 className="mb-4 text-[14px] font-medium text-body">Sign Up For Early Access &amp; Exclusive Events</h2>
+          <NewsletterForm buttonLabel="Join the Workshop" tone="accent" className="max-w-[456px]" />
+          <ul className="mt-6 flex gap-6 text-ink">
+            {SOCIAL.map((s) => (
+              <li key={s.label}>
+                <span title={`${s.label} (demo)`} className="block">
+                  <Icon name={s.icon} width={24} height={24} aria-hidden={false} aria-label={s.label} role="img" />
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-7 text-[13px] leading-6 text-mute">
+            © 2026 {SITE.legalName} A demo shop — no real orders or payments.
           </p>
         </div>
       </div>

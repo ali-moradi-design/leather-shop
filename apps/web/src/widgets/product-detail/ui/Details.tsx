@@ -3,9 +3,9 @@ import type { Product } from '@/entities/product';
 
 export function Details({ product }: { product: Product }) {
   return (
-    <section className="grid gap-12 px-4 pb-16 pt-7 sm:px-[58px] lg:grid-cols-[2fr_1fr]">
+    <section className="container-shop grid gap-12 pb-16 pt-12 lg:grid-cols-[2fr_1fr]">
       <div>
-        <h2 className="border-y border-line py-3.5 text-[15px] font-medium">Product Features</h2>
+        <h2 className="border-y border-line py-3.5 text-[15px] font-semibold">Product Features</h2>
         <ul className="list-disc pl-5 pt-4 text-[14px] leading-8 sm:columns-2">
           {product.features.map((f) => <li key={f}>{f}</li>)}
         </ul>
@@ -28,7 +28,7 @@ export function Details({ product }: { product: Product }) {
         )}
       </div>
       <div>
-        <h2 className="border-y border-line py-3.5 text-[15px] font-medium">Shipping Info</h2>
+        <h2 className="border-y border-line py-3.5 text-[15px] font-semibold">Shipping Info</h2>
         <ul className="list-disc pl-5 pt-4 text-[14px] leading-8">
           <li>Free ground shipping on every order</li>
           <li>Free returns within 30 days</li>
@@ -43,7 +43,7 @@ export function Editorial({ product }: { product: Product }) {
   const image = product.images.at(-1) ?? '/media/men-captain-arizona.jpg';
   return (
     <>
-      <section className="relative mx-4 h-[540px] sm:mx-[18px]">
+      <section className="relative mx-4 h-[540px] max-w-[1404px] sm:mx-[18px] min-[1440px]:mx-auto">
         <Image src={image} alt="" fill sizes="100vw" className="object-cover" />
         <div className="absolute inset-x-4 top-10 bg-white/95 px-6 py-12 text-center sm:left-[88px] sm:right-auto sm:top-[72px] sm:w-[526px] sm:px-10">
           <h2 className="heading mb-4 text-[27px] leading-snug">The {product.name}, built to last</h2>
@@ -54,7 +54,7 @@ export function Editorial({ product }: { product: Product }) {
           </p>
         </div>
       </section>
-      <section className="m-4 grid items-center gap-10 bg-soft px-6 py-14 sm:m-[18px] sm:px-24 lg:grid-cols-2">
+      <section className="mx-4 my-[18px] grid max-w-[1404px] items-center gap-10 bg-soft px-6 py-14 sm:mx-[18px] sm:px-24 lg:grid-cols-2 min-[1440px]:mx-auto">
         <h2 className="heading text-center text-[27px] lg:col-span-2">Highest Quality. Honest Prices.</h2>
         <div className="relative h-[300px]">
           {product.images[0] && <Image src={product.images[0]} alt="" fill sizes="50vw" className="object-contain" />}

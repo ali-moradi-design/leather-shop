@@ -6,6 +6,7 @@ import { requireUser } from '@/features/auth/server';
 import { FakeGateway } from '@/features/checkout';
 import { ApiError } from '@/shared/api';
 import { serverApi } from '@/shared/api/server';
+import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Payment', robots: { index: false } };
 
@@ -27,7 +28,7 @@ async function Gateway({ params }: Props) {
 
 export default function PayPage(props: Props) {
   return (
-    <Suspense fallback={<div className="h-96" />}>
+    <Suspense fallback={<Skeleton className="h-96 w-full" />}>
       <Gateway {...props} />
     </Suspense>
   );
