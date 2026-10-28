@@ -30,9 +30,9 @@ async function main() {
   process.exit(0);
 }
 
-const isCli =
-  typeof process.argv[1] === 'string' &&
-  (process.argv[1].endsWith('scripts/seed.ts') || process.argv[1].endsWith('scripts/seed.js'));
+// Windows passes the path with backslashes
+const entry = process.argv[1]?.replaceAll('\\', '/') ?? '';
+const isCli = entry.endsWith('scripts/seed.ts') || entry.endsWith('scripts/seed.js');
 
 if (isCli) {
   main().catch((err) => {
