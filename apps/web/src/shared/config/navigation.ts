@@ -24,7 +24,7 @@ const all = (slug: string, label = 'All Styles'): NavLink => ({ label, href: `/c
 export const MEGA_MENU: MegaMenu[] = [
   {
     label: 'Men',
-    href: '/collections/mens-boots',
+    href: '/collections/mens',
     columns: [
       [
         {
@@ -73,7 +73,7 @@ export const MEGA_MENU: MegaMenu[] = [
   },
   {
     label: 'Women',
-    href: '/collections/womens-boots',
+    href: '/collections/womens',
     columns: [
       [
         {
@@ -119,6 +119,8 @@ export const MEGA_MENU: MegaMenu[] = [
 
 /** The thin category bar under the header on desktop. */
 export const SUB_NAV: NavLink[] = [
+  { label: "Men's", href: '/collections/mens' },
+  { label: "Women's", href: '/collections/womens' },
   { label: "Men's Boots", href: '/collections/mens-boots' },
   { label: "Women's Boots", href: '/collections/womens-boots' },
   { label: "Men's Shoes", href: '/collections/mens-shoes' },

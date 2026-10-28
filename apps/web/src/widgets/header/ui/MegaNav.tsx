@@ -134,6 +134,12 @@ function MegaPanel({ id, menu, open, onEnter, onNavigate }: { id: string; menu: 
           <span className="mt-[10px] block text-[12px] leading-6 tracking-[1px] text-body">{menu.feature.title}</span>
           <span className="block text-[12px] leading-6 tracking-[1px] text-mute">{menu.feature.text}</span>
         </Link>
+        <Link
+          href={menu.href}
+          className="ml-auto self-start text-[12px] font-semibold uppercase tracking-[2px] text-black underline underline-offset-[5px] hover:text-mute"
+        >
+          Shop all {menu.label === 'Women' ? "women's" : "men's"}
+        </Link>
       </div>
     </div>
   );

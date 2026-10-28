@@ -42,6 +42,9 @@ export function MobileMenu({ menus, links }: { menus: MegaMenu[]; links: NavLink
                 <Icon name="minus" width={18} height={18} className="hidden group-open:block" />
               </summary>
               <div className="pb-3 pl-1">
+                <Link href={menu.href} className="mb-4 block py-1 text-[12px] font-semibold uppercase tracking-[1.5px] text-ink underline underline-offset-4">
+                  All {menu.label === 'Women' ? "women's" : "men's"}
+                </Link>
                 {menu.columns.flat().map((g) => (
                   <div key={g.title.label} className="mb-4">
                     <Link href={g.title.href} className="block py-1 text-[12px] font-semibold uppercase tracking-[1.5px] text-ink">

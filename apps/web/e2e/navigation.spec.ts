@@ -68,3 +68,15 @@ test('home rail can be dragged with the mouse; a drag does not open a tile', asy
   await rail.getByRole('link').first().click();
   await expect(page).toHaveURL(/\/collections\//);
 });
+
+test("men's and women's landing pages list sections and link to their collections", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  for (const [slug, title] of [['mens', "Men's Collection"], ['womens', "Women's Collection"]]) {
+    await page.goto(`/collections/${slug}`);
+    await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
+    const first = page.getByRole('region').filter({ has: page.getByTestId('product-card') }).first();
+    await expect(first.getByTestId('product-card')).toHaveCount(9);
+  }
+  await page.getByRole('link', { name: 'Shop all handbags' }).click();
+  await expect(page).toHaveURL(/\/collections\/womens-handbags$/);
+});

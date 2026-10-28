@@ -55,9 +55,9 @@ export function SiteHeader({ cart, account }: { cart: ReactNode; account: ReactN
 
       <nav aria-label="Categories" className="h-[var(--subnav-h)] bg-soft">
         {/* desktop: one line of text links */}
-        <ul className="hidden h-full items-center justify-center gap-8 px-6 lg:flex">
+        <ul className="no-scrollbar hidden h-full items-center gap-6 overflow-x-auto px-6 lg:flex xl:justify-center xl:gap-8">
           {SUB_NAV.map((l) => (
-            <li key={l.href}>
+            <li key={l.href} className="shrink-0 first:ml-auto last:mr-auto xl:first:ml-0 xl:last:mr-0">
               <Link href={l.href} className="relative text-[13px] text-black hover:underline">
                 {l.label}
                 <PendingHint />
