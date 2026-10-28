@@ -50,7 +50,7 @@ pnpm install
 pnpm db                                   # MongoDB in Docker on 127.0.0.1:27017
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
-pnpm --filter @wg/api seed                # 480 products, demo accounts, reviews
+pnpm seed                                 # 480 products, demo accounts, reviews
 pnpm dev                                  # API on :4000 (docs: /api/docs) + web on :3000
 ```
 
