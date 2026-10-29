@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Actions (and the deploy-kit workflow) are pinned to commit SHAs;
+  # Dependabot proposes new SHAs as PRs, so CI checks them before they run.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
