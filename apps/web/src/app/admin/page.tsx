@@ -1,11 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { orderNumber, STATUS_LABEL, type Order, type OrderStatus } from '@/entities/order';
 import type { Product } from '@/entities/product';
 import { BarList, PageHeader, RevenueChart, type DayPoint } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
 import { serverApi } from '@/shared/api/server';
+import { early } from '@/shared/lib/early';
 import { formatMoney } from '@/shared/lib/money';
 import { Skeleton } from '@/shared/ui';
 
@@ -32,14 +34,15 @@ function fillDays(rows: DayPoint[], today: Date): DayPoint[] {
 }
 
 async function Dashboard() {
-  await requireAdmin('/admin');
+  // request time decides "the last 30 days"; connection() marks this part as per request
+  await connection();
   const today = new Date();
   const from = new Date(today);
   from.setUTCDate(from.getUTCDate() - (DAYS - 1));
   const range = `from=${isoDay(from)}`;
-  // one round of parallel reads; none depends on another
-  const [{ data: s }, { data: low }, { data: recent }, { data: sales }, { data: period }, { data: byStatus }, { data: top }] =
-    await Promise.all([
+  // one round of parallel reads, started next to the session check
+  const reads = early(
+    Promise.all([
       serverApi<{ data: Summary }>('/admin/dashboard/summary'),
       serverApi<{ data: Product[] }>('/admin/dashboard/low-stock?threshold=5'),
       serverApi<{ data: Order[] }>('/admin/dashboard/recent-orders?limit=6'),
@@ -47,7 +50,10 @@ async function Dashboard() {
       serverApi<{ data: { totalRevenue: number; orderCount: number; avgOrderValue: number } }>(`/reports/analytics/revenue?${range}`),
       serverApi<{ data: { status: OrderStatus; count: number }[] }>('/reports/analytics/orders-by-status'),
       serverApi<{ data: { _id: string; title: string; quantitySold: number }[] }>(`/reports/analytics/top-products?${range}&limit=6`),
-    ]);
+    ]),
+  );
+  await requireAdmin('/admin');
+  const [{ data: s }, { data: low }, { data: recent }, { data: sales }, { data: period }, { data: byStatus }, { data: top }] = await reads;
 
   const tiles = [
     ['Revenue, 30 days', formatMoney(period.totalRevenue), `${formatMoney(s.revenue)} all time`],

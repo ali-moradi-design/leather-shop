@@ -1,10 +1,11 @@
 'use client';
 
 import { Icon } from '@/shared/ui/Icon';
-import { useCart } from '../model/CartProvider';
+import { useCartActions, useCartState } from '../model/CartProvider';
 
 export function CartButton() {
-  const { cart, setOpen } = useCart();
+  const { cart } = useCartState();
+  const { setOpen } = useCartActions();
   const count = cart?.count ?? 0;
   return (
     <button

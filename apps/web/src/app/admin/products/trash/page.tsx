@@ -7,6 +7,7 @@ import { TrashTable } from '@/features/admin/ui/TrashTable';
 import { requireAdmin } from '@/features/auth/server';
 import type { ApiPaginated } from '@/shared/api';
 import { serverApi } from '@/shared/api/server';
+import { early } from '@/shared/lib/early';
 import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Trash' };
@@ -14,9 +15,10 @@ export const metadata: Metadata = { title: 'Trash' };
 type Props = { searchParams: Promise<{ page?: string }> };
 
 async function Trash({ searchParams }: Props) {
-  await requireAdmin('/admin/products/trash');
   const page = Math.max(1, Number((await searchParams).page) || 1);
-  const { data, meta } = await serverApi<ApiPaginated<Product>>(`/products/trash?page=${page}&limit=30`);
+  const list = early(serverApi<ApiPaginated<Product>>(`/products/trash?page=${page}&limit=30`));
+  await requireAdmin('/admin/products/trash');
+  const { data, meta } = await list;
   return (
     <>
       <TrashTable rows={data.map((p) => ({ id: p.id, title: p.title, image: p.images[0], stock: p.stock }))} />

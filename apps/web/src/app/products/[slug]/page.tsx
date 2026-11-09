@@ -117,9 +117,10 @@ function JsonLd({ product }: { product: Product }) {
 }
 
 export default async function ProductPage({ params }: Props) {
-  const product = await fetchProduct((await params).slug);
+  const { slug } = await params;
+  // both are cached catalog reads keyed by the slug, so they can start together
+  const [product, colors] = await Promise.all([fetchProduct(slug), fetchColors(slug).catch(() => [])]);
   if (!product) notFound();
-  const colors = await fetchColors(product.slug);
   const collection = collectionOf(product);
   const off = discountPercent(product.price, product.compareAtPrice);
 

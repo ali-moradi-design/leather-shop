@@ -18,7 +18,7 @@ export function Hero() {
         src={heroImage}
         alt="Two people walking down a city street in leather boots"
         fill
-        priority
+        preload
         placeholder="blur"
         sizes="100vw"
         className="object-cover object-[60%_center]"

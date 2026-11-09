@@ -7,6 +7,7 @@ import { OrdersTable, PageHeader, Pagination, type OrderRow } from '@/features/a
 import { requireAdmin } from '@/features/auth/server';
 import type { ApiPaginated } from '@/shared/api';
 import { serverApi } from '@/shared/api/server';
+import { early } from '@/shared/lib/early';
 import { cn } from '@/shared/lib/cn';
 import { Skeleton } from '@/shared/ui';
 
@@ -26,13 +27,14 @@ const toRow = (o: Order): OrderRow => ({
 });
 
 async function Orders({ searchParams }: Props) {
-  await requireAdmin('/admin/orders');
   const sp = await searchParams;
   const status = ORDER_STATUSES.includes(sp.status as OrderStatus) ? (sp.status as OrderStatus) : undefined;
   const q = sp.q?.trim() || undefined;
   const page = Math.max(1, Number(sp.page) || 1);
   const qs = new URLSearchParams({ page: String(page), limit: '25', ...(status && { status }), ...(q && { q }) });
-  const { data, meta } = await serverApi<ApiPaginated<Order>>(`/orders?${qs}`);
+  const list = early(serverApi<ApiPaginated<Order>>(`/orders?${qs}`));
+  await requireAdmin('/admin/orders');
+  const { data, meta } = await list;
   const tabHref = (s?: OrderStatus) => {
     const p = new URLSearchParams({ ...(s && { status: s }), ...(q && { q }) }).toString();
     return p ? `/admin/orders?${p}` : '/admin/orders';

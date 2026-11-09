@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { PageHeader, Pagination, ReviewsTable, type ReviewRow } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
 import { serverApi } from '@/shared/api/server';
+import { early } from '@/shared/lib/early';
 import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Reviews' };
@@ -21,9 +22,10 @@ interface ApiReview {
 const LIMIT = 30;
 
 async function Reviews({ searchParams }: Props) {
-  await requireAdmin('/admin/reviews');
   const page = Math.max(1, Number((await searchParams).page) || 1);
-  const { data, meta } = await serverApi<{ data: ApiReview[]; meta: { total: number } }>(`/reviews?page=${page}&limit=${LIMIT}`);
+  const list = early(serverApi<{ data: ApiReview[]; meta: { total: number } }>(`/reviews?page=${page}&limit=${LIMIT}`));
+  await requireAdmin('/admin/reviews');
+  const { data, meta } = await list;
   const rows: ReviewRow[] = data.map((r) => ({
     id: r.id,
     rating: r.rating,

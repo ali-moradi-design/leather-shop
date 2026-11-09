@@ -11,7 +11,7 @@ export default function AboutPage() {
   return (
     <>
       <section className="relative flex h-[360px] items-end text-white">
-        <Image src="/media/factory.jpg" alt="A sole being pressed in the workshop" fill priority sizes="100vw" className="object-cover" />
+        <Image src="/media/factory.jpg" alt="A sole being pressed in the workshop" fill preload sizes="100vw" className="object-cover" />
         <div className="absolute inset-0 bg-black/40" />
         <h1 className="heading relative mb-12 ml-6 text-[44px] sm:ml-[73px]">Our Story</h1>
       </section>

@@ -7,6 +7,7 @@ import { PageHeader, ProductForm } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
 import { ApiError } from '@/shared/api';
 import { serverApi } from '@/shared/api/server';
+import { early } from '@/shared/lib/early';
 import { Skeleton } from '@/shared/ui';
 import { productFormOptions } from '../form-options';
 
@@ -26,8 +27,9 @@ async function readProduct(id: string): Promise<Product> {
 
 async function Editor({ params, searchParams }: Props) {
   const { id } = await params;
+  const reads = early(Promise.all([readProduct(id), productFormOptions(), searchParams]));
   await requireAdmin(`/admin/products/${id}`);
-  const [product, options, { created }] = await Promise.all([readProduct(id), productFormOptions(), searchParams]);
+  const [product, options, { created }] = await reads;
   return (
     <>
       <PageHeader title={product.title}>

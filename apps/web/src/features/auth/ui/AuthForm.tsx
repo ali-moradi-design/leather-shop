@@ -1,9 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useCart } from '@/features/cart';
+import { useEffect, useRef, useState } from 'react';
 import { clientApi } from '@/shared/api/client';
 
 export const DEMO = { email: 'demo@weltandgrain.local', password: 'Demo123!' };
@@ -21,31 +19,28 @@ export function safeNext(next: string | undefined): string {
 
 /** Sign in / create account. After success the guest cart is merged into the account. */
 export function AuthForm({ mode, next }: { mode: 'login' | 'register'; next?: string }) {
-  const router = useRouter();
-  const { refresh } = useCart();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const target = safeNext(next);
 
   const finish = async () => {
     await clientApi('/cart/merge', { method: 'POST' }).catch(() => {});
-    await refresh();
-    router.replace(target);
-    router.refresh();
+    // A full load, not router.replace + router.refresh: the client router keeps
+    // pages rendered before sign-in (e.g. the redirect from /checkout), and the
+    // two calls raced, so the visitor could land back on this form.
+    window.location.replace(target);
   };
 
   // A still-valid refresh cookie signs the visitor back in without the form.
+  // Once only: refresh tokens rotate, so a second call (React's dev double
+  // effect) sends the already-used token, fails, and would sign in twice.
+  const triedRefresh = useRef(false);
   useEffect(() => {
-    if (mode !== 'login') return;
-    let alive = true;
+    if (mode !== 'login' || triedRefresh.current) return;
+    triedRefresh.current = true;
     clientApi('/auth/refresh', { method: 'POST' })
-      .then(() => {
-        if (alive) void finish();
-      })
+      .then(() => finish())
       .catch(() => {});
-    return () => {
-      alive = false;
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -114,17 +109,14 @@ export function AuthForm({ mode, next }: { mode: 'login' | 'register'; next?: st
 }
 
 export function SignOutButton() {
-  const router = useRouter();
-  const { refresh } = useCart();
   return (
     <button
       type="button"
       className="link-underline text-[14px]"
       onClick={async () => {
         await clientApi('/auth/logout', { method: 'POST' }).catch(() => {});
-        await refresh();
-        router.replace('/');
-        router.refresh();
+        // full load: nothing rendered for the signed-in visitor stays in memory
+        window.location.replace('/');
       }}
     >
       Sign out

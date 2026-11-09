@@ -5,11 +5,12 @@ export const favoritesPaths = {
         "Favorites"
       ],
       "summary": "List favorites",
-      "description": "Each item carries the product title, slug, price (cents) and first image.",
+      "description": "Each item carries the product title, slug, price (cents) and first image. Visitors without a session get an empty list.",
       "security": [
         {
           "bearerAuth": []
-        }
+        },
+        {}
       ],
       "responses": {
         "200": {

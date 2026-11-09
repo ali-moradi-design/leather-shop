@@ -9,6 +9,7 @@ import { OrderStatusSelect, PageHeader } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
 import { ApiError } from '@/shared/api';
 import { serverApi } from '@/shared/api/server';
+import { early } from '@/shared/lib/early';
 import { formatMoney } from '@/shared/lib/money';
 import { Skeleton } from '@/shared/ui';
 
@@ -29,8 +30,9 @@ async function readOrder(id: string): Promise<Order> {
 
 async function OrderDetail({ params }: Props) {
   const { id } = await params;
+  const reading = early(readOrder(id));
   await requireAdmin(`/admin/orders/${id}`);
-  const order = await readOrder(id);
+  const order = await reading;
   // the account may have been deleted since; the order still shows
   const customer = await serverApi<{ data: User & { email: string } }>(`/users/${order.user}`)
     .then((r) => r.data)
