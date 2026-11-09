@@ -63,6 +63,7 @@ export function Gallery({ images, title }: { images: string[]; title: string }) 
         <div
           ref={strip}
           className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain"
+          role="region"
           aria-roledescription="carousel"
           aria-label={`${title} photos`}
           tabIndex={0}

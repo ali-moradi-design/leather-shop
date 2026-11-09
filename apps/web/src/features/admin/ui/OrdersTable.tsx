@@ -22,7 +22,7 @@ const helper = createColumnHelper<typeof features, OrderRow>();
 const columns = helper.columns([
   helper.accessor('id', {
     header: 'Order',
-    cell: ({ getValue }) => <Link className="link-underline" href={`/admin/orders/${getValue()}`}>{orderNumber(getValue())}</Link>,
+    cell: ({ getValue }) => <Link prefetch={false} className="link-underline" href={`/admin/orders/${getValue()}`}>{orderNumber(getValue())}</Link>,
   }),
   helper.accessor('createdAt', { header: 'Date', cell: ({ getValue }) => <span className="whitespace-nowrap">{date.format(new Date(getValue()))}</span> }),
   helper.accessor('customer', { header: 'Customer' }),

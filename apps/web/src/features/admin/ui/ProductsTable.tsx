@@ -68,7 +68,7 @@ const columns = helper.columns([
           {row.original.image && <Image src={row.original.image} alt="" fill sizes="48px" className="object-contain" />}
         </span>
         <span>
-          <Link href={`/admin/products/${row.original.id}`} className="text-ink hover:underline">{row.original.title}</Link>
+          <Link prefetch={false} href={`/admin/products/${row.original.id}`} className="text-ink hover:underline">{row.original.title}</Link>
           {row.original.featured && <span className="ml-2 bg-soft px-1.5 py-0.5 text-[11px] text-mute">Featured</span>}
         </span>
       </span>
@@ -162,8 +162,8 @@ function RowActions({ row }: { row: ProductRow }) {
   const { pending, result, run } = useAction();
   return (
     <span className="flex items-center justify-end gap-3 whitespace-nowrap text-[13px]">
-      <Link href={`/admin/products/${row.id}`} className="link-underline">Edit</Link>
-      <Link href={`/products/${row.slug}`} className="text-mute hover:text-ink" target="_blank">View</Link>
+      <Link prefetch={false} href={`/admin/products/${row.id}`} className="link-underline">Edit</Link>
+      <Link prefetch={false} href={`/products/${row.slug}`} className="text-mute hover:text-ink" target="_blank">View</Link>
       <button
         type="button"
         disabled={pending}

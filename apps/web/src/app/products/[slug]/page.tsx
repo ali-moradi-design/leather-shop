@@ -193,6 +193,8 @@ export default async function ProductPage({ params }: Props) {
       <RecentlyViewed
         current={{ slug: product.slug, name: product.name, color: product.color, image: product.images[0], price: product.price }}
       />
+      {/* room for the sticky add-to-cart bar on phones, so it never covers the footer */}
+      <div aria-hidden className="h-20 lg:hidden" />
     </>
   );
 }

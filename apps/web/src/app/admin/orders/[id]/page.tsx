@@ -60,7 +60,7 @@ async function OrderDetail({ params }: Props) {
                   {item.image && <Image src={item.image} alt="" fill sizes="56px" className="object-contain" />}
                 </span>
                 <span>
-                  <Link href={`/admin/products/${item.product}`} className="text-ink hover:underline">{item.title}</Link>
+                  <Link prefetch={false} href={`/admin/products/${item.product}`} className="text-ink hover:underline">{item.title}</Link>
                   <span className="block text-mute">Size {item.size}{item.width ? ` · ${item.width}` : ''} · {item.sku} · × {item.quantity}</span>
                 </span>
                 <span>{formatMoney(item.price * item.quantity)}</span>
