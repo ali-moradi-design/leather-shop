@@ -29,21 +29,44 @@ const columns = helper.columns([
     ),
   }),
   helper.accessor('stock', { header: 'Stock' }),
-  helper.display({ id: 'restore', header: () => <span className="sr-only">Actions</span>, cell: ({ row }) => <Restore id={row.original.id} /> }),
+  helper.display({
+    id: 'restore',
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row, table }) => <Restore id={row.original.id} {...(table.options.meta as RestoreMeta)} />,
+  }),
 ]);
 
-export function TrashTable({ rows }: { rows: TrashRow[] }) {
-  const table = useTable({ features, columns, data: rows, getRowId: (r) => r.id });
-  return <DataTable table={table} label="Deleted products" empty="The trash is empty." />;
+interface RestoreMeta {
+  pending: boolean;
+  onRestore: (id: string) => void;
 }
 
-function Restore({ id }: { id: string }) {
+/**
+ * The result shows above the table: a restored product leaves this list, so a
+ * message inside its row would vanish with it.
+ */
+export function TrashTable({ rows }: { rows: TrashRow[] }) {
   const { pending, result, run } = useAction();
+  const table = useTable({
+    features,
+    columns,
+    data: rows,
+    getRowId: (r) => r.id,
+    meta: { pending, onRestore: (id: string) => run(() => restoreProduct(id)) } satisfies RestoreMeta,
+  });
   return (
-    <span className="flex items-center justify-end gap-3">
-      <ActionMessage result={result} />
-      <button type="button" disabled={pending} onClick={() => run(() => restoreProduct(id))} className="link-underline text-[13px]">
-        {pending ? 'Restoring…' : 'Restore'}
+    <>
+      <ActionMessage result={result} className="mb-3" />
+      <DataTable table={table} label="Deleted products" empty="The trash is empty." />
+    </>
+  );
+}
+
+function Restore({ id, pending, onRestore }: { id: string } & RestoreMeta) {
+  return (
+    <span className="flex justify-end">
+      <button type="button" disabled={pending} onClick={() => onRestore(id)} className="link-underline text-[13px]">
+        Restore
       </button>
     </span>
   );

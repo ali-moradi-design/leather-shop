@@ -1,16 +1,26 @@
 import 'server-only';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { API_V1 } from '@/shared/config';
 import { ApiError } from './types';
 
+/**
+ * The visitor's IP, as the /api proxy route forwards it: without it the API's
+ * rate limit would count every visitor's server-side reads as one client.
+ */
+function visitorIp(h: Headers): string | undefined {
+  return h.get('x-real-ip') ?? h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? undefined;
+}
+
 async function call<T>(path: string, init: RequestInit): Promise<T> {
-  const jar = await cookies();
+  const [jar, h] = await Promise.all([cookies(), headers()]);
+  const ip = visitorIp(h);
   const res = await fetch(`${API_V1}${path}`, {
     cache: 'no-store',
     ...init,
     headers: {
       Accept: 'application/json',
       ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(ip ? { 'X-Forwarded-For': ip } : {}),
       Cookie: jar.toString(),
     },
   });
