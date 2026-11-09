@@ -36,8 +36,8 @@ async function Editor({ params, searchParams }: Props) {
         <Link href={`/products/${product.slug}`} target="_blank" className="text-[14px] text-mute underline underline-offset-4">View in shop ↗</Link>
       </PageHeader>
       {created && <p role="status" className="mb-6 border border-accent px-4 py-3 text-[14px] text-accent">Product created. It is live in the shop.</p>}
-      {/* a fresh form after every save: the saved product becomes its default values */}
-      <ProductForm key={product.updatedAt} product={product} options={options} />
+      {/* keyed by product, not by save: the form resets itself after a save and keeps its message */}
+      <ProductForm key={product.id} product={product} options={options} />
     </>
   );
 }

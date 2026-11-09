@@ -64,8 +64,8 @@ export function ProductForm({ product, options }: { product?: Product; options: 
             setError(path as FieldPath<ProductFormValues>, { message });
           }
         } else {
-          // the saved values become the new baseline for "unsaved changes"
-          reset(values);
+          // the saved product becomes the new baseline for "unsaved changes"
+          reset(r.product ? productToFormValues(r.product) : values);
         }
       },
     ),

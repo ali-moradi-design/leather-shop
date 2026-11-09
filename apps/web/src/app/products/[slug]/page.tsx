@@ -60,6 +60,7 @@ async function LiveBuyBox({ product }: { product: Product }) {
   const sizeNote = product.category === 'boots' ? 'Order ½ size smaller than you wear in sneakers.' : undefined;
   return (
     <BuyBox
+      key={product.id}
       productId={product.id}
       price={product.price}
       variants={variants}
@@ -141,7 +142,8 @@ export default async function ProductPage({ params }: Props) {
               <span className="mx-1">›</span>
               <span aria-current="page">{product.name}</span>
             </nav>
-            <Gallery images={product.images} title={product.title} />
+            {/* keyed: another color is another product, so the photo index starts over */}
+            <Gallery key={product.slug} images={product.images} title={product.title} />
           </div>
           <div className="lg:sticky lg:top-[calc(var(--header-h)+18px)] lg:self-start lg:pt-1">
             <div className="flex items-start justify-between gap-4">

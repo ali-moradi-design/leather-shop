@@ -1,7 +1,16 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useId, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { cn } from '@/shared/lib/cn';
+
+const schema = z.object({
+  email: z.string().trim().email('Enter a valid email address'),
+  gender: z.string().optional(),
+});
+type Values = z.infer<typeof schema>;
 
 /**
  * Email sign-up. This is a demo shop with no mailing list, so it only confirms
@@ -20,6 +29,11 @@ export function NewsletterForm({
 }) {
   const id = useId();
   const [done, setDone] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { email: '' } });
 
   if (done) {
     return (
@@ -32,17 +46,15 @@ export function NewsletterForm({
   return (
     <form
       className={className}
-      onSubmit={(e) => {
-        e.preventDefault();
-        setDone(true);
-      }}
+      noValidate
+      onSubmit={handleSubmit(() => setDone(true))}
     >
       {withGender && (
         <fieldset className="mb-3 flex gap-5 text-[15px] text-ink">
           <legend className="sr-only">I shop for</legend>
           {["Men's", "Women's"].map((g) => (
             <label key={g} className="flex items-center gap-2">
-              <input type="radio" name={`${id}-gender`} value={g} className="h-[18px] w-[18px] accent-brand" />
+              <input type="radio" {...register('gender')} value={g} className="h-[18px] w-[18px] accent-brand" />
               {g}
             </label>
           ))}
@@ -53,7 +65,9 @@ export function NewsletterForm({
         <input
           id={`${id}-email`}
           type="email"
-          required
+          {...register('email')}
+          aria-invalid={errors.email ? true : undefined}
+          aria-describedby={errors.email ? `${id}-error` : undefined}
           autoComplete="email"
           placeholder="Email address"
           className="h-[42px] min-w-0 flex-1 border border-ink/80 bg-white px-3 text-[15px] text-ink outline-none placeholder:text-mute focus:border-accent"
@@ -68,6 +82,7 @@ export function NewsletterForm({
           {buttonLabel}
         </button>
       </div>
+      {errors.email && <p id={`${id}-error`} className="mt-1.5 text-[13px] text-danger">{errors.email.message}</p>}
     </form>
   );
 }
