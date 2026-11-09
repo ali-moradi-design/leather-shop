@@ -59,7 +59,8 @@ jobs:
 
   e2e:
     name: E2E (purchase path + axe)
-    runs-on: ubuntu-latest
+    # pinned: Playwright 1.56 cannot install Chromium's system packages on 26.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     services:
       mongo:
