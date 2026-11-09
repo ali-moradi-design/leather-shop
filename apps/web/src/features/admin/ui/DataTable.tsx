@@ -5,6 +5,9 @@ import type { ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
 
 /**
+ * Row links in these tables should pass prefetch={false}: a page of 30 rows would
+ * otherwise prefetch every linked page as it scrolls into view.
+ *
  * Markup for an admin table built with TanStack Table's useTable. The table owns
  * rows and selection; this owns the look. Scrolls sideways on small screens.
  */

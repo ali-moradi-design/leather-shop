@@ -114,7 +114,7 @@ async function Dashboard() {
           <ul className="divide-y divide-line border-y border-line text-[14px]">
             {recent.map((o) => (
               <li key={o.id} className="flex items-center justify-between gap-3 py-2.5">
-                <Link href={`/admin/orders/${o.id}`} className="link-underline">{orderNumber(o.id)}</Link>
+                <Link prefetch={false} href={`/admin/orders/${o.id}`} className="link-underline">{orderNumber(o.id)}</Link>
                 <span className="flex-1 truncate">{o.shippingAddress.fullName}</span>
                 <span className="text-mute">{STATUS_LABEL[o.status]}</span>
                 <span>{formatMoney(o.totalAmount)}</span>
@@ -134,7 +134,7 @@ async function Dashboard() {
                 <div className="relative h-10 bg-soft">{p.images[0] && <Image src={p.images[0]} alt="" fill sizes="40px" className="object-contain" />}</div>
                 <span className="truncate">{p.title}</span>
                 <span className={p.stock === 0 ? 'text-danger' : 'text-mute'}>{p.stock === 0 ? 'Sold out' : `${p.stock} left`}</span>
-                <Link href={`/admin/products/${p.id}`} className="link-underline">Restock</Link>
+                <Link prefetch={false} href={`/admin/products/${p.id}`} className="link-underline">Restock</Link>
               </li>
             ))}
           </ul>

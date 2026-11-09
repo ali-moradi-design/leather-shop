@@ -101,4 +101,8 @@ orderSchema.pre(/^find/, function (this: Query<unknown, IOrderDoc>) {
   }
 });
 
+// the order lists: newest first, for one customer or one status
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ status: 1, createdAt: -1 });
+
 export const OrderModel = model<IOrderDoc>('Order', orderSchema);

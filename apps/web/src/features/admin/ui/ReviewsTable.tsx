@@ -35,7 +35,7 @@ const columns = helper.columns([
     header: 'Product',
     cell: ({ getValue }) => {
       const p = getValue();
-      return p ? <Link href={`/products/${p.slug}#reviews`} target="_blank" className="hover:underline">{p.title}</Link> : <span className="text-mute">Deleted product</span>;
+      return p ? <Link prefetch={false} href={`/products/${p.slug}#reviews`} target="_blank" className="hover:underline">{p.title}</Link> : <span className="text-mute">Deleted product</span>;
     },
   }),
   helper.display({ id: 'actions', header: () => <span className="sr-only">Actions</span>, cell: ({ row }) => <Remove review={row.original} /> }),

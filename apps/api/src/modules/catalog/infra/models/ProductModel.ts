@@ -84,6 +84,8 @@ const productSchema = new Schema<IProductDoc>(
 productSchema.index({ title: 'text', name: 'text', color: 'text', description: 'text' });
 productSchema.index({ category: 1, gender: 1, featuredOrder: 1 });
 productSchema.index({ price: 1 });
+// admin low-stock list and stock sort
+productSchema.index({ stock: 1 });
 productSchema.index({ 'variants.sku': 1 });
 
 productSchema.pre('validate', function () {
