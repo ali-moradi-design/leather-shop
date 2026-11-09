@@ -17,6 +17,9 @@ export interface IProductRepository {
   create(input: CreateProductInput): Promise<Product>;
   update(id: string, input: UpdateProductInput): Promise<Product | null>;
   softDelete(id: string): Promise<Product | null>;
+  /** Soft-deleted products, most recently deleted first. */
+  listDeleted(page: number, limit: number): Promise<{ data: Product[]; total: number }>;
+  restore(id: string): Promise<Product | null>;
   /** Atomically takes stock from one variant; false when not enough is left. */
   decrementStock(productId: string, sku: string, quantity: number): Promise<boolean>;
   incrementStock(productId: string, sku: string, quantity: number): Promise<void>;

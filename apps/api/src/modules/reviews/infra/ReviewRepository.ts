@@ -60,6 +60,16 @@ export class MongooseReviewRepository implements IReviewRepository {
     return row ? { avg: Math.round(row.avg * 10) / 10, count: row.count } : { avg: 0, count: 0 };
   }
 
+  async starCounts(productId: string): Promise<number[]> {
+    const rows = await ReviewModel.aggregate<{ _id: number; count: number }>([
+      { $match: { product: new Types.ObjectId(productId), deletedAt: null } },
+      { $group: { _id: '$rating', count: { $sum: 1 } } },
+    ]);
+    const counts = [0, 0, 0, 0, 0];
+    for (const row of rows) if (row._id >= 1 && row._id <= 5) counts[row._id - 1] = row.count;
+    return counts;
+  }
+
   async softDelete(id: string): Promise<Review | null> {
     const doc = await ReviewModel.findById(id);
     if (!doc) return null;

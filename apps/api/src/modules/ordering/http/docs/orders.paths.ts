@@ -1,13 +1,20 @@
 import { ORDER_STATUSES } from '../../domain/order.entity';
-import { data, errors, json, list, path, ref, signedIn } from '@shared/http/docs/helpers';
+import { data, errors, json, paged, path, query, ref, signedIn } from '@shared/http/docs/helpers';
 
 export const ordersPaths = {
   '/api/v1/orders': {
     get: {
       tags: ['Orders'],
       summary: 'My orders (all orders for staff)',
+      description: '`q` matches the end of the order id or the name on the shipping address.',
       security: signedIn,
-      responses: { 200: { description: 'Orders', ...list('Order') }, 401: errors[401] },
+      parameters: [
+        query('status', { type: 'string', enum: ORDER_STATUSES }),
+        query('q', { type: 'string', maxLength: 100 }),
+        query('page', { type: 'integer', minimum: 1, default: 1 }),
+        query('limit', { type: 'integer', minimum: 1, maximum: 100, default: 50 }),
+      ],
+      responses: { 200: { description: 'Orders', ...paged('Order') }, 400: errors[400], 401: errors[401] },
     },
     post: {
       tags: ['Orders'],

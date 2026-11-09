@@ -44,7 +44,14 @@ export const createProductSchema = z.object({
   featuredOrder: z.number().int().optional(),
 });
 
-export const updateProductSchema = createProductSchema.partial();
+export const updateProductSchema = createProductSchema
+  .partial()
+  .extend({ compareAtPrice: z.number().int().nonnegative().nullable().optional() });
+
+export const trashQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(100).optional().default(30),
+});
 
 export const idParamSchema = z.object({ id: z.string().min(1) });
 export const slugParamSchema = z.object({ slug: z.string().min(1).max(160) });
@@ -69,9 +76,10 @@ export const listProductsQuerySchema = facetsQuerySchema.extend({
   minPrice: z.coerce.number().int().nonnegative().optional(),
   maxPrice: z.coerce.number().int().nonnegative().optional(),
   inStock: bool,
+  maxStock: z.coerce.number().int().nonnegative().optional(),
   featured: bool,
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(24),
-  sort: z.enum(['featured', 'price', 'title', 'createdAt']).optional().default('featured'),
+  sort: z.enum(['featured', 'price', 'title', 'createdAt', 'stock']).optional().default('featured'),
   order: z.enum(['asc', 'desc']).optional().default('asc'),
 });

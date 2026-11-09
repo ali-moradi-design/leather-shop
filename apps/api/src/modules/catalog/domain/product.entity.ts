@@ -88,9 +88,12 @@ export interface CreateProductInput {
   featuredOrder?: number;
 }
 
-export type UpdateProductInput = Partial<CreateProductInput>;
+/** A null compare-at price removes the sale price. */
+export type UpdateProductInput = Partial<Omit<CreateProductInput, 'compareAtPrice'>> & {
+  compareAtPrice?: number | null;
+};
 
-export type ProductSort = 'featured' | 'price' | 'title' | 'createdAt';
+export type ProductSort = 'featured' | 'price' | 'title' | 'createdAt' | 'stock';
 
 export interface ProductListFilter {
   q?: string;
@@ -104,6 +107,8 @@ export interface ProductListFilter {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
+  /** Total stock at or below this number (admin low-stock filter). */
+  maxStock?: number;
   featured?: boolean;
   page?: number;
   limit?: number;
