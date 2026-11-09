@@ -5,7 +5,7 @@ const ADMIN = { email: 'admin@weltandgrain.local', password: 'Admin123!' };
 
 async function signIn(page: Page, next: string) {
   await page.goto(`/account/login?next=${encodeURIComponent(next)}`);
-  await page.getByLabel('Email', { exact: true }).fill(ADMIN.email);
+  await page.getByRole('textbox', { name: 'Email', exact: true }).fill(ADMIN.email);
   await page.getByLabel('Password').fill(ADMIN.password);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(next.replace(/\//g, '\\/')));
@@ -19,12 +19,12 @@ test('admin creates a product, sees it in the shop, deletes and restores it', as
   await page.getByRole('button', { name: 'Create product' }).click();
   await expect(page.locator('#name-error')).toHaveText('Enter a name');
 
-  await page.getByLabel('Style name').fill('E2E Ranger');
-  await page.getByLabel('Color', { exact: true }).fill(color);
-  await page.getByLabel('Price (USD)').fill('210');
-  await page.getByLabel('Compare-at price (optional)').fill('300');
-  await page.getByLabel('Size, row 1').fill('10');
-  await page.getByLabel('Stock, row 1').fill('4');
+  await page.getByRole('textbox', { name: 'Style name' }).fill('E2E Ranger');
+  await page.getByRole('textbox', { name: 'Color', exact: true }).fill(color);
+  await page.getByRole('textbox', { name: 'Price (USD)' }).fill('210');
+  await page.getByRole('textbox', { name: 'Compare-at price (optional)' }).fill('300');
+  await page.getByRole('textbox', { name: 'Size, row 1' }).fill('10');
+  await page.getByRole('spinbutton', { name: 'Stock, row 1' }).fill('4');
   await page.getByRole('button', { name: 'Create product' }).click();
   await expect(page.getByText('Product created. It is live in the shop.')).toBeVisible({ timeout: 15_000 });
 

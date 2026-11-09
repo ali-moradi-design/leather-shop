@@ -406,6 +406,12 @@ describe('Welt & Grain API (integration)', () => {
   });
 
   describe('Favorites', () => {
+    it('visitors get an empty list, not a 401', async () => {
+      const res = await ctx.request.get('/api/v1/favorites').expect(200);
+      expect(res.body.data).toEqual([]);
+      await ctx.request.post('/api/v1/favorites').send({ productId: 'x' }).expect(401);
+    });
+
     it('add → list → remove', async () => {
       const customer = await registerCustomer(ctx.request, `fav_${Date.now()}`);
       const products = await ctx.request.get('/api/v1/products?limit=1').expect(200);

@@ -38,7 +38,7 @@ export function CollectionLanding({
 
       <div className="min-w-0">
         <section className="relative -mx-4 flex h-[200px] items-center justify-center overflow-hidden text-white sm:mx-0 sm:h-[280px] lg:h-[340px]">
-          <Image src={collection.hero} alt="" fill priority sizes="(min-width: 1024px) 1070px, 100vw" className="object-cover object-[center_65%]" />
+          <Image src={collection.hero} alt="" fill preload sizes="(min-width: 1024px) 1070px, 100vw" className="object-cover object-[center_65%]" />
           <div className="absolute inset-0 bg-black/30" />
           <div className="relative px-6 text-center lg:mr-[38%]">
             <h1 className="font-serif text-[30px] font-bold text-white sm:text-[38px]">{collection.title}</h1>

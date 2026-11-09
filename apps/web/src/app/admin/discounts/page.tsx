@@ -4,6 +4,7 @@ import type { Discount } from '@/entities/discount';
 import { DiscountForm, DiscountsTable, PageHeader, type DiscountRow } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
 import { serverApi } from '@/shared/api/server';
+import { early } from '@/shared/lib/early';
 import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Discounts' };
@@ -24,8 +25,9 @@ function withState(discounts: Discount[]): DiscountRow[] {
 }
 
 async function Discounts() {
+  const list = early(serverApi<{ data: Discount[] }>('/discounts'));
   await requireAdmin('/admin/discounts');
-  const { data } = await serverApi<{ data: Discount[] }>('/discounts');
+  const { data } = await list;
   return (
     <>
       <h2 className="heading mb-3 text-[18px]">New code</h2>

@@ -4,7 +4,8 @@ import { discountPercent, formatMoney } from '@/shared/lib/money';
 import type { Product } from '../model/types';
 
 /** Grid tile: light grey square image, name + price, color below (like the mockup). */
-export function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
+/** `preload` the first row of a grid: those photos are the largest paint above the fold. */
+export function ProductCard({ product, preload }: { product: Product; preload?: boolean }) {
   const soldOut = product.stock === 0;
   const off = discountPercent(product.price, product.compareAtPrice);
   return (
@@ -16,7 +17,7 @@ export function ProductCard({ product, priority }: { product: Product; priority?
             alt={product.title}
             fill
             sizes="(min-width: 1440px) 300px, (min-width: 1024px) 22vw, (min-width: 768px) 33vw, 50vw"
-            preload={priority}
+            preload={preload}
             className="object-contain transition-opacity duration-300 group-hover:opacity-0"
           />
         )}

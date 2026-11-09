@@ -7,6 +7,7 @@ import { PageHeader, Pagination, ProductsTable, type ProductRow } from '@/featur
 import { requireAdmin } from '@/features/auth/server';
 import type { ApiPaginated } from '@/shared/api';
 import { serverApi } from '@/shared/api/server';
+import { early } from '@/shared/lib/early';
 import { PRODUCT_CATEGORIES, PRODUCT_GENDERS } from '@/shared/config';
 import { Skeleton } from '@/shared/ui';
 
@@ -33,7 +34,6 @@ const toRow = (p: Product): ProductRow => ({
 });
 
 async function Products({ searchParams }: Props) {
-  await requireAdmin('/admin/products');
   const sp = await searchParams;
   const filters = {
     q: sp.q?.trim() || undefined,
@@ -51,7 +51,9 @@ async function Products({ searchParams }: Props) {
   if (filters.stock === 'low') query.maxStock = '5';
   if (filters.stock === 'out') query.inStock = 'false';
   const qs = new URLSearchParams(query satisfies Partial<Record<keyof ProductQuery | 'maxStock', string>>);
-  const { data, meta } = await serverApi<ApiPaginated<Product>>(`/products?${qs}`);
+  const list = early(serverApi<ApiPaginated<Product>>(`/products?${qs}`));
+  await requireAdmin('/admin/products');
+  const { data, meta } = await list;
 
   const select = 'border border-line bg-white px-2 py-2 text-[14px]';
   return (

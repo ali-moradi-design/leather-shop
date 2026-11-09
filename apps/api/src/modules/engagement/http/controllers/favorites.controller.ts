@@ -3,7 +3,7 @@ import { favoriteService } from '../../infra/wiring';
 import { asyncHandler } from '@shared/http/asyncHandler';
 
 export const list = asyncHandler(async (req: Request, res: Response) => {
-  const data = await favoriteService.list(req.user!.id);
+  const data = req.user ? await favoriteService.list(req.user.id) : [];
   res.json({ data });
 });
 

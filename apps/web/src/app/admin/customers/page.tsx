@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { CustomersTable, PageHeader, type CustomerRow } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
 import { serverApi } from '@/shared/api/server';
+import { early } from '@/shared/lib/early';
 import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Customers' };
@@ -19,11 +20,11 @@ interface ApiUser {
 const roleId = (r: ApiUser['roles'][number]) => (typeof r === 'string' ? r : r._id ?? r.id ?? '');
 
 async function Customers() {
+  const reads = early(
+    Promise.all([serverApi<{ data: ApiUser[] }>('/users'), serverApi<{ data: { id: string; name: string }[] }>('/roles')]),
+  );
   const me = await requireAdmin('/admin/customers');
-  const [{ data: users }, { data: roles }] = await Promise.all([
-    serverApi<{ data: ApiUser[] }>('/users'),
-    serverApi<{ data: { id: string; name: string }[] }>('/roles'),
-  ]);
+  const [{ data: users }, { data: roles }] = await reads;
   const adminRoleId = roles.find((r) => r.name === 'admin')?.id;
   // only these fields reach the browser (not the populated roles and permissions)
   const rows: CustomerRow[] = users.map((u) => ({
