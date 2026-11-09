@@ -68,6 +68,7 @@ export const shopSchemas = {
     properties: {
       colors: { type: 'array', items: { $ref: '#/components/schemas/FacetCount' } },
       leathers: { type: 'array', items: { $ref: '#/components/schemas/FacetCount' } },
+      styles: { type: 'array', items: { $ref: '#/components/schemas/FacetCount' }, description: 'Style groups (all colors of one model)' },
       sizes: { type: 'array', items: { $ref: '#/components/schemas/FacetCount' } },
       widths: { type: 'array', items: { $ref: '#/components/schemas/FacetCount' } },
       price: { type: 'object', properties: { min: cents, max: cents } },

@@ -1,3 +1,5 @@
 export { AdminNav } from './ui/AdminNav';
-export { OrderStatusSelect } from './ui/OrderStatusSelect';
-export { ProductEditor } from './ui/ProductEditor';
+export { PageHeader } from './ui/PageHeader';
+export { ProductForm, type ProductFormOptions } from './ui/ProductForm';
+export { ProductsTable, type ProductRow } from './ui/ProductsTable';
+export { Pagination } from './ui/Pagination';

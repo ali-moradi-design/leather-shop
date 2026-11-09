@@ -66,6 +66,7 @@ export class MongooseProductRepository implements IProductRepository {
     const [result] = await ProductModel.aggregate<{
       colors: { _id: string; count: number }[];
       leathers: { _id: string; count: number }[];
+      styles: { _id: string; count: number }[];
       sizes: { _id: string; count: number }[];
       widths: { _id: string; count: number }[];
       price: { min: number; max: number }[];
@@ -75,6 +76,7 @@ export class MongooseProductRepository implements IProductRepository {
         $facet: {
           colors: count('colorFamily'),
           leathers: count('leather'),
+          styles: count('style'),
           sizes: [
             { $unwind: '$variants' },
             { $group: { _id: '$variants.size', products: { $addToSet: '$_id' } } },
@@ -96,6 +98,7 @@ export class MongooseProductRepository implements IProductRepository {
     return {
       colors: toCounts(result.colors),
       leathers: toCounts(result.leathers),
+      styles: toCounts(result.styles),
       sizes: toCounts(result.sizes).sort(compareSizes),
       widths: toCounts(result.widths),
       price: result.price[0] ? { min: result.price[0].min, max: result.price[0].max } : { min: 0, max: 0 },

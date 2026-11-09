@@ -124,6 +124,8 @@ export interface FacetCount {
 export interface ProductFacets {
   colors: FacetCount[];
   leathers: FacetCount[];
+  /** Style groups (all colors of one model), for the admin form. */
+  styles: FacetCount[];
   sizes: FacetCount[];
   widths: FacetCount[];
   price: { min: number; max: number };
