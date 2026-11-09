@@ -1,8 +1,12 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { clientApi } from '@/shared/api/client';
+import { loginSchema, registerSchema, type RegisterValues } from '../model/schema';
 
 export const DEMO = { email: 'demo@weltandgrain.local', password: 'Demo123!' };
 
@@ -22,6 +26,16 @@ export function AuthForm({ mode, next }: { mode: 'login' | 'register'; next?: st
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const target = safeNext(next);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterValues>({
+    // one form for both modes; signing in ignores the (hidden) name
+    resolver: zodResolver(mode === 'login' ? loginSchema.extend({ name: z.string() }) : registerSchema),
+    defaultValues: { name: '', email: '', password: '' },
+    mode: 'onTouched',
+  });
 
   const finish = async () => {
     await clientApi('/cart/merge', { method: 'POST' }).catch(() => {});
@@ -44,11 +58,12 @@ export function AuthForm({ mode, next }: { mode: 'login' | 'register'; next?: st
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const submit = async (values: Record<string, string>) => {
+  const submit = async (values: Partial<RegisterValues>) => {
     setBusy(true);
     setError(null);
     try {
-      await clientApi(`/auth/${mode}`, { method: 'POST', body: JSON.stringify(values) });
+      const body = mode === 'login' ? { email: values.email, password: values.password } : values;
+      await clientApi(`/auth/${mode}`, { method: 'POST', body: JSON.stringify(body) });
       await finish();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -56,38 +71,42 @@ export function AuthForm({ mode, next }: { mode: 'login' | 'register'; next?: st
     }
   };
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    void submit(Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>);
-  };
-
-  const field = 'mt-1 block w-full border border-line px-3 py-2.5 outline-none focus:border-ink';
+  const field = 'mt-1 block w-full border border-line px-3 py-2.5 outline-none focus:border-ink aria-[invalid=true]:border-danger';
+  const fieldError = (name: keyof RegisterValues) =>
+    errors[name] && <p id={`auth-${name}-error`} className="mt-1 text-[12px] text-danger">{errors[name]?.message}</p>;
+  const a11y = (name: keyof RegisterValues) => ({
+    id: `auth-${name}`,
+    'aria-invalid': errors[name] ? true : undefined,
+    'aria-describedby': errors[name] ? `auth-${name}-error` : undefined,
+  });
   return (
     <div className="mx-auto max-w-md px-4 py-16">
       <h1 className="heading text-center text-[32px]">{mode === 'login' ? 'Sign In' : 'Create Account'}</h1>
-      <form onSubmit={onSubmit} className="mt-8 space-y-4" noValidate={false}>
+      <form onSubmit={handleSubmit(submit)} noValidate className="mt-8 space-y-4 text-[14px]">
         {mode === 'register' && (
-          <label className="block text-[14px]">
-            Name
-            <input name="name" required autoComplete="name" className={field} />
-          </label>
+          <div>
+            <label htmlFor="auth-name">Name</label>
+            <input {...register('name')} {...a11y('name')} autoComplete="name" className={field} />
+            {fieldError('name')}
+          </div>
         )}
-        <label className="block text-[14px]">
-          Email
-          <input name="email" type="email" required autoComplete="email" className={field} />
-        </label>
-        <label className="block text-[14px]">
-          Password
+        <div>
+          <label htmlFor="auth-email">Email</label>
+          <input {...register('email')} {...a11y('email')} type="email" autoComplete="email" className={field} />
+          {fieldError('email')}
+        </div>
+        <div>
+          <label htmlFor="auth-password">Password</label>
           <input
-            name="password"
+            {...register('password')}
+            {...a11y('password')}
             type="password"
-            required
-            minLength={8}
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             className={field}
           />
-        </label>
-        {error && <p role="alert" className="text-[14px] text-danger">{error}</p>}
+          {fieldError('password')}
+        </div>
+        {error && <p role="alert" className="text-danger">{error}</p>}
         <button type="submit" disabled={busy} className="btn w-full">
           {mode === 'login' ? 'Sign in' : 'Create account'}
         </button>

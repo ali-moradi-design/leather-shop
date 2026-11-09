@@ -4,7 +4,7 @@ import { PRODUCT_CATEGORIES, PRODUCT_GENDERS, type ProductCategory, type Product
 
 /** What a Server Action returns to an admin form or button. */
 export type ActionResult =
-  | { status: 'ok'; message: string }
+  | { status: 'ok'; message: string; product?: Product }
   | { status: 'error'; message: string; fieldErrors?: Record<string, string> };
 
 export const slugify = (s: string) =>

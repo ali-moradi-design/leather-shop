@@ -1,14 +1,19 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import type { Cart } from '@/features/cart';
 import { useCartActions } from '@/features/cart';
 import { clientApi } from '@/shared/api/client';
 import { formatMoney } from '@/shared/lib/money';
+import { addressSchema, toShippingAddress, type AddressValues } from '../model/schema';
 
 type Quote = Cart & { discountCode?: string; discountAmount: number; total: number };
+
+const field = 'mt-1 block w-full border border-line px-3 py-2.5 outline-none focus:border-ink aria-[invalid=true]:border-danger';
 
 export function CheckoutForm({ name }: { name: string }) {
   const router = useRouter();
@@ -18,6 +23,15 @@ export function CheckoutForm({ name }: { name: string }) {
   const [codeError, setCodeError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AddressValues>({
+    resolver: zodResolver(addressSchema),
+    defaultValues: { fullName: name, line1: '', line2: '', city: '', state: '', postalCode: '', country: 'United States' },
+    mode: 'onTouched',
+  });
 
   useEffect(() => {
     clientApi<{ data: Quote }>('/cart/quote', { method: 'POST', body: '{}' })
@@ -35,16 +49,16 @@ export function CheckoutForm({ name }: { name: string }) {
     }
   };
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = handleSubmit(async (values) => {
     setBusy(true);
     setError(null);
-    const shippingAddress = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
-    if (!shippingAddress.line2) delete shippingAddress.line2;
     try {
       const { data } = await clientApi<{ data: { id: string } }>('/cart/checkout', {
         method: 'POST',
-        body: JSON.stringify({ shippingAddress, ...(quote?.discountCode ? { discountCode: quote.discountCode } : {}) }),
+        body: JSON.stringify({
+          shippingAddress: toShippingAddress(values),
+          ...(quote?.discountCode ? { discountCode: quote.discountCode } : {}),
+        }),
       });
       await refresh();
       router.push(`/pay/${data.id}`);
@@ -52,27 +66,41 @@ export function CheckoutForm({ name }: { name: string }) {
       setError(err instanceof Error ? err.message : 'Checkout failed');
       setBusy(false);
     }
-  };
+  });
+
+  const input = (key: keyof AddressValues, label: string, autoComplete: string, wide = false) => (
+    <div className={wide ? 'col-span-2' : undefined}>
+      <label htmlFor={`ship-${key}`}>{label}</label>
+      <input
+        id={`ship-${key}`}
+        {...register(key)}
+        autoComplete={autoComplete}
+        aria-invalid={errors[key] ? true : undefined}
+        aria-describedby={errors[key] ? `ship-${key}-error` : undefined}
+        className={field}
+      />
+      {errors[key] && <p id={`ship-${key}-error`} className="mt-1 text-[12px] text-danger">{errors[key]?.message}</p>}
+    </div>
+  );
 
   if (quote && quote.items.length === 0) {
     return <p className="py-10 text-center text-mute">Your cart is empty.</p>;
   }
 
-  const field = 'mt-1 block w-full border border-line px-3 py-2.5 outline-none focus:border-ink';
   return (
     <div className="grid gap-12 lg:grid-cols-[1fr_420px]">
-      <form id="checkout" onSubmit={onSubmit} className="grid grid-cols-2 gap-4 text-[14px]">
+      <form id="checkout" onSubmit={onSubmit} noValidate className="grid grid-cols-2 gap-4 text-[14px]">
         <h2 className="heading col-span-2 text-[22px]">Shipping address</h2>
         <p className="col-span-2 border border-line bg-soft px-3 py-2 text-[13px]">
           Demo shop: please don’t enter real personal data. The demo account is shared and all orders are deleted every night.
         </p>
-        <label className="col-span-2">Full name<input name="fullName" required defaultValue={name} autoComplete="name" className={field} /></label>
-        <label className="col-span-2">Address<input name="line1" required autoComplete="address-line1" className={field} /></label>
-        <label className="col-span-2">Apartment, suite (optional)<input name="line2" autoComplete="address-line2" className={field} /></label>
-        <label>City<input name="city" required autoComplete="address-level2" className={field} /></label>
-        <label>State / region<input name="state" autoComplete="address-level1" className={field} /></label>
-        <label>Postal code<input name="postalCode" required autoComplete="postal-code" className={field} /></label>
-        <label>Country<input name="country" required defaultValue="United States" autoComplete="country-name" className={field} /></label>
+        {input('fullName', 'Full name', 'name', true)}
+        {input('line1', 'Address', 'address-line1', true)}
+        {input('line2', 'Apartment, suite (optional)', 'address-line2', true)}
+        {input('city', 'City', 'address-level2')}
+        {input('state', 'State / region', 'address-level1')}
+        {input('postalCode', 'Postal code', 'postal-code')}
+        {input('country', 'Country', 'country-name')}
       </form>
       <aside className="self-start border border-line bg-soft p-6" aria-label="Order summary">
         <h2 className="heading text-[22px]">Order summary</h2>

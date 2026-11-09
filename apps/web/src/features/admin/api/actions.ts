@@ -68,7 +68,8 @@ export async function saveProduct(
   }
   catalogChanged(saved.slug, previousSlug);
   if (!id) redirect(`/admin/products/${saved.id}?created=1`);
-  return { status: 'ok', message: 'Saved. The shop shows the change now.' };
+  // the saved product (with generated SKUs, trimmed text) becomes the form's new baseline
+  return { status: 'ok', message: 'Saved. The shop shows the change now.', product: saved };
 }
 
 export async function deleteProduct(id: string, slug: string): Promise<ActionResult> {
