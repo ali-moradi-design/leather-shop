@@ -5,7 +5,7 @@ Prerendering and an Express + MongoDB API, in one pnpm workspace.
 
 | Part | Stack |
 | --- | --- |
-| `apps/web` | Next.js 16 (App Router, Cache Components / PPR), Tailwind CSS 4, Feature-Sliced Design |
+| `apps/web` | Next.js 16 (App Router, Cache Components / PPR, Server Actions), Tailwind CSS 4, react-hook-form + zod, TanStack Table, Feature-Sliced Design |
 | `apps/api` | Express 5, Mongoose, modular monolith (catalog, ordering, identity, promotions, reviews, engagement, reporting) |
 | Database | MongoDB 8.2 |
 | Tests | Vitest (API unit + integration on an in-memory MongoDB, web units), Playwright E2E with axe |
@@ -28,7 +28,13 @@ What was built, PR by PR, and a code walkthrough plan: [docs/build-log.md](docs/
 - Checkout with discount codes (`WELCOME10`, `FLAT20`) and a simulated payment
   gateway (approve `4242 4242 4242 4242`, decline `4000 0000 0000 0002`)
 - Accounts with order history, favorites, reviews with product ratings
-- Small admin: dashboard, order status, price and per-size stock
+- Admin: dashboard with a 30-day revenue chart; products (create, edit, photos,
+  sizes and stock, bulk sale and feature, trash and restore); orders with status
+  history; discount codes; customers; review moderation. Forms use
+  react-hook-form with zod schemas shared with the Server Actions, tables use
+  TanStack Table
+- Product pages: photo gallery with zoom, size guide, sticky add to cart on
+  phones, rating breakdown, related and recently viewed products
 - SEO: metadata, JSON-LD (Product, BreadcrumbList), sitemap, robots, Open Graph image
 - Nightly demo reset (`pnpm --filter @wg/api reset-demo`)
 
