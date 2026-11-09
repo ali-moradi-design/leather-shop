@@ -48,6 +48,7 @@ export interface FacetCount {
 export interface ProductFacets {
   colors: FacetCount[];
   leathers: FacetCount[];
+  styles: FacetCount[];
   sizes: FacetCount[];
   widths: FacetCount[];
   price: { min: number; max: number };

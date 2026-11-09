@@ -16,6 +16,8 @@
   --color-accent: #2374ab;
   --color-accent-dark: #1d5f8c;
   --color-danger: #b42318;
+  /* "only a few left": a warning, not an error */
+  --color-warn: #c2570c;
   --font-serif: var(--font-frank-ruhl), Georgia, serif;
   --font-sans: var(--font-nunito), system-ui, sans-serif;
 

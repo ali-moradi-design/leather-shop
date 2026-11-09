@@ -1,4 +1,4 @@
-import type { IOrderRepository } from '@modules/ordering/domain/order.repository';
+import type { IOrderRepository, OrderSearchFilter } from '@modules/ordering/domain/order.repository';
 import type {
   Order,
   CreateOrderInput,
@@ -21,6 +21,26 @@ export class MongooseOrderRepository implements IOrderRepository {
     if (filter.limit) query = query.limit(filter.limit);
     const docs = await query;
     return docs.map(mapOrder);
+  }
+
+  async search(filter: OrderSearchFilter): Promise<{ data: Order[]; total: number }> {
+    const q: Record<string, unknown> = {};
+    if (filter.userId) q.user = filter.userId;
+    if (filter.status) q.status = filter.status;
+    const term = filter.q?.trim().replace(/^#/, '');
+    if (term) {
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      q.$or = [
+        { 'shippingAddress.fullName': { $regex: escaped, $options: 'i' } },
+        { $expr: { $regexMatch: { input: { $toString: '$_id' }, regex: `${escaped}$`, options: 'i' } } },
+      ];
+    }
+    const skip = (filter.page - 1) * filter.limit;
+    const [docs, total] = await Promise.all([
+      OrderModel.find(q).sort({ createdAt: -1 }).skip(skip).limit(filter.limit),
+      OrderModel.countDocuments(q),
+    ]);
+    return { data: docs.map(mapOrder), total };
   }
 
   async create(input: CreateOrderInput): Promise<Order> {

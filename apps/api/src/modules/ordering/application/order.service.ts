@@ -15,6 +15,7 @@ import {
 } from '@modules/ordering/domain/order.transitions';
 import { DomainError } from '@shared/domain/DomainError';
 import { buildOrderLines } from '@modules/ordering/domain/rules/order.lines';
+import { paginate } from '@shared/pagination';
 import { computeSubtotal, computeOrderTotal } from '@modules/ordering/domain/rules/cart.totals';
 import { PayOrderUseCase } from './use-cases/pay-order';
 
@@ -92,8 +93,20 @@ export class OrderService {
     return this.payOrder.execute(orderId, userId, isStaff);
   }
 
-  async list(userId: string, canReadAll: boolean): Promise<Order[]> {
-    return this.orders.list(canReadAll ? {} : { userId });
+  async list(
+    userId: string,
+    canReadAll: boolean,
+    query: { status?: OrderStatus; q?: string; page?: number; limit?: number } = {},
+  ) {
+    const { page, limit } = paginate(query.page, query.limit ?? 50);
+    const { data, total } = await this.orders.search({
+      ...(canReadAll ? {} : { userId }),
+      status: query.status,
+      q: query.q,
+      page,
+      limit,
+    });
+    return { data, meta: { page, limit, total, pages: Math.ceil(total / limit) } };
   }
 
   async getById(orderId: string, userId: string, canReadAll: boolean): Promise<Order> {

@@ -66,6 +66,7 @@ export class MongooseProductRepository implements IProductRepository {
     const [result] = await ProductModel.aggregate<{
       colors: { _id: string; count: number }[];
       leathers: { _id: string; count: number }[];
+      styles: { _id: string; count: number }[];
       sizes: { _id: string; count: number }[];
       widths: { _id: string; count: number }[];
       price: { min: number; max: number }[];
@@ -75,6 +76,7 @@ export class MongooseProductRepository implements IProductRepository {
         $facet: {
           colors: count('colorFamily'),
           leathers: count('leather'),
+          styles: count('style'),
           sizes: [
             { $unwind: '$variants' },
             { $group: { _id: '$variants.size', products: { $addToSet: '$_id' } } },
@@ -96,6 +98,7 @@ export class MongooseProductRepository implements IProductRepository {
     return {
       colors: toCounts(result.colors),
       leathers: toCounts(result.leathers),
+      styles: toCounts(result.styles),
       sizes: toCounts(result.sizes).sort(compareSizes),
       widths: toCounts(result.widths),
       price: result.price[0] ? { min: result.price[0].min, max: result.price[0].max } : { min: 0, max: 0 },
@@ -119,7 +122,10 @@ export class MongooseProductRepository implements IProductRepository {
   }
 
   async update(id: string, input: UpdateProductInput): Promise<Product | null> {
-    const patch: Record<string, unknown> = { ...input };
+    const { compareAtPrice, ...rest } = input;
+    const patch: Record<string, unknown> = { ...rest };
+    if (compareAtPrice !== undefined && compareAtPrice !== null) patch.compareAtPrice = compareAtPrice;
+    if (compareAtPrice === null) patch.$unset = { compareAtPrice: 1 };
     if (input.variants) patch.stock = totalStock(input.variants);
     const doc = await ProductModel.findByIdAndUpdate(id, patch, {
       returnDocument: 'after',
@@ -132,6 +138,25 @@ export class MongooseProductRepository implements IProductRepository {
     const doc = await ProductModel.findByIdAndUpdate(
       id,
       { deletedAt: new Date() },
+      { returnDocument: 'after' },
+    );
+    return doc ? mapProduct(doc) : null;
+  }
+
+  async listDeleted(page: number, limit: number): Promise<{ data: Product[]; total: number }> {
+    const { skip } = paginate(page, limit);
+    const query = { deletedAt: { $ne: null } };
+    const [docs, total] = await Promise.all([
+      ProductModel.find(query).sort({ deletedAt: -1 }).skip(skip).limit(limit),
+      ProductModel.countDocuments(query),
+    ]);
+    return { data: docs.map(mapProduct), total };
+  }
+
+  async restore(id: string): Promise<Product | null> {
+    const doc = await ProductModel.findOneAndUpdate(
+      { _id: id, deletedAt: { $ne: null } },
+      { deletedAt: null },
       { returnDocument: 'after' },
     );
     return doc ? mapProduct(doc) : null;
@@ -214,6 +239,7 @@ function buildQuery(filter: ProductListFilter): Record<string, unknown> {
   }
   if (filter.inStock === true) query.stock = { $gt: 0 };
   else if (filter.inStock === false) query.stock = { $lte: 0 };
+  else if (filter.maxStock !== undefined) query.stock = { $lte: filter.maxStock };
   if (filter.featured !== undefined) query.featured = filter.featured;
   return query;
 }

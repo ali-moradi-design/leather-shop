@@ -1,3 +1,13 @@
 export { AdminNav } from './ui/AdminNav';
+export { PageHeader } from './ui/PageHeader';
+export { ProductForm, type ProductFormOptions } from './ui/ProductForm';
+export { ProductsTable, type ProductRow } from './ui/ProductsTable';
+export { Pagination } from './ui/Pagination';
+export { OrdersTable, type OrderRow } from './ui/OrdersTable';
 export { OrderStatusSelect } from './ui/OrderStatusSelect';
-export { ProductEditor } from './ui/ProductEditor';
+export { DiscountForm } from './ui/DiscountForm';
+export { DiscountsTable, type DiscountRow } from './ui/DiscountsTable';
+export { CustomersTable, type CustomerRow } from './ui/CustomersTable';
+export { ReviewsTable, type ReviewRow } from './ui/ReviewsTable';
+export { RevenueChart, type DayPoint } from './ui/RevenueChart';
+export { BarList } from './ui/BarList';

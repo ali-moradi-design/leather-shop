@@ -12,9 +12,20 @@ import {
 import { BuyBox, BuyBoxSkeleton } from '@/features/add-to-cart';
 import { FavoriteButton } from '@/features/favorite';
 import { ReviewForm, ReviewList } from '@/features/reviews';
-import { ColorPicker, Details, Editorial, Gallery } from '@/widgets/product-detail';
+import {
+  ColorPicker,
+  Details,
+  Editorial,
+  Gallery,
+  hasSizeGuide,
+  RecentlyViewed,
+  RelatedProducts,
+  ShareButton,
+  SizeGuide,
+  SizeGuideButton,
+} from '@/widgets/product-detail';
 import { COLLECTIONS, SITE } from '@/shared/config';
-import { formatMoney } from '@/shared/lib/money';
+import { discountPercent, formatMoney } from '@/shared/lib/money';
 import { Icon, Skeleton, Stars } from '@/shared/ui';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -47,7 +58,16 @@ function collectionOf(p: Product) {
 async function LiveBuyBox({ product }: { product: Product }) {
   const variants = await fetchLiveVariants(product.slug);
   const sizeNote = product.category === 'boots' ? 'Order ½ size smaller than you wear in sneakers.' : undefined;
-  return <BuyBox productId={product.id} price={product.price} variants={variants} sizeNote={sizeNote} />;
+  return (
+    <BuyBox
+      productId={product.id}
+      price={product.price}
+      variants={variants}
+      sizeNote={sizeNote}
+      title={product.name}
+      sizeGuide={hasSizeGuide(product) ? <SizeGuideButton><SizeGuide product={product} /></SizeGuideButton> : undefined}
+    />
+  );
 }
 
 function JsonLd({ product }: { product: Product }) {
@@ -101,6 +121,7 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
   const colors = await fetchColors(product.slug);
   const collection = collectionOf(product);
+  const off = discountPercent(product.price, product.compareAtPrice);
 
   return (
     <>
@@ -124,11 +145,16 @@ export default async function ProductPage({ params }: Props) {
           <div className="lg:sticky lg:top-[calc(var(--header-h)+18px)] lg:self-start lg:pt-1">
             <div className="flex items-start justify-between gap-4">
               <h1 className="heading text-[28px] leading-[1.25] sm:text-[30px]">{product.name}</h1>
-              <FavoriteButton productId={product.id} />
+              <div className="flex items-center gap-3 pt-1">
+                <ShareButton title={product.title} />
+                <FavoriteButton productId={product.id} />
+              </div>
             </div>
-            <p className="mb-3 mt-2 text-[16px] text-body">
-              {product.compareAtPrice && <s className="mr-2 text-mute">{formatMoney(product.compareAtPrice)}</s>}
-              <span className="text-ink">{formatMoney(product.price)}</span> or 4 payments of {formatMoney(Math.round(product.price / 4))}
+            <p className="mb-3 mt-2 flex flex-wrap items-center gap-x-2 text-[16px] text-body">
+              {product.compareAtPrice && <s className="text-mute">{formatMoney(product.compareAtPrice)}</s>}
+              <span className="text-ink">{formatMoney(product.price)}</span>
+              {off > 0 && <span className="bg-danger px-1.5 py-0.5 text-[12px] font-semibold text-white">{off}% off</span>}
+              <span>or 4 payments of {formatMoney(Math.round(product.price / 4))}</span>
             </p>
             <p className="flex items-center gap-2 text-[14.5px] text-accent">
               <span className="grid h-4 w-4 place-items-center rounded-full bg-accent text-white">
@@ -155,11 +181,15 @@ export default async function ProductPage({ params }: Props) {
       <section id="reviews" className="container-shop scroll-mt-28 py-16">
         <h2 className="heading mb-6 text-[28px]">Reviews</h2>
         <Suspense fallback={<ReviewsSkeleton />}>
-          <ReviewList slug={product.slug} />
+          <ReviewList productId={product.id} />
         </Suspense>
         <h3 className="heading mb-4 mt-12 text-[22px]">Write a review</h3>
         <ReviewForm productId={product.id} />
       </section>
+      <RelatedProducts product={product} />
+      <RecentlyViewed
+        current={{ slug: product.slug, name: product.name, color: product.color, image: product.images[0], price: product.price }}
+      />
     </>
   );
 }

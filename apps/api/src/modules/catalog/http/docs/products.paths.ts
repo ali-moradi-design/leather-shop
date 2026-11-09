@@ -24,10 +24,11 @@ export const productsPaths = {
         query('minPrice', { type: 'integer' }, 'Cents'),
         query('maxPrice', { type: 'integer' }, 'Cents'),
         query('inStock', { type: 'boolean' }),
+        query('maxStock', { type: 'integer', minimum: 0 }, 'Total stock at or below this number'),
         query('featured', { type: 'boolean' }),
         query('page', { type: 'integer', minimum: 1, default: 1 }),
         query('limit', { type: 'integer', minimum: 1, maximum: 100, default: 24 }),
-        query('sort', { type: 'string', enum: ['featured', 'price', 'title', 'createdAt'], default: 'featured' }),
+        query('sort', { type: 'string', enum: ['featured', 'price', 'title', 'createdAt', 'stock'], default: 'featured' }),
         query('order', { type: 'string', enum: ['asc', 'desc'], default: 'asc' }),
       ],
       responses: { 200: { description: 'Products', ...paged('Product') }, 400: errors[400] },
@@ -65,6 +66,27 @@ export const productsPaths = {
       summary: 'All colors of the same style',
       parameters: [path('slug')],
       responses: { 200: { description: 'Products', ...list('Product') }, 404: errors[404] },
+    },
+  },
+  '/api/v1/products/trash': {
+    get: {
+      tags: ['Products'],
+      summary: 'Soft-deleted products (admin)',
+      security: signedIn,
+      parameters: [
+        query('page', { type: 'integer', minimum: 1, default: 1 }),
+        query('limit', { type: 'integer', minimum: 1, maximum: 100, default: 30 }),
+      ],
+      responses: { 200: { description: 'Deleted products', ...paged('Product') }, 401: errors[401], 403: errors[403] },
+    },
+  },
+  '/api/v1/products/{id}/restore': {
+    post: {
+      tags: ['Products'],
+      summary: 'Restore a soft-deleted product (admin)',
+      security: signedIn,
+      parameters: [path('id')],
+      responses: { 200: { description: 'Restored', ...data(ref('Product')) }, 401: errors[401], 403: errors[403], 404: errors[404] },
     },
   },
   '/api/v1/products/{id}': {

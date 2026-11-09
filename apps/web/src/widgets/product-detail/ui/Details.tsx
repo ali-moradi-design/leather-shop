@@ -1,39 +1,73 @@
 import Image from 'next/image';
+import Link from 'next/link';
+import { Icon } from '@/shared/ui';
+import { hasSizeGuide, SizeGuide } from './SizeGuide';
 import type { Product } from '@/entities/product';
 
-export function Details({ product }: { product: Product }) {
+/** One accordion row: native <details>, so it opens without JavaScript. */
+function Section({ title, open, id, children }: { title: string; open?: boolean; id?: string; children: React.ReactNode }) {
   return (
-    <section className="container-shop grid gap-12 pb-16 pt-12 lg:grid-cols-[2fr_1fr]">
-      <div>
-        <h2 className="border-y border-line py-3.5 text-[15px] font-semibold">Product Features</h2>
-        <ul className="list-disc pl-5 pt-4 text-[14px] leading-8 sm:columns-2">
-          {product.features.map((f) => <li key={f}>{f}</li>)}
-        </ul>
-        {(product.leather || product.construction) && (
-          <dl className="mt-6 grid grid-cols-2 gap-px border border-line bg-line text-[14px] sm:grid-cols-4">
-            {[
-              ['Leather', product.leather],
-              ['Construction', product.construction],
-              ['Sole', product.sole],
-              ['Color', product.color],
-            ]
-              .filter(([, v]) => v)
-              .map(([k, v]) => (
+    <details id={id} open={open} className="group border-b border-line">
+      <summary className="flex cursor-pointer list-none items-center justify-between py-4 text-[15px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
+        {title}
+        <Icon name="plus" width={18} height={18} className="transition-transform group-open:rotate-45" />
+      </summary>
+      <div className="pb-6 text-[14px] leading-7">{children}</div>
+    </details>
+  );
+}
+
+/** Description first, then features, materials, fit, shipping and care, each folded. */
+export function Details({ product }: { product: Product }) {
+  const facts = [
+    ['Leather', product.leather],
+    ['Construction', product.construction],
+    ['Sole', product.sole],
+    ['Color', product.color],
+  ].filter(([, v]) => v);
+  return (
+    <section className="container-shop grid gap-x-16 pb-16 pt-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="border-t border-line">
+        <Section title="Description" open>
+          <p className="max-w-[68ch]">{product.description || `The ${product.name} in ${product.color}.`}</p>
+        </Section>
+        {product.features.length > 0 && (
+          <Section title="Features" open>
+            <ul className="list-disc pl-5 sm:columns-2">
+              {product.features.map((f) => <li key={f}>{f}</li>)}
+            </ul>
+          </Section>
+        )}
+        {facts.length > 0 && (
+          <Section title="Materials">
+            <dl className="grid grid-cols-2 gap-px border border-line bg-line sm:grid-cols-4">
+              {facts.map(([k, v]) => (
                 <div key={k} className="bg-white p-3.5">
                   <dt className="text-[10px] font-medium uppercase tracking-[0.2em] text-mute">{k}</dt>
                   <dd className="mt-1 font-serif text-[16px] font-semibold">{v}</dd>
                 </div>
               ))}
-          </dl>
+            </dl>
+          </Section>
         )}
+        {hasSizeGuide(product) && (
+          <Section title="Size and fit" id="size-and-fit">
+            <SizeGuide product={product} />
+          </Section>
+        )}
+        <Section title="Leather care">
+          <p>Brush off dust after wear and let the leather dry away from heat. Condition every two to three months with a balm, and use shoe trees for boots and shoes so they keep their shape.</p>
+          <Link href="/collections/leather-care" className="link-underline mt-2 inline-block">Shop leather care</Link>
+        </Section>
       </div>
-      <div>
-        <h2 className="border-y border-line py-3.5 text-[15px] font-semibold">Shipping Info</h2>
+      <div className="mt-10 lg:mt-0">
+        <h2 className="border-y border-line py-3.5 text-[15px] font-semibold">Shipping and returns</h2>
         <ul className="list-disc pl-5 pt-4 text-[14px] leading-8">
           <li>Free ground shipping on every order</li>
           <li>Free returns within 30 days</li>
           <li>Ships within 1–2 business days</li>
         </ul>
+        <Link href="/help" className="link-underline mt-3 inline-block text-[14px]">Returns and exchanges</Link>
       </div>
     </section>
   );

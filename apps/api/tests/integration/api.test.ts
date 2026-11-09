@@ -226,6 +226,42 @@ describe('Welt & Grain API (integration)', () => {
       expect(updated.body.data.price).toBe(2150);
       expect(updated.body.data.stock).toBe(8);
     });
+
+    it('admin can clear a sale price, delete a product and restore it from the trash', async () => {
+      const created = await ctx.request
+        .post('/api/v1/products')
+        .set(authHeader(ctx.adminToken))
+        .send({ ...newProduct('test-trash', 3), compareAtPrice: 2999 })
+        .expect(201);
+      const { id, slug } = created.body.data as { id: string; slug: string };
+
+      const cleared = await ctx.request
+        .patch(`/api/v1/products/${id}`)
+        .set(authHeader(ctx.adminToken))
+        .send({ compareAtPrice: null })
+        .expect(200);
+      expect(cleared.body.data.compareAtPrice).toBeUndefined();
+
+      await ctx.request.get('/api/v1/products/trash').expect(401);
+      await ctx.request.delete(`/api/v1/products/${id}`).set(authHeader(ctx.adminToken)).expect(200);
+      await ctx.request.get(`/api/v1/products/slug/${slug}`).expect(404);
+
+      const trash = await ctx.request.get('/api/v1/products/trash').set(authHeader(ctx.adminToken)).expect(200);
+      expect(trash.body.data.some((p: { id: string }) => p.id === id)).toBe(true);
+      expect(trash.body.meta.total).toBeGreaterThan(0);
+
+      await ctx.request.post(`/api/v1/products/${id}/restore`).set(authHeader(ctx.adminToken)).expect(200);
+      await ctx.request.get(`/api/v1/products/slug/${slug}`).expect(200);
+      // restoring a live product is a 404
+      await ctx.request.post(`/api/v1/products/${id}/restore`).set(authHeader(ctx.adminToken)).expect(404);
+    });
+
+    it('sorts by stock and filters to low stock', async () => {
+      const res = await ctx.request.get('/api/v1/products?sort=stock&order=asc&maxStock=5&limit=50').expect(200);
+      const stocks = (res.body.data as { stock: number }[]).map((p) => p.stock);
+      expect(stocks.every((n) => n <= 5)).toBe(true);
+      expect([...stocks].sort((a, b) => a - b)).toEqual(stocks);
+    });
   });
 
   describe('Cart & orders', () => {
@@ -473,10 +509,46 @@ describe('Welt & Grain API (integration)', () => {
       expect(product.body.data.ratingCount).toBe(2);
       expect(product.body.data.ratingAvg).toBe(4.5);
 
+      const summary = await ctx.request.get(`/api/v1/reviews/summary?product=${productId}`).expect(200);
+      expect(summary.body.data.count).toBe(2);
+      expect(summary.body.data.stars).toEqual([0, 0, 0, 1, 1]);
+      await ctx.request.get('/api/v1/reviews/summary?product=nope').expect(400);
+
       // the public list shows the reviewer's name, not the email
       const list = await ctx.request.get(`/api/v1/reviews?product=${productId}`).expect(200);
       expect(list.body.data[0].user.name).toBeTruthy();
       expect(list.body.data[0].user.email).toBeUndefined();
+    });
+  });
+
+  describe('Admin orders and users', () => {
+    it('pages and filters the order list', async () => {
+      const page = await ctx.request.get('/api/v1/orders?limit=2').set(authHeader(ctx.adminToken)).expect(200);
+      expect(page.body.meta).toMatchObject({ page: 1, limit: 2 });
+      expect(page.body.data.length).toBeLessThanOrEqual(2);
+
+      const paid = await ctx.request.get('/api/v1/orders?status=paid').set(authHeader(ctx.adminToken)).expect(200);
+      expect(paid.body.data.every((o: { status: string }) => o.status === 'paid')).toBe(true);
+
+      const all = await ctx.request.get('/api/v1/orders').set(authHeader(ctx.adminToken)).expect(200);
+      const first = all.body.data[0] as { id: string } | undefined;
+      if (first) {
+        const byId = await ctx.request
+          .get(`/api/v1/orders?q=${first.id.slice(-6)}`)
+          .set(authHeader(ctx.adminToken))
+          .expect(200);
+        expect(byId.body.data.map((o: { id: string }) => o.id)).toContain(first.id);
+      }
+      await ctx.request.get('/api/v1/orders?status=bogus').set(authHeader(ctx.adminToken)).expect(400);
+    });
+
+    it('an admin cannot deactivate their own account', async () => {
+      const me = await ctx.request.get('/api/v1/users/me').set(authHeader(ctx.adminToken)).expect(200);
+      await ctx.request
+        .patch(`/api/v1/users/${me.body.data.id}`)
+        .set(authHeader(ctx.adminToken))
+        .send({ isActive: false })
+        .expect(400);
     });
   });
 
