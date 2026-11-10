@@ -12,6 +12,7 @@ export {
   fetchProducts,
   fetchFacets,
   fetchProduct,
+  fetchProductSizes,
   fetchColors,
   fetchLiveVariants,
 } from './api/product-api';

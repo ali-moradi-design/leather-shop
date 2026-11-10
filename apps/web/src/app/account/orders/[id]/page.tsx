@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { CANCELLABLE, RETURN_STATUS_LABEL, STATUS_LABEL, type Order, type ReturnRequest } from '@/entities/order';
-import type { Product } from '@/entities/product';
+import { fetchProductSizes } from '@/entities/product';
 import { CancelOrderButton, ReturnRequestForm, type ReturnableLine } from '@/features/account';
 import { requireUser } from '@/features/auth/server';
 import { PaymentPending, PayNowButton, TrackPurchase } from '@/features/checkout';
@@ -120,10 +120,9 @@ async function returnableLines(order: Order, returns: ReturnRequest[]): Promise<
     for (const i of r.items) taken.set(i.sku, (taken.get(i.sku) ?? 0) + i.quantity);
   }
   const ids = [...new Set(order.items.map((i) => i.product))];
-  const products = await Promise.all(
-    ids.map((pid) => serverApi<{ data: Product }>(`/products/${pid}`).then((r) => r.data).catch(() => null)),
-  );
-  const sizesOf = new Map(products.filter(Boolean).map((p) => [p!.id, [...new Set(p!.variants.map((v) => v.size))]]));
+  // cached catalog reads, not a live request per product on every order view
+  const sizes = await Promise.all(ids.map((pid) => fetchProductSizes(pid)));
+  const sizesOf = new Map(ids.map((pid, i) => [pid, sizes[i]]));
   return order.items.map((i) => ({
     sku: i.sku,
     title: i.title,

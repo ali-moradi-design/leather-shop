@@ -63,3 +63,16 @@ export async function fetchLiveVariants(slug: string): Promise<Product['variants
   });
   return res.data.variants;
 }
+
+/** The sizes a style comes in, by product id (for size exchanges); cached like the catalog. */
+export async function fetchProductSizes(id: string): Promise<string[]> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('products');
+  try {
+    const { data } = await apiGetJson<{ data: Product }>(`/products/${encodeURIComponent(id)}`);
+    return [...new Set(data.variants.map((v) => v.size))];
+  } catch {
+    return [];
+  }
+}

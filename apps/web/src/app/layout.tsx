@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
-import { Frank_Ruhl_Libre, Nunito_Sans } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { SiteHeader } from '@/widgets/header';
 import { SiteFooter } from '@/widgets/footer';
@@ -8,8 +8,22 @@ import { SITE } from '@/shared/config';
 import { Analytics, Icon } from '@/shared/ui';
 import { CartButton, CartDrawer, CartProvider } from '@/features/cart';
 
-const serif = Frank_Ruhl_Libre({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-frank-ruhl', display: 'swap' });
-const sans = Nunito_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'], variable: '--font-nunito', display: 'swap' });
+// Self-hosted (SIL OFL, files in ./fonts): the build no longer downloads from Google Fonts,
+// which failed CI builds whenever that request did
+const serif = localFont({
+  src: [
+    { path: './fonts/frank-ruhl-libre-latin-500-normal.woff2', weight: '500', style: 'normal' },
+    { path: './fonts/frank-ruhl-libre-latin-700-normal.woff2', weight: '700', style: 'normal' },
+  ],
+  variable: '--font-frank-ruhl',
+  display: 'swap',
+});
+const sans = localFont({
+  src: './fonts/nunito-sans-latin-wght-normal.woff2',
+  weight: '200 1000',
+  variable: '--font-nunito',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
