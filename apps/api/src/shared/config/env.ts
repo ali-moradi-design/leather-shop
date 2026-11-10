@@ -29,6 +29,8 @@ const envSchema = z.object({
   // Express 'trust proxy': hops in front of the API (e.g. 1 = the storefront's /api proxy route),
   // so rate limits use the visitor's IP instead of the storefront's.
   TRUST_PROXY: z.coerce.number().int().nonnegative().default(0),
+  // API requests per visitor IP per 15 minutes
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(3000),
   UPLOAD_DIR: z.string().default('uploads'),
   COOKIE_SECURE: optionalBool,
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),

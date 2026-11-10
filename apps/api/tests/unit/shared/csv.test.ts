@@ -31,3 +31,14 @@ describe('mailer redact', () => {
     expect(redact('Reset: http://x/reset-password?token=abc123def')).toBe('Reset: http://x/reset-password?token=[removed]');
   });
 });
+
+describe('isStorefrontServer', () => {
+  it('skips only private callers without a forwarded visitor address', async () => {
+    const { isStorefrontServer } = await import('../../../src/shared/http/middleware/rate-limit');
+    const req = (ip: string, xff?: string) => ({ headers: xff ? { 'x-forwarded-for': xff } : {}, socket: { remoteAddress: ip } }) as never;
+    expect(isStorefrontServer(req('172.18.0.3'))).toBe(true);
+    expect(isStorefrontServer(req('::ffff:127.0.0.1'))).toBe(true);
+    expect(isStorefrontServer(req('172.18.0.3', '203.0.113.9'))).toBe(false);
+    expect(isStorefrontServer(req('203.0.113.9'))).toBe(false);
+  });
+});
