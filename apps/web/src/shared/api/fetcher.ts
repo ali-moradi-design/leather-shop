@@ -15,11 +15,14 @@ export async function apiGetJson<T>(path: string, init?: FetchInit): Promise<T> 
     },
   });
   if (!res.ok) {
-    let body: unknown;
+    // read the body once: a JSON parse that fails has already used it up, and a
+    // second read threw "Body is unusable", turning e.g. a 429 into a page crash
+    const text = await res.text().catch(() => '');
+    let body: unknown = text;
     try {
-      body = await res.json();
+      body = JSON.parse(text);
     } catch {
-      body = await res.text();
+      // not JSON: keep the text
     }
     const detail =
       typeof body === 'object' && body && 'message' in body
