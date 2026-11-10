@@ -20,7 +20,9 @@ export function OrderStatusSelect({ orderId, status, withNote = false }: { order
     run(() => updateOrderStatus(orderId, next, note, shipment));
   };
 
-  if (withNote) return <StatusForm options={options} pending={pending} result={result} onChange={change} />;
+  // keyed by status: after a change the next steps differ, so the form starts over;
+  // the result message lives here, so it stays on screen
+  if (withNote) return <StatusForm key={status} options={options} pending={pending} result={result} onChange={change} />;
 
   return (
     <span className="inline-flex flex-wrap items-center gap-2">

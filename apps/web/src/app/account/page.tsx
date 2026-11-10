@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { STATUS_LABEL, type Order } from '@/entities/order';
-import { SetPasswordPrompt, type Account } from '@/features/account';
+import { SetPasswordPrompt } from '@/features/account';
 import { SignOutButton } from '@/features/auth';
-import { requireUser } from '@/features/auth/server';
+import { requireAccount } from '@/features/auth/server';
 import { serverApi } from '@/shared/api/server';
 import { formatMoney } from '@/shared/lib/money';
 import { Skeleton } from '@/shared/ui';
@@ -12,11 +12,9 @@ import { Skeleton } from '@/shared/ui';
 export const metadata: Metadata = { title: 'My Account', robots: { index: false } };
 
 async function Account() {
-  const user = await requireUser('/account');
-  const [{ data: orders }, { data: account }] = await Promise.all([
-    serverApi<{ data: Order[] }>('/orders'),
-    serverApi<{ data: Account }>('/account'),
-  ]);
+  // both at once; the account read also checks the session
+  const [account, { data: orders }] = await Promise.all([requireAccount('/account'), serverApi<{ data: Order[] }>('/orders').catch(() => ({ data: [] as Order[] }))]);
+  const user = account;
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
