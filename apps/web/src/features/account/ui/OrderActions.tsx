@@ -73,14 +73,15 @@ export function ReturnRequestForm({ orderId, lines }: { orderId: string; lines: 
     defaultValues: {
       reason: 'too-small',
       comment: '',
-      lines: Object.fromEntries(lines.map((l) => [l.sku, { quantity: '0', type: 'exchange', exchangeSize: '' }])),
+      // keyed by row, not SKU: SKUs can hold dots (size 10.5), which form paths read as nesting
+      lines: Object.fromEntries(lines.map((_, i) => [`r${i}`, { quantity: '0', type: 'exchange', exchangeSize: '' }])),
     },
   });
   const chosen = useWatch({ control, name: 'lines' });
   const submit = handleSubmit(async (v) => {
     setError(null);
     const items = lines
-      .map((l) => ({ l, row: v.lines[l.sku] }))
+      .map((l, i) => ({ l, row: v.lines[`r${i}`] }))
       .filter(({ row }) => Number(row.quantity) > 0)
       .map(({ l, row }) => ({ sku: l.sku, quantity: Number(row.quantity), type: row.type, ...(row.type === 'exchange' ? { exchangeSize: row.exchangeSize } : {}) }));
     if (items.length === 0) return setError('Choose at least one pair to send back.');
@@ -107,8 +108,8 @@ export function ReturnRequestForm({ orderId, lines }: { orderId: string; lines: 
       <h2 id="return-heading" className="heading text-[22px]">Return or exchange</h2>
       <p className="text-mute">Free within 30 days of shipping. Send the pairs unworn, in their box; we email you a label once we approve the request.</p>
       <ul className="space-y-4">
-        {lines.map((l) => {
-          const row = chosen?.[l.sku];
+        {lines.map((l, i) => {
+          const row = chosen?.[`r${i}`];
           return (
             <li key={l.sku} className="grid gap-3 border-b border-line pb-4 sm:grid-cols-[1fr_auto_auto_auto] sm:items-end">
               <div>
@@ -117,13 +118,13 @@ export function ReturnRequestForm({ orderId, lines }: { orderId: string; lines: 
               </div>
               <label className="block">
                 Pairs
-                <select {...register(`lines.${l.sku}.quantity`)} disabled={l.available === 0} className="mt-1 block border border-line px-2 py-2">
+                <select {...register(`lines.r${i}.quantity`)} disabled={l.available === 0} className="mt-1 block border border-line px-2 py-2">
                   {Array.from({ length: l.available + 1 }, (_, n) => <option key={n} value={n}>{n}</option>)}
                 </select>
               </label>
               <label className="block">
                 I want
-                <select {...register(`lines.${l.sku}.type`)} className="mt-1 block border border-line px-2 py-2">
+                <select {...register(`lines.r${i}.type`)} className="mt-1 block border border-line px-2 py-2">
                   <option value="exchange">Another size</option>
                   <option value="refund">A refund</option>
                 </select>
@@ -131,7 +132,7 @@ export function ReturnRequestForm({ orderId, lines }: { orderId: string; lines: 
               {row?.type === 'exchange' && Number(row.quantity) > 0 && (
                 <label className="block">
                   New size
-                  <select {...register(`lines.${l.sku}.exchangeSize`)} className="mt-1 block border border-line px-2 py-2">
+                  <select {...register(`lines.r${i}.exchangeSize`)} className="mt-1 block border border-line px-2 py-2">
                     <option value="">Choose</option>
                     {l.sizes.filter((s) => s !== l.size).map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
