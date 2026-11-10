@@ -81,6 +81,8 @@ export class MongooseOrderRepository implements IOrderRepository {
     doc.status = order.status;
     doc.payment = order.payment;
     doc.statusHistory = order.statusHistory;
+    doc.shipment = order.shipment;
+    doc.refundId = order.refundId;
     doc.subtotalAmount = order.subtotalAmount;
     doc.discountCode = order.discountCode;
     doc.discountAmount = order.discountAmount;

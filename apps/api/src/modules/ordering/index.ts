@@ -6,3 +6,4 @@ export type { Cart } from './domain/cart.entity';
 export type { ICartRepository } from './domain/cart.repository';
 export { cartPaths } from './http/docs/cart.paths';
 export { ordersPaths } from './http/docs/orders.paths';
+export { OrderModel } from './infra/models/OrderModel';

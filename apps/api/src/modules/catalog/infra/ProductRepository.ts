@@ -174,11 +174,13 @@ export class MongooseProductRepository implements IProductRepository {
     return result.modifiedCount === 1;
   }
 
-  async incrementStock(productId: string, sku: string, quantity: number): Promise<void> {
-    await ProductModel.updateOne(
+  async incrementStock(productId: string, sku: string, quantity: number): Promise<boolean> {
+    const before = await ProductModel.findOneAndUpdate(
       { _id: productId, 'variants.sku': sku },
       { $inc: { 'variants.$.stock': quantity, stock: quantity } },
-    );
+      { returnDocument: 'before', projection: { variants: { $elemMatch: { sku } } } },
+    ).lean();
+    return before?.variants?.[0]?.stock === 0 && quantity > 0;
   }
 
   async upsertBySlug(slug: string, data: CreateProductInput): Promise<Product> {

@@ -25,6 +25,8 @@ export function mapOrder(doc: {
   totalAmount: number;
   status: Order['status'];
   payment: Order['payment'];
+  shipment?: Order['shipment'];
+  refundId?: string;
   shippingAddress: Order['shippingAddress'];
   statusHistory: Order['statusHistory'];
   deletedAt?: Date | null;
@@ -61,6 +63,10 @@ export function mapOrder(doc: {
     },
     shippingAddress: doc.shippingAddress,
     statusHistory: doc.statusHistory,
+    shipment: doc.shipment?.trackingNumber
+      ? { carrier: doc.shipment.carrier, trackingNumber: doc.shipment.trackingNumber, shippedAt: doc.shipment.shippedAt }
+      : undefined,
+    refundId: doc.refundId,
     deletedAt: doc.deletedAt,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,

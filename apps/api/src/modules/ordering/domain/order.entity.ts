@@ -44,6 +44,15 @@ export interface ShippingAddress {
   country: string;
 }
 
+export const CARRIERS = ['UPS', 'USPS', 'FedEx', 'DHL', 'Other'] as const;
+export type Carrier = (typeof CARRIERS)[number];
+
+export interface Shipment {
+  carrier: Carrier;
+  trackingNumber: string;
+  shippedAt: Date;
+}
+
 export interface StatusHistory {
   status: OrderStatus;
   at: Date;
@@ -64,6 +73,9 @@ export interface Order {
   payment: Payment;
   shippingAddress: ShippingAddress;
   statusHistory: StatusHistory[];
+  shipment?: Shipment;
+  /** Set when a cancelled paid order was refunded through the provider. */
+  refundId?: string;
   deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;

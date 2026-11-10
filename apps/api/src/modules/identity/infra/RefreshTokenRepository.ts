@@ -35,4 +35,11 @@ export class MongooseRefreshTokenRepository implements IRefreshTokenRepository {
       },
     );
   }
+
+  async revokeAllForUser(userId: string, keepHash?: string): Promise<void> {
+    await RefreshTokenModel.updateMany(
+      { user: userId, revokedAt: null, ...(keepHash ? { tokenHash: { $ne: keepHash } } : {}) },
+      { revokedAt: new Date() },
+    );
+  }
 }

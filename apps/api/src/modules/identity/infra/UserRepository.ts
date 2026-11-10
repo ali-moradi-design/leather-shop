@@ -48,6 +48,7 @@ export class MongooseUserRepository implements IUserRepository {
       name: input.name,
       email: input.email.toLowerCase(),
       passwordHash: input.passwordHash,
+      guest: input.guest ?? false,
       roles: input.roles ?? [],
       isActive: input.isActive ?? true,
     });
@@ -56,6 +57,8 @@ export class MongooseUserRepository implements IUserRepository {
 
   async update(id: string, input: UpdateUserInput): Promise<User | null> {
     const updates: Record<string, unknown> = { ...input };
+    // saved addresses keep their ids so the checkout's choice stays valid
+    if (input.addresses) updates.addresses = input.addresses.map((a) => ('id' in a ? { ...a, _id: a.id } : a));
     if (input.email) updates.email = input.email.toLowerCase();
     const doc = await UserModel.findByIdAndUpdate(id, updates, {
       returnDocument: 'after',

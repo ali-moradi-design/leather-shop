@@ -12,16 +12,17 @@ import { unitOfWork, notifier } from '../../../shared/infra';
 export const cartRepo = new MongooseCartRepository();
 export const orderRepo = new MongooseOrderRepository();
 
+export const payments = createPayments(orderRepo);
 export const orderService = new OrderService(
   orderRepo,
   productRepo,
   discountService,
   unitOfWork,
   notifier,
+  payments.gateway,
 );
 export const cartService = new CartService(cartRepo, productRepo, orderRepo, discountService);
 
-export const payments = createPayments(orderRepo);
 export const checkoutService = new CheckoutService(orderRepo, orderService, payments.gateway, payments.verifier, {
   storefrontUrl: env.STOREFRONT_URL.replace(/\/$/, ''),
   currency: env.PAYMENT_CURRENCY,

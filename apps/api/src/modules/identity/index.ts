@@ -25,3 +25,4 @@ export { hasAllPermissions, hasAnyPermission } from './domain/rules/hasPermissio
 export { authPaths } from './http/docs/auth.paths';
 export { usersPaths } from './http/docs/users.paths';
 export { rbacPaths } from './http/docs/rbac.paths';
+export { UserModel } from './infra/models/UserModel';

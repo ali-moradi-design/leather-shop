@@ -1,4 +1,5 @@
 import type { Order } from '@modules/ordering/domain/order.entity';
+import { trackingUrl } from '@modules/ordering/domain/rules/tracking';
 
 export interface OrderDto {
   id: string;
@@ -13,6 +14,8 @@ export interface OrderDto {
   payment: Omit<Order['payment'], 'checkoutSessionId'>;
   shippingAddress: Order['shippingAddress'];
   statusHistory: Order['statusHistory'];
+  shipment?: Order['shipment'] & { url?: string };
+  refunded: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,6 +38,8 @@ export function toOrderDto(order: Order): OrderDto {
     },
     shippingAddress: order.shippingAddress,
     statusHistory: order.statusHistory,
+    shipment: order.shipment ? { ...order.shipment, url: trackingUrl(order.shipment) } : undefined,
+    refunded: Boolean(order.refundId),
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
   };

@@ -41,6 +41,14 @@ export class StripeGateway implements PaymentGateway {
     return { id: session.id, url: session.url };
   }
 
+  async refund(paymentIntentId: string, amount: number): Promise<string> {
+    const refund = await this.stripe.refunds.create(
+      { payment_intent: paymentIntentId, amount },
+      { idempotencyKey: `refund-${paymentIntentId}-${amount}` },
+    );
+    return refund.id;
+  }
+
   async findOpenSession(id: string): Promise<CheckoutSessionRef | null> {
     try {
       const session = await this.stripe.checkout.sessions.retrieve(id);

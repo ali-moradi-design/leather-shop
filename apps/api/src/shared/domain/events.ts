@@ -1,4 +1,4 @@
-export type DomainEventName = 'OrderPaid' | 'StockLow';
+export type DomainEventName = 'OrderPaid' | 'StockLow' | 'OrderShipped' | 'OrderCancelled' | 'StockRestored' | 'ReturnUpdated';
 
 export interface DomainEvent<T = unknown> {
   name: DomainEventName;
@@ -17,6 +17,18 @@ export interface StockLowPayload {
   title: string;
   stock: number;
   threshold: number;
+}
+
+export interface OrderChangedPayload {
+  orderId: string;
+  userId: string;
+  refunded?: boolean;
+}
+
+/** Sizes whose stock went from 0 to more than 0. */
+export interface StockRestoredPayload {
+  productId: string;
+  skus: string[];
 }
 
 type Handler = (event: DomainEvent) => void | Promise<void>;
@@ -56,4 +68,16 @@ export function orderPaidEvent(payload: OrderPaidPayload): DomainEvent<OrderPaid
 
 export function stockLowEvent(payload: StockLowPayload): DomainEvent<StockLowPayload> {
   return { name: 'StockLow', occurredAt: new Date(), payload };
+}
+
+export function orderShippedEvent(payload: OrderChangedPayload): DomainEvent<OrderChangedPayload> {
+  return { name: 'OrderShipped', occurredAt: new Date(), payload };
+}
+
+export function orderCancelledEvent(payload: OrderChangedPayload): DomainEvent<OrderChangedPayload> {
+  return { name: 'OrderCancelled', occurredAt: new Date(), payload };
+}
+
+export function stockRestoredEvent(payload: StockRestoredPayload): DomainEvent<StockRestoredPayload> {
+  return { name: 'StockRestored', occurredAt: new Date(), payload };
 }

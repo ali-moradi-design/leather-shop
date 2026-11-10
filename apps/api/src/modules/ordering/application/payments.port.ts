@@ -31,7 +31,11 @@ export interface PaymentGateway {
   createCheckoutSession(input: CreateCheckoutInput): Promise<CheckoutSessionRef>;
   /** The session if the customer can still pay with it, else null (expired, completed). */
   findOpenSession(id: string): Promise<CheckoutSessionRef | null>;
+  /** Refunds (part of) a payment; returns the refund id. */
+  refund(paymentIntentId: string, amount: number): Promise<string>;
 }
+
+export type Refunder = Pick<PaymentGateway, 'refund'>;
 
 /** The fields of a Stripe event the shop acts on. */
 export interface PaymentEvent {

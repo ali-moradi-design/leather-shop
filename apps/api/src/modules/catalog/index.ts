@@ -20,3 +20,5 @@ export {
 } from './domain/rules/stock';
 export { productsPaths } from './http/docs/products.paths';
 export { uploadsPaths } from './http/docs/uploads.paths';
+export { ProductModel } from './infra/models/ProductModel';
+export { createProductSchema } from './http/validators/products.validation';

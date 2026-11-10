@@ -45,6 +45,12 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: optionalString,
   STRIPE_WEBHOOK_SECRET: optionalString,
   PAYMENT_CURRENCY: z.string().length(3).toLowerCase().default('usd'),
+  // Email. Without SMTP_URL messages are kept in the outbox (admin → Emails) instead of sent.
+  SMTP_URL: optionalString,
+  MAIL_FROM: z.string().default('Welt & Grain <shop@weltandgrain.local>'),
+  // Low-stock alerts go here; without it they go to every admin account.
+  ADMIN_ALERT_EMAIL: optionalString,
+  SENTRY_DSN: optionalString,
 });
 
 const parsed = envSchema.safeParse(process.env);

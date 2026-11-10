@@ -1,5 +1,5 @@
 import { Schema, model, Document, Types, Query } from 'mongoose';
-import { ORDER_STATUSES, PAYMENT_METHODS, type OrderStatus, type Payment } from '@modules/ordering/domain/order.entity';
+import { CARRIERS, ORDER_STATUSES, PAYMENT_METHODS, type OrderStatus, type Payment, type Shipment } from '@modules/ordering/domain/order.entity';
 
 export interface IOrderItemDoc {
   product: Types.ObjectId;
@@ -21,6 +21,8 @@ export interface IOrderDoc extends Document {
   totalAmount: number;
   status: OrderStatus;
   payment: Payment;
+  shipment?: Shipment;
+  refundId?: string;
   shippingAddress: {
     fullName: string;
     line1: string;
@@ -70,6 +72,18 @@ const orderSchema = new Schema<IOrderDoc>(
       transactionId: String,
       checkoutSessionId: String,
     },
+    shipment: {
+      type: new Schema<Shipment>(
+        {
+          carrier: { type: String, enum: CARRIERS, required: true },
+          trackingNumber: { type: String, required: true, trim: true },
+          shippedAt: { type: Date, required: true },
+        },
+        { _id: false },
+      ),
+      required: false,
+    },
+    refundId: String,
     shippingAddress: {
       fullName: { type: String, required: true },
       line1: { type: String, required: true },

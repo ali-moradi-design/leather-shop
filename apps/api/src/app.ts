@@ -10,6 +10,7 @@ import { errorHandler, notFoundHandler } from './shared/http/middleware/errorHan
 import { requestIdMiddleware } from './shared/http/middleware/requestId';
 import { globalRateLimiter } from './shared/http/middleware/rate-limit';
 import { originCheck } from './shared/http/middleware/originCheck';
+import { registerNotifications } from './modules/messaging/notifications';
 import {
   registerIdentityRoutes,
   registerCatalogRoutes,
@@ -19,7 +20,11 @@ import {
   registerEngagementRoutes,
   registerPromotionsRoutes,
   registerReportingRoutes,
+  registerMessagingRoutes,
+  auditTrail,
 } from './modules';
+
+registerNotifications();
 
 const app = express();
 if (env.TRUST_PROXY > 0) app.set('trust proxy', env.TRUST_PROXY);
@@ -69,6 +74,7 @@ app.use(
 );
 
 const apiV1 = express.Router();
+apiV1.use(auditTrail);
 registerIdentityRoutes(apiV1);
 registerCatalogRoutes(apiV1);
 registerOrderingRoutes(apiV1);
@@ -76,6 +82,7 @@ registerReviewsRoutes(apiV1);
 registerEngagementRoutes(apiV1);
 registerPromotionsRoutes(apiV1);
 registerReportingRoutes(apiV1);
+registerMessagingRoutes(apiV1);
 app.use('/api/v1', apiV1);
 
 app.use(notFoundHandler);

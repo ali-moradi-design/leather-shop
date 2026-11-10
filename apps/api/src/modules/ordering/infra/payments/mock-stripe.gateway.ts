@@ -28,6 +28,10 @@ export class MockStripeGateway implements PaymentGateway {
     return { id, url: this.urlFor(id) };
   }
 
+  async refund(_paymentIntentId: string, _amount: number): Promise<string> {
+    return `re_mock_${randomBytes(12).toString('hex')}`;
+  }
+
   /** Builds, signs and delivers a webhook event, like Stripe's servers do. */
   async sendEvent(
     type: string,

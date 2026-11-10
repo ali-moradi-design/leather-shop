@@ -22,7 +22,8 @@ export interface IProductRepository {
   restore(id: string): Promise<Product | null>;
   /** Atomically takes stock from one variant; false when not enough is left. */
   decrementStock(productId: string, sku: string, quantity: number): Promise<boolean>;
-  incrementStock(productId: string, sku: string, quantity: number): Promise<void>;
+  /** Returns true when the size was sold out before (so back-in-stock alerts can go out). */
+  incrementStock(productId: string, sku: string, quantity: number): Promise<boolean>;
   upsertBySlug(slug: string, data: CreateProductInput): Promise<Product>;
   setRating(productId: string, avg: number, count: number): Promise<void>;
   count(): Promise<number>;
