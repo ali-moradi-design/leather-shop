@@ -67,7 +67,7 @@ export function Details({ product }: { product: Product }) {
           <li>Free returns within 30 days</li>
           <li>Ships within 1–2 business days</li>
         </ul>
-        <Link href="/help" className="link-underline mt-3 inline-block text-[14px]">Returns and exchanges</Link>
+        <Link href="/help#how-to-return" className="link-underline mt-3 inline-block text-[14px]">Returns and exchanges</Link>
       </div>
     </section>
   );

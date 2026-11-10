@@ -44,9 +44,9 @@ test('browse → cart → Stripe Checkout (simulated) → order visible in admin
   await shopper.getByRole('textbox', { name: 'Card number' }).fill('4242 4242 4242 4242');
   await shopper.getByRole('button', { name: /^Pay \$/ }).click();
   await expect(shopper).toHaveURL(/checkout=success/);
-  await expect(shopper.getByText('Your payment went through')).toBeVisible();
-  await expect(shopper.getByTestId('order-status')).toHaveText(/paid/i);
-  const orderNo = (await shopper.getByRole('heading', { level: 1 }).innerText()).replace('Order ', '');
+  await expect(shopper.getByText('Your payment went through').locator('visible=true')).toBeVisible();
+  await expect(shopper.getByTestId('order-status').locator('visible=true')).toHaveText(/paid/i);
+  const orderNo = (await shopper.getByRole('heading', { level: 1 }).locator('visible=true').innerText()).replace('Order ', '');
 
   // the admin sees the order
   const admin = await (await browser.newContext()).newPage();

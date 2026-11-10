@@ -2,8 +2,10 @@ import app from './app';
 import { connectDb } from './shared/config/db';
 import { env } from './shared/config/env';
 import { logger } from './shared/logging/logger';
+import { initMonitoring } from './shared/infra/monitoring';
 
 async function main() {
+  await initMonitoring();
   await connectDb();
   app.listen(env.PORT, () => {
     logger.info('server_started', {

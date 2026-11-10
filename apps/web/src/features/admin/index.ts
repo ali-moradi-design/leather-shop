@@ -11,3 +11,7 @@ export { CustomersTable, type CustomerRow } from './ui/CustomersTable';
 export { ReviewsTable, type ReviewRow } from './ui/ReviewsTable';
 export { RevenueChart, type DayPoint } from './ui/RevenueChart';
 export { BarList } from './ui/BarList';
+export { PrintButton } from './ui/PrintButton';
+export { ReturnsTable, EmailsTable, AuditTable, SubscribersTable, type EmailRow, type AuditRow, type SubscriberRow } from './ui/MoreTables';
+export { RolesManager, type RoleRow, type PermissionOption } from './ui/RoleEditor';
+export { ImportProducts } from './ui/ImportProducts';

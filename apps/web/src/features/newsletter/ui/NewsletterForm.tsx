@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useId, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { clientApi } from '@/shared/api/client';
 import { cn } from '@/shared/lib/cn';
 
 const schema = z.object({
@@ -12,10 +13,7 @@ const schema = z.object({
 });
 type Values = z.infer<typeof schema>;
 
-/**
- * Email sign-up. This is a demo shop with no mailing list, so it only confirms
- * locally and never sends the address anywhere.
- */
+/** Email sign-up; the API adds the address to the list and sends a welcome email with an unsubscribe link. */
 export function NewsletterForm({
   buttonLabel = 'Join',
   withGender = false,
@@ -29,11 +27,21 @@ export function NewsletterForm({
 }) {
   const id = useId();
   const [done, setDone] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { email: '' } });
+  const subscribe = handleSubmit(async ({ email, gender }) => {
+    setFailed(null);
+    try {
+      await clientApi('/newsletter', { method: 'POST', body: JSON.stringify({ email, source: gender ? `footer-${gender.startsWith('W') ? 'women' : 'men'}` : 'footer' }) });
+      setDone(true);
+    } catch (err) {
+      setFailed(err instanceof Error ? err.message : 'Could not sign you up. Try again.');
+    }
+  });
 
   if (done) {
     return (
@@ -47,7 +55,7 @@ export function NewsletterForm({
     <form
       className={className}
       noValidate
-      onSubmit={handleSubmit(() => setDone(true))}
+      onSubmit={subscribe}
     >
       {withGender && (
         <fieldset className="mb-3 flex gap-5 text-[15px] text-ink">
@@ -74,6 +82,7 @@ export function NewsletterForm({
         />
         <button
           type="submit"
+          disabled={isSubmitting}
           className={cn(
             'h-[42px] shrink-0 px-5 text-[13px] font-semibold uppercase tracking-[2px] text-white transition-colors',
             tone === 'accent' ? 'bg-accent hover:bg-accent-dark' : 'bg-brand hover:bg-[#1a2b2e]',
@@ -83,6 +92,7 @@ export function NewsletterForm({
         </button>
       </div>
       {errors.email && <p id={`${id}-error`} className="mt-1.5 text-[13px] text-danger">{errors.email.message}</p>}
+      {failed && <p role="alert" className="mt-1.5 text-[13px] text-danger">{failed}</p>}
     </form>
   );
 }

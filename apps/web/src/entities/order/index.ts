@@ -43,6 +43,8 @@ export interface Order {
   totalAmount: number;
   status: OrderStatus;
   payment: { method: PaymentMethod; status: 'pending' | 'paid' | 'failed'; paidAt?: string; transactionId?: string };
+  shipment?: { carrier: string; trackingNumber: string; shippedAt: string; url?: string };
+  refunded?: boolean;
   shippingAddress: {
     fullName: string;
     line1: string;
@@ -89,3 +91,31 @@ export const STATUS_LABEL: Record<OrderStatus, string> = {
   cancelled: 'Cancelled',
   failed: 'Payment failed',
 };
+
+export type ReturnStatus = 'requested' | 'approved' | 'rejected' | 'received' | 'refunded' | 'exchanged';
+
+export interface ReturnRequest {
+  id: string;
+  order: string;
+  user: string;
+  items: { sku: string; title: string; size: string; quantity: number; price: number; type: 'refund' | 'exchange'; exchangeSize?: string }[];
+  reason: string;
+  comment?: string;
+  status: ReturnStatus;
+  refundAmount: number;
+  refunded: boolean;
+  history: { status: ReturnStatus; at: string; note?: string }[];
+  createdAt: string;
+}
+
+export const RETURN_STATUS_LABEL: Record<ReturnStatus, string> = {
+  requested: 'Requested',
+  approved: 'Approved — send it back',
+  rejected: 'Not accepted',
+  received: 'Received',
+  refunded: 'Refunded',
+  exchanged: 'New size sent',
+};
+
+/** Orders a customer may still cancel themselves. */
+export const CANCELLABLE: OrderStatus[] = ['pending_payment', 'paid', 'processing'];

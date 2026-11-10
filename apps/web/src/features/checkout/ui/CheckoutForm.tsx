@@ -16,7 +16,29 @@ type Quote = Cart & { discountCode?: string; discountAmount: number; total: numb
 
 const field = 'mt-1 block w-full border border-line px-3 py-2.5 outline-none focus:border-ink aria-[invalid=true]:border-danger';
 
-export function CheckoutForm({ name }: { name: string }) {
+type Saved = AddressValues & { id: string; label?: string; isDefault: boolean };
+
+const blank = (name: string): AddressValues => ({ fullName: name, line1: '', line2: '', city: '', state: '', postalCode: '', country: 'United States' });
+const fromSaved = (a: Omit<Saved, 'line2' | 'state'> & { line2?: string; state?: string }): AddressValues => ({
+  fullName: a.fullName,
+  line1: a.line1,
+  line2: a.line2 ?? '',
+  city: a.city,
+  state: a.state ?? '',
+  postalCode: a.postalCode,
+  country: a.country,
+});
+
+export function CheckoutForm({
+  name,
+  addresses = [],
+}: {
+  name: string;
+  addresses?: (Omit<Saved, 'line2' | 'state'> & { line2?: string; state?: string })[];
+}) {
+  const preferred = addresses.find((a) => a.isDefault) ?? addresses[0];
+  const [savedId, setSavedId] = useState<string>(preferred?.id ?? 'new');
+  const [saveAddress, setSaveAddress] = useState(addresses.length === 0);
   const router = useRouter();
   const { refresh } = useCartActions();
   const [quote, setQuote] = useState<Quote | null>(null);
@@ -27,12 +49,18 @@ export function CheckoutForm({ name }: { name: string }) {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<AddressValues>({
     resolver: zodResolver(addressSchema),
-    defaultValues: { fullName: name, line1: '', line2: '', city: '', state: '', postalCode: '', country: 'United States' },
+    defaultValues: preferred ? fromSaved(preferred) : blank(name),
     mode: 'onTouched',
   });
+  const pickAddress = (id: string) => {
+    setSavedId(id);
+    const a = addresses.find((x) => x.id === id);
+    reset(a ? fromSaved(a) : blank(name));
+  };
 
   useEffect(() => {
     clientApi<{ data: Quote }>('/cart/quote', { method: 'POST', body: '{}' })
@@ -54,6 +82,10 @@ export function CheckoutForm({ name }: { name: string }) {
     setBusy(true);
     setError(null);
     try {
+      if (saveAddress && savedId === 'new') {
+        // a convenience: the order goes ahead even if saving the address fails
+        await clientApi('/account/addresses', { method: 'POST', body: JSON.stringify(toShippingAddress(values)) }).catch(() => {});
+      }
       const { data } = await clientApi<{ data: { id: string } }>('/cart/checkout', {
         method: 'POST',
         body: JSON.stringify({
@@ -100,6 +132,26 @@ export function CheckoutForm({ name }: { name: string }) {
         <p className="col-span-2 border border-line bg-soft px-3 py-2 text-[13px]">
           Demo shop: please don’t enter real personal data. The demo account is shared and all orders are deleted every night.
         </p>
+        {addresses.length > 0 && (
+          <fieldset className="col-span-2">
+            <legend className="mb-2">Ship to</legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {addresses.map((a) => (
+                <label key={a.id} className="flex cursor-pointer gap-3 border border-line p-3 has-[:checked]:border-ink">
+                  <input type="radio" name="saved-address" checked={savedId === a.id} onChange={() => pickAddress(a.id)} className="mt-1" />
+                  <span>
+                    <span className="block font-medium">{a.label || a.fullName}</span>
+                    <span className="block text-mute">{[a.line1, a.city, a.postalCode].join(', ')}</span>
+                  </span>
+                </label>
+              ))}
+              <label className="flex cursor-pointer gap-3 border border-line p-3 has-[:checked]:border-ink">
+                <input type="radio" name="saved-address" checked={savedId === 'new'} onChange={() => pickAddress('new')} className="mt-1" />
+                <span className="font-medium">A new address</span>
+              </label>
+            </div>
+          </fieldset>
+        )}
         {input('fullName', 'Full name', 'name', true)}
         {input('line1', 'Address', 'address-line1', true)}
         {input('line2', 'Apartment, suite (optional)', 'address-line2', true)}
@@ -107,6 +159,12 @@ export function CheckoutForm({ name }: { name: string }) {
         {input('state', 'State / region', 'address-level1')}
         {input('postalCode', 'Postal code', 'postal-code')}
         {input('country', 'Country', 'country-name')}
+        {savedId === 'new' && (
+          <label className="col-span-2 flex items-center gap-2">
+            <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="h-4 w-4" />
+            Save this address for next time
+          </label>
+        )}
       </form>
       <aside className="self-start border border-line bg-soft p-6" aria-label="Order summary">
         <h2 className="heading text-[22px]">Order summary</h2>

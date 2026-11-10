@@ -7,7 +7,7 @@ import { API_URL } from '@/shared/config';
  * IP on in X-Forwarded-For for the API's rate limits.
  */
 const FORWARD_REQUEST = ['accept', 'content-type', 'cookie', 'authorization', 'origin', 'referer', 'user-agent'];
-const FORWARD_RESPONSE = ['content-type', 'cache-control', 'retry-after', 'ratelimit', 'ratelimit-policy'];
+const FORWARD_RESPONSE = ['content-type', 'content-disposition', 'cache-control', 'retry-after', 'ratelimit', 'ratelimit-policy'];
 
 async function proxy(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;

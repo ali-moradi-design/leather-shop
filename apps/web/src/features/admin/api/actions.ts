@@ -134,9 +134,15 @@ export async function bulkUpdateProducts(ids: string[], action: BulkAction): Pro
   return { status: 'ok', message: `${done} product${done === 1 ? '' : 's'} updated.` };
 }
 
-export async function updateOrderStatus(id: string, status: OrderStatus, note?: string): Promise<ActionResult> {
+export type Shipment = { carrier: 'UPS' | 'USPS' | 'FedEx' | 'DHL' | 'Other'; trackingNumber: string };
+
+export async function updateOrderStatus(id: string, status: OrderStatus, note?: string, shipment?: Shipment): Promise<ActionResult> {
   try {
-    await serverMutate(`/orders/${encodeURIComponent(id)}/status`, 'PATCH', { status, ...(note ? { note } : {}) });
+    await serverMutate(`/orders/${encodeURIComponent(id)}/status`, 'PATCH', {
+      status,
+      ...(note ? { note } : {}),
+      ...(status === 'shipped' && shipment?.trackingNumber ? { shipment } : {}),
+    });
   } catch (err) {
     return failure(err, `/admin/orders/${id}`);
   }
@@ -224,4 +230,74 @@ export async function deleteReview(id: string, productSlug?: string): Promise<Ac
   // The product's average rating changed.
   catalogChanged(productSlug);
   return { status: 'ok', message: 'Review removed.' };
+}
+
+export type ReturnStatus = 'approved' | 'rejected' | 'received' | 'refunded' | 'exchanged';
+
+export async function updateReturn(id: string, status: ReturnStatus, note?: string): Promise<ActionResult> {
+  try {
+    await serverMutate(`/returns/${encodeURIComponent(id)}`, 'PATCH', { status, ...(note ? { note } : {}) });
+  } catch (err) {
+    return failure(err, '/admin/returns');
+  }
+  refresh();
+  return { status: 'ok', message: 'Return updated. The customer was emailed.' };
+}
+
+export interface RoleInput {
+  name: string;
+  description?: string;
+  permissions: string[];
+}
+
+/** Creates (no id) or updates a role; the API protects the built-in roles. */
+export async function saveRole(id: string | undefined, input: RoleInput): Promise<ActionResult> {
+  const name = input.name.trim();
+  if (name.length < 2 || name.length > 50) return { status: 'error', message: 'Use a name of 2–50 characters.' };
+  try {
+    if (id) await serverMutate(`/roles/${encodeURIComponent(id)}`, 'PATCH', { ...input, name });
+    else await serverMutate('/roles', 'POST', { ...input, name });
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 409) return { status: 'error', message: 'A role with this name exists.' };
+    return failure(err, '/admin/roles');
+  }
+  refresh();
+  return { status: 'ok', message: id ? 'Role saved.' : `${name} created.` };
+}
+
+export async function deleteRole(id: string): Promise<ActionResult> {
+  try {
+    await serverMutate(`/roles/${encodeURIComponent(id)}`, 'DELETE');
+  } catch (err) {
+    return failure(err, '/admin/roles');
+  }
+  refresh();
+  return { status: 'ok', message: 'Role deleted.' };
+}
+
+export interface ImportReport {
+  created: number;
+  updated: number;
+  errors: { row: number; slug?: string; message: string }[];
+  dryRun: boolean;
+}
+
+/** Checks (dryRun) or applies a product CSV. */
+export async function importProducts(csv: string, dryRun: boolean): Promise<ActionResult & { report?: ImportReport }> {
+  if (!csv.trim()) return { status: 'error', message: 'Choose a CSV file first.' };
+  if (csv.length > 2_000_000) return { status: 'error', message: 'The file is too large (2 MB at most).' };
+  let report: ImportReport;
+  try {
+    report = (await serverMutate<{ data: ImportReport }>('/admin/import/products', 'POST', { csv, dryRun })).data;
+  } catch (err) {
+    return failure(err, '/admin/products/import');
+  }
+  if (!dryRun && report.created + report.updated > 0) catalogChanged();
+  const total = report.created + report.updated;
+  const verb = dryRun ? 'would be' : 'were';
+  return {
+    status: report.errors.length ? 'error' : 'ok',
+    message: `${report.created} new and ${report.updated} existing products ${verb} saved${report.errors.length ? `; ${report.errors.length} rows have problems` : ''}.${dryRun && total ? ' Check the list, then import.' : ''}`,
+    report,
+  };
 }

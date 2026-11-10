@@ -4,3 +4,4 @@ export { Stars } from './Stars';
 export { Drawer } from './Drawer';
 export { Skeleton } from './Skeleton';
 export { DragScroll } from './DragScroll';
+export { Analytics } from './Analytics';

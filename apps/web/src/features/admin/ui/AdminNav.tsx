@@ -8,9 +8,14 @@ const LINKS = [
   { segment: null, href: '/admin', label: 'Dashboard' },
   { segment: 'products', href: '/admin/products', label: 'Products' },
   { segment: 'orders', href: '/admin/orders', label: 'Orders' },
+  { segment: 'returns', href: '/admin/returns', label: 'Returns' },
   { segment: 'discounts', href: '/admin/discounts', label: 'Discounts' },
   { segment: 'customers', href: '/admin/customers', label: 'Customers' },
   { segment: 'reviews', href: '/admin/reviews', label: 'Reviews' },
+  { segment: 'emails', href: '/admin/emails', label: 'Emails' },
+  { segment: 'experiments', href: '/admin/experiments', label: 'A/B tests' },
+  { segment: 'roles', href: '/admin/roles', label: 'Roles' },
+  { segment: 'activity', href: '/admin/activity', label: 'Activity' },
 ] as const;
 
 /** Side menu on desktop, a scrolling strip on phones; the current section is marked. */

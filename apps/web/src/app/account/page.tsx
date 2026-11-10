@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { STATUS_LABEL, type Order } from '@/entities/order';
+import { SetPasswordPrompt, type Account } from '@/features/account';
 import { SignOutButton } from '@/features/auth';
 import { requireUser } from '@/features/auth/server';
 import { serverApi } from '@/shared/api/server';
@@ -12,7 +13,10 @@ export const metadata: Metadata = { title: 'My Account', robots: { index: false 
 
 async function Account() {
   const user = await requireUser('/account');
-  const { data: orders } = await serverApi<{ data: Order[] }>('/orders');
+  const [{ data: orders }, { data: account }] = await Promise.all([
+    serverApi<{ data: Order[] }>('/orders'),
+    serverApi<{ data: Account }>('/account'),
+  ]);
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
@@ -22,9 +26,11 @@ async function Account() {
         </div>
         <div className="flex gap-6">
           <Link href="/account/favorites" className="link-underline text-[14px]">Favorites</Link>
+          <Link href="/account/settings" className="link-underline text-[14px]">Settings</Link>
           <SignOutButton />
         </div>
       </div>
+      {account.guest && <div className="mt-8"><SetPasswordPrompt /></div>}
       <h2 className="heading mt-10 text-[24px]">Order History</h2>
       {orders.length === 0 ? (
         <p className="mt-4 text-mute">No orders yet. <Link className="link-underline text-ink" href="/collections/mens-boots">Start shopping</Link></p>

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { trackConversion } from '@/shared/lib/ab';
 
 const EVERY_MS = 2000;
 const TRIES = 15;
@@ -33,4 +34,19 @@ export function PaymentPending() {
         : 'Confirming your payment…'}
     </p>
   );
+}
+
+/** Counts the purchase for the visitor's A/B tests, once per order on this device. */
+export function TrackPurchase({ orderId }: { orderId: string }) {
+  useEffect(() => {
+    const key = `wg-purchase-${orderId}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch {
+      // storage blocked: the API still keeps one purchase per visitor
+    }
+    trackConversion('purchase');
+  }, [orderId]);
+  return null;
 }
