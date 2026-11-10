@@ -55,12 +55,19 @@ export class Mailer implements IMailer {
       }
     }
     try {
-      await EmailModel.create({ ...email, status, error });
+      // once the real email is out, the copy must not let staff use someone's reset link
+      const stored = status === 'sent' ? { ...email, text: redact(email.text), html: redact(email.html) } : email;
+      await EmailModel.create({ ...stored, status, error });
     } catch (err) {
       log.error('could not store email', { error: err instanceof Error ? err.message : String(err) });
     }
     return status;
   }
+}
+
+/** Hides one-time tokens (password reset, unsubscribe) in the stored copy. */
+export function redact(body: string): string {
+  return body.replace(/token=[A-Za-z0-9_-]+/g, 'token=[removed]');
 }
 
 export const mailer = new Mailer();

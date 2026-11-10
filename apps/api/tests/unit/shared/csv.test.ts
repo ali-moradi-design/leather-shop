@@ -24,3 +24,10 @@ describe('pValue', () => {
     expect(pValue(0, 0, 1, 1)).toBeNull();
   });
 });
+
+describe('mailer redact', () => {
+  it('hides one-time tokens in stored copies', async () => {
+    const { redact } = await import('../../../src/modules/messaging/infra/mailer');
+    expect(redact('Reset: http://x/reset-password?token=abc123def')).toBe('Reset: http://x/reset-password?token=[removed]');
+  });
+});

@@ -1,16 +1,13 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { requireUser } from '@/features/auth/server';
-import type { Account } from '@/features/account';
+import { requireAccount } from '@/features/auth/server';
 import { CheckoutForm } from '@/features/checkout';
-import { serverApi } from '@/shared/api/server';
 import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Checkout', robots: { index: false } };
 
 async function Checkout() {
-  await requireUser('/checkout');
-  const { data: account } = await serverApi<{ data: Account }>('/account');
+  const account = await requireAccount('/checkout');
   return <CheckoutForm name={account.name} addresses={account.addresses} />;
 }
 
