@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { ImportProducts, PageHeader } from '@/features/admin';
+import { requireAdmin } from '@/features/auth/server';
+import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Import products' };
 
@@ -14,7 +17,12 @@ const COLUMNS = [
   ['featured', 'yes to feature it'],
 ];
 
-/** The page shell is static; the admin check happens in the import action. */
+/** Hides the form from anyone who is not staff (the import action checks again). */
+async function Guarded() {
+  await requireAdmin('/admin/products/import');
+  return <ImportProducts />;
+}
+
 export default function ImportProductsPage() {
   return (
     <div>
@@ -25,7 +33,9 @@ export default function ImportProductsPage() {
         </PageHeader>
       </div>
       <p className="-mt-3 mb-6 max-w-2xl text-[14px] text-mute">Export the catalog, edit it in a spreadsheet, and import it back. Checking the file changes nothing; it lists the rows that need fixing.</p>
-      <ImportProducts />
+      <Suspense fallback={<Skeleton className="h-40 w-full max-w-md" />}>
+        <Guarded />
+      </Suspense>
       <section className="mt-12 max-w-2xl text-[14px]">
         <h2 className="heading mb-3 text-[18px]">Columns</h2>
         <dl className="divide-y divide-line border-y border-line">
