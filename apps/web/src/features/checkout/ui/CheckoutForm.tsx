@@ -9,6 +9,7 @@ import type { Cart } from '@/features/cart';
 import { useCartActions } from '@/features/cart';
 import { clientApi } from '@/shared/api/client';
 import { formatMoney } from '@/shared/lib/money';
+import { startPayment } from '../api/startPayment';
 import { addressSchema, toShippingAddress, type AddressValues } from '../model/schema';
 
 type Quote = Cart & { discountCode?: string; discountAmount: number; total: number };
@@ -61,7 +62,12 @@ export function CheckoutForm({ name }: { name: string }) {
         }),
       });
       await refresh();
-      router.push(`/pay/${data.id}`);
+      try {
+        await startPayment(data.id);
+      } catch {
+        // the order exists; its page has a Pay now button to try again
+        router.push(`/account/orders/${data.id}`);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Checkout failed');
       setBusy(false);

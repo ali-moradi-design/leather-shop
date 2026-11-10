@@ -33,11 +33,28 @@ export const ordersPaths = {
       responses: { 200: { description: 'Order', ...data(ref('Order')) }, 403: errors[403], 404: errors[404] },
     },
   },
+  '/api/v1/orders/{id}/checkout': {
+    post: {
+      tags: ['Payments'],
+      summary: 'Start Stripe Checkout for an order',
+      description:
+        'Returns the Checkout Session URL to send the customer to. An open session is reused, so two tabs cannot pay twice. ' +
+        'With no `STRIPE_SECRET_KEY` the URL opens the local simulator (`mode: mock`). The order is marked paid only by the webhook.',
+      security: signedIn,
+      parameters: [path('id')],
+      responses: {
+        200: { description: 'Session URL', ...data({ type: 'object', properties: { url: { type: 'string' }, mode: { type: 'string', enum: ['stripe', 'mock'] } } }) },
+        400: { description: 'Order is not awaiting payment' },
+        403: errors[403],
+        404: errors[404],
+      },
+    },
+  },
   '/api/v1/orders/{id}/pay': {
     post: {
       tags: ['Orders'],
-      summary: 'Pay with the simulated gateway',
-      description: 'The only payment method is `fake`. Takes the stock of each size atomically; if a size ran out the order becomes `failed` (409).',
+      summary: 'Record a payment by hand (staff)',
+      description: 'For payments taken outside the shop. Takes the stock of each size atomically; if a size ran out the order becomes `failed` (409).',
       security: signedIn,
       parameters: [path('id')],
       responses: {
@@ -46,6 +63,35 @@ export const ordersPaths = {
         404: errors[404],
         409: { description: 'Insufficient stock' },
       },
+    },
+  },
+  '/api/v1/payments/stripe/webhook': {
+    post: {
+      tags: ['Payments'],
+      summary: 'Stripe webhook',
+      description:
+        'Verified with the `Stripe-Signature` header. Handles `checkout.session.completed`, `checkout.session.async_payment_succeeded` and `checkout.session.expired`. Retries are safe.',
+      responses: { 200: { description: 'Received' }, 400: { description: 'Bad signature' } },
+    },
+  },
+  '/api/v1/payments/simulator/sessions/{id}': {
+    get: {
+      tags: ['Payments'],
+      summary: 'Simulated Checkout Session (no Stripe key only)',
+      security: signedIn,
+      parameters: [path('id')],
+      responses: { 200: { description: 'Session' }, 404: errors[404] },
+    },
+  },
+  '/api/v1/payments/simulator/sessions/{id}/pay': {
+    post: {
+      tags: ['Payments'],
+      summary: 'Pay a simulated session with a Stripe test card',
+      description: '4242 4242 4242 4242 pays and sends a signed `checkout.session.completed` webhook. 4000 0000 0000 0002 and other decline cards answer 402.',
+      security: signedIn,
+      parameters: [path('id')],
+      requestBody: json({ type: 'object', required: ['card'], properties: { card: { type: 'string' }, expiry: { type: 'string' }, cvc: { type: 'string' } } }),
+      responses: { 200: { description: 'Where to send the customer' }, 402: { description: 'Card declined' }, 404: errors[404] },
     },
   },
   '/api/v1/orders/{id}/status': {

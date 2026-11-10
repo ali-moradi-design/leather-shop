@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loginSchema, registerSchema } from '@/features/auth/model/schema';
 import { reviewSchema } from '@/features/reviews/model/schema';
-import { addressSchema, cardSchema, sameCard, toShippingAddress } from '../schema';
+import { addressSchema, cardSchema, toShippingAddress } from '../schema';
 
 describe('storefront form schemas', () => {
   it('checks sign-in and registration fields', () => {
@@ -17,10 +17,9 @@ describe('storefront form schemas', () => {
     expect(toShippingAddress(v)).toEqual({ fullName: 'Dana', line1: '1 Main St', city: 'Portland', postalCode: '97201', country: 'US' });
   });
 
-  it('accepts spaced card numbers and compares them without spaces', () => {
+  it('accepts spaced card numbers', () => {
     expect(cardSchema.safeParse({ card: '4242 4242 4242 4242', expiry: '12 / 30', cvc: '123' }).success).toBe(true);
     expect(cardSchema.safeParse({ card: '4242', expiry: '13/30', cvc: '1' }).success).toBe(false);
-    expect(sameCard('4000 0000 0000 0002', '4000000000000002')).toBe(true);
   });
 
   it('needs a star rating for a review', () => {

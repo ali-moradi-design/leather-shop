@@ -23,7 +23,7 @@ export function toShippingAddress(v: AddressValues) {
 
 const digits = (s: string) => s.replace(/\s/g, '');
 
-/** Test-gateway card: 16 digits, an MM / YY expiry and a 3–4 digit CVC. */
+/** Stripe test card on the simulated Checkout page: 16 digits, an MM / YY expiry and a 3–4 digit CVC. */
 export const cardSchema = z.object({
   card: z.string().refine((v) => /^\d{16}$/.test(digits(v)), 'Enter the 16 card digits'),
   expiry: z.string().trim().regex(/^(0[1-9]|1[0-2])\s*\/\s*\d{2}$/, 'Use MM / YY'),
@@ -31,4 +31,3 @@ export const cardSchema = z.object({
 });
 
 export type CardValues = z.infer<typeof cardSchema>;
-export const sameCard = (a: string, b: string) => digits(a) === digits(b);

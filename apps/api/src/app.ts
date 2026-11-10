@@ -14,6 +14,7 @@ import {
   registerIdentityRoutes,
   registerCatalogRoutes,
   registerOrderingRoutes,
+  registerPaymentWebhook,
   registerReviewsRoutes,
   registerEngagementRoutes,
   registerPromotionsRoutes,
@@ -31,6 +32,8 @@ app.use(
     credentials: true,
   }),
 );
+// before express.json: the Stripe signature covers the raw body
+registerPaymentWebhook(app);
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 app.use(originCheck);

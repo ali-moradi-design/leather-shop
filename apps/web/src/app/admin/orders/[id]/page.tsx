@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { orderNumber, STATUS_LABEL, type Order } from '@/entities/order';
+import { orderNumber, PAYMENT_METHOD_LABEL, STATUS_LABEL, type Order } from '@/entities/order';
 import type { User } from '@/entities/user';
 import { OrderStatusSelect, PageHeader } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
@@ -94,6 +94,7 @@ async function OrderDetail({ params }: Props) {
           </section>
           <section>
             <h2 className="heading mb-2 text-[18px]">Payment</h2>
+            <p>{PAYMENT_METHOD_LABEL[order.payment.method] ?? order.payment.method}</p>
             <p className="capitalize">{order.payment.status}{order.payment.paidAt && ` · ${date.format(new Date(order.payment.paidAt))}`}</p>
             {order.payment.transactionId && <p className="break-all text-mute">{order.payment.transactionId}</p>}
           </section>

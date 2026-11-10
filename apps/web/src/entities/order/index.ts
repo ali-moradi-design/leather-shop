@@ -24,6 +24,14 @@ export interface OrderStatusChange {
   note?: string;
 }
 
+export type PaymentMethod = 'fake' | 'stripe' | 'manual';
+
+export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
+  stripe: 'Stripe',
+  manual: 'Recorded by staff',
+  fake: 'Demo gateway',
+};
+
 export interface Order {
   id: string;
   /** The customer's user id. */
@@ -34,7 +42,7 @@ export interface Order {
   discountAmount: number;
   totalAmount: number;
   status: OrderStatus;
-  payment: { method: 'fake'; status: 'pending' | 'paid' | 'failed'; paidAt?: string; transactionId?: string };
+  payment: { method: PaymentMethod; status: 'pending' | 'paid' | 'failed'; paidAt?: string; transactionId?: string };
   shippingAddress: {
     fullName: string;
     line1: string;

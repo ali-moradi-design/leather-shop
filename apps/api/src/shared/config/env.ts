@@ -12,6 +12,11 @@ const optionalBool = z
     return ['true', '1', 'yes'].includes(v.trim().toLowerCase());
   });
 
+const optionalString = z
+  .string()
+  .optional()
+  .transform((v) => v?.trim() || undefined);
+
 const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
   MONGODB_URI: z.string().min(1),
@@ -34,6 +39,12 @@ const envSchema = z.object({
       const trimmed = v?.trim();
       return trimmed ? trimmed : undefined;
     }),
+  // Payments. With no Stripe key the API runs a local Stripe Checkout simulator,
+  // including signed webhooks, so the whole flow works without an account.
+  STOREFRONT_URL: z.string().url().default('http://localhost:3000'),
+  STRIPE_SECRET_KEY: optionalString,
+  STRIPE_WEBHOOK_SECRET: optionalString,
+  PAYMENT_CURRENCY: z.string().length(3).toLowerCase().default('usd'),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -45,6 +56,12 @@ if (!parsed.success) {
 
 const data = parsed.data;
 
+// This shop only takes test payments: a live key would charge real cards.
+if (data.STRIPE_SECRET_KEY && !data.STRIPE_SECRET_KEY.startsWith('sk_test_')) {
+  console.error('STRIPE_SECRET_KEY must be a test key (sk_test_...)');
+  process.exit(1);
+}
+
 // Production refuses guessable secrets and a wildcard CORS origin.
 if (data.NODE_ENV === 'production') {
   const problems: string[] = [];
@@ -55,6 +72,9 @@ if (data.NODE_ENV === 'production') {
   }
   if (data.JWT_ACCESS_SECRET === data.JWT_REFRESH_SECRET) {
     problems.push('JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must differ');
+  }
+  if (data.STRIPE_SECRET_KEY && !data.STRIPE_WEBHOOK_SECRET) {
+    problems.push('STRIPE_WEBHOOK_SECRET is required when STRIPE_SECRET_KEY is set');
   }
   if (data.CORS_ORIGIN.trim() === '*') problems.push('CORS_ORIGIN must list the storefront origin');
   if (problems.length) {

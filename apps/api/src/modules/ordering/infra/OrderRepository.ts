@@ -14,6 +14,11 @@ export class MongooseOrderRepository implements IOrderRepository {
     return doc ? mapOrder(doc) : null;
   }
 
+  async findByCheckoutSession(sessionId: string): Promise<Order | null> {
+    const doc = await OrderModel.findOne({ 'payment.checkoutSessionId': sessionId });
+    return doc ? mapOrder(doc) : null;
+  }
+
   async list(filter: { userId?: string; limit?: number }): Promise<Order[]> {
     const q: Record<string, unknown> = {};
     if (filter.userId) q.user = filter.userId;
@@ -63,7 +68,7 @@ export class MongooseOrderRepository implements IOrderRepository {
       discountAmount,
       totalAmount: input.totalAmount,
       status: 'pending_payment',
-      payment: { method: 'fake', status: 'pending' },
+      payment: { method: 'stripe', status: 'pending' },
       shippingAddress: input.shippingAddress,
       statusHistory: [{ status: 'pending_payment', at: new Date(), note: 'Order created' }],
     });

@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { STATUS_LABEL, type Order } from '@/entities/order';
 import { requireUser } from '@/features/auth/server';
+import { PaymentPending, PayNowButton } from '@/features/checkout';
 import { ApiError } from '@/shared/api';
 import { serverApi } from '@/shared/api/server';
 import { formatMoney } from '@/shared/lib/money';
@@ -12,7 +13,7 @@ import { Skeleton } from '@/shared/ui';
 
 export const metadata: Metadata = { title: 'Order', robots: { index: false } };
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ paid?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ checkout?: string }> };
 
 async function OrderView({ params, searchParams }: Props) {
   const { id } = await params;
@@ -24,12 +25,20 @@ async function OrderView({ params, searchParams }: Props) {
     if (err instanceof ApiError && (err.status === 404 || err.status === 403 || err.status === 400)) notFound();
     throw err;
   }
-  const justPaid = (await searchParams).paid === '1' && order.status === 'paid';
+  // the redirect back from Stripe proves nothing; the status comes from its webhook
+  const result = (await searchParams).checkout;
+  const pending = order.status === 'pending_payment';
   return (
     <>
-      {justPaid && (
+      {result === 'success' && order.status === 'paid' && (
         <p role="status" className="mb-8 border border-ink px-4 py-3 text-[15px]">
           Thank you! Your payment went through and your order is confirmed.
+        </p>
+      )}
+      {result === 'success' && pending && <PaymentPending />}
+      {result === 'cancelled' && pending && (
+        <p role="status" className="mb-8 border border-line px-4 py-3 text-[15px]">
+          Payment cancelled. Your order is saved, and you can pay for it below whenever you are ready.
         </p>
       )}
       <Link href="/account" className="text-[13px] text-mute underline">← All orders</Link>
@@ -56,9 +65,7 @@ async function OrderView({ params, searchParams }: Props) {
         <h2 className="eyebrow mb-2">Shipping to</h2>
         <p>{order.shippingAddress.fullName}<br />{order.shippingAddress.line1}{order.shippingAddress.line2 ? `, ${order.shippingAddress.line2}` : ''}<br />{order.shippingAddress.city} {order.shippingAddress.postalCode}, {order.shippingAddress.country}</p>
       </div>
-      {order.status === 'pending_payment' && (
-        <Link href={`/pay/${order.id}`} className="btn mt-8">Pay now</Link>
-      )}
+      {pending && <PayNowButton orderId={order.id} />}
     </>
   );
 }

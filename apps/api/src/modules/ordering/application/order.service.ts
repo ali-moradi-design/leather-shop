@@ -17,7 +17,7 @@ import { DomainError } from '@shared/domain/DomainError';
 import { buildOrderLines } from '@modules/ordering/domain/rules/order.lines';
 import { paginate } from '@shared/pagination';
 import { computeSubtotal, computeOrderTotal } from '@modules/ordering/domain/rules/cart.totals';
-import { PayOrderUseCase } from './use-cases/pay-order';
+import { PayOrderUseCase, type PaymentReceipt } from './use-cases/pay-order';
 
 export class OrderService {
   private readonly payOrder: PayOrderUseCase;
@@ -89,8 +89,17 @@ export class OrderService {
     return order;
   }
 
-  pay(orderId: string, userId: string, isStaff: boolean): Promise<Order> {
-    return this.payOrder.execute(orderId, userId, isStaff);
+  /** Staff record a payment taken outside the shop (bank transfer, in store). */
+  recordPayment(orderId: string, staffId: string): Promise<Order> {
+    return this.payOrder.execute(orderId, {
+      method: 'manual',
+      transactionId: `manual_${orderId}`,
+      note: `Payment recorded by staff (${staffId})`,
+    });
+  }
+
+  confirmPayment(orderId: string, receipt: PaymentReceipt): Promise<Order> {
+    return this.payOrder.execute(orderId, receipt);
   }
 
   async list(

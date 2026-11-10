@@ -2,6 +2,7 @@ import type { Order, CreateOrderInput, OrderStatus, Payment } from './order.enti
 
 export interface IOrderRepository {
   findById(id: string): Promise<Order | null>;
+  findByCheckoutSession(sessionId: string): Promise<Order | null>;
   list(filter: { userId?: string; limit?: number }): Promise<Order[]>;
   /** Paged list; `q` matches the end of the order id or the customer's name. */
   search(filter: OrderSearchFilter): Promise<{ data: Order[]; total: number }>;

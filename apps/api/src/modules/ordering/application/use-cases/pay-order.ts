@@ -2,7 +2,7 @@ import type { IOrderRepository } from '@modules/ordering/domain/order.repository
 import type { IProductRepository } from '@modules/catalog';
 import type { INotificationPort } from '@shared/domain/notifications.port';
 import type { IUnitOfWork } from '@shared/application/unit-of-work.port';
-import type { Order } from '@modules/ordering/domain/order.entity';
+import type { Order, PaymentMethod } from '@modules/ordering/domain/order.entity';
 import { DomainError } from '@shared/domain/DomainError';
 import { assertTransition } from '@modules/ordering/domain/order.transitions';
 import { isStockLow, DEFAULT_LOW_STOCK_THRESHOLD } from '@modules/catalog';
@@ -12,6 +12,18 @@ import {
   stockLowEvent,
 } from '@shared/domain/events';
 
+/** What the payment provider (or staff) reports about a successful payment. */
+export interface PaymentReceipt {
+  method: PaymentMethod;
+  transactionId: string;
+  note: string;
+}
+
+/**
+ * Marks an order paid and takes its stock. Callers check who may do this: the
+ * Stripe webhook (signature verified) or staff recording a payment by hand.
+ * Running it twice with the same transaction is a no-op, since providers retry.
+ */
 export class PayOrderUseCase {
   constructor(
     private readonly orders: IOrderRepository,
@@ -21,11 +33,11 @@ export class PayOrderUseCase {
     private readonly lowStockThreshold = DEFAULT_LOW_STOCK_THRESHOLD,
   ) {}
 
-  async execute(orderId: string, userId: string, isStaff: boolean): Promise<Order> {
+  async execute(orderId: string, receipt: PaymentReceipt): Promise<Order> {
     const order = await this.orders.findById(orderId);
     if (!order) throw new DomainError('Order not found', 'NOT_FOUND');
-    if (!isStaff && order.user !== userId) {
-      throw new DomainError('Forbidden', 'FORBIDDEN');
+    if (order.payment.status === 'paid' && order.payment.transactionId === receipt.transactionId) {
+      return order;
     }
     if (order.status !== 'pending_payment') {
       throw new DomainError('Order is not awaiting payment', 'VALIDATION');
@@ -54,16 +66,13 @@ export class PayOrderUseCase {
 
       order.status = 'paid';
       order.payment = {
-        method: 'fake',
+        ...order.payment,
+        method: receipt.method,
         status: 'paid',
         paidAt: new Date(),
-        transactionId: `fake_${Date.now()}`,
+        transactionId: receipt.transactionId,
       };
-      order.statusHistory.push({
-        status: 'paid',
-        at: new Date(),
-        note: 'Fake payment confirmed',
-      });
+      order.statusHistory.push({ status: 'paid', at: new Date(), note: receipt.note });
       const saved = await this.orders.save(order);
 
       await domainEvents.publish(
@@ -104,11 +113,12 @@ export class PayOrderUseCase {
 
       if (err instanceof DomainError && err.code === 'INSUFFICIENT_STOCK') {
         order.status = 'failed';
-        order.payment.status = 'failed';
+        order.payment = { ...order.payment, method: receipt.method, status: 'failed', transactionId: receipt.transactionId };
         order.statusHistory.push({
           status: 'failed',
           at: new Date(),
-          note: err.message,
+          // the provider already took the money, so staff must refund it
+          note: receipt.method === 'stripe' ? `${err.message}. Refund ${receipt.transactionId} in Stripe.` : err.message,
         });
         await this.orders.save(order);
       }
