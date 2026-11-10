@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 const DEMO = { email: 'demo@weltandgrain.local', password: 'Demo123!' };
 const ADMIN = { email: 'admin@weltandgrain.local', password: 'Admin123!' };
 
-test('browse → cart → fake payment → order visible in admin', async ({ browser }) => {
+test('browse → cart → Stripe Checkout (simulated) → order visible in admin', async ({ browser }) => {
   const shopper = await browser.newPage();
 
   // browse a collection and filter by size
@@ -36,16 +36,17 @@ test('browse → cart → fake payment → order visible in admin', async ({ bro
   await shopper.getByRole('textbox', { name: 'Postal code' }).fill('10115');
   await shopper.getByRole('button', { name: 'Continue to payment' }).click();
 
-  // simulated gateway: decline first, then approve
-  await expect(shopper).toHaveURL(/\/pay\//);
+  // simulated Stripe Checkout: decline first, then pay; the order is confirmed by webhook
+  await expect(shopper).toHaveURL(/\/pay\/cs_test_mock_/);
   await shopper.getByRole('textbox', { name: 'Card number' }).fill('4000 0000 0000 0002');
   await shopper.getByRole('button', { name: /^Pay \$/ }).click();
   await expect(shopper.getByText('Your card was declined')).toBeVisible();
   await shopper.getByRole('textbox', { name: 'Card number' }).fill('4242 4242 4242 4242');
   await shopper.getByRole('button', { name: /^Pay \$/ }).click();
-  await expect(shopper).toHaveURL(/paid=1/);
-  await expect(shopper.getByTestId('order-status')).toHaveText(/paid/i);
-  const orderNo = (await shopper.getByRole('heading', { level: 1 }).innerText()).replace('Order ', '');
+  await expect(shopper).toHaveURL(/checkout=success/);
+  await expect(shopper.getByText('Your payment went through').locator('visible=true')).toBeVisible();
+  await expect(shopper.getByTestId('order-status').locator('visible=true')).toHaveText(/paid/i);
+  const orderNo = (await shopper.getByRole('heading', { level: 1 }).locator('visible=true').innerText()).replace('Order ', '');
 
   // the admin sees the order
   const admin = await (await browser.newContext()).newPage();

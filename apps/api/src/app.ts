@@ -10,15 +10,21 @@ import { errorHandler, notFoundHandler } from './shared/http/middleware/errorHan
 import { requestIdMiddleware } from './shared/http/middleware/requestId';
 import { globalRateLimiter } from './shared/http/middleware/rate-limit';
 import { originCheck } from './shared/http/middleware/originCheck';
+import { registerNotifications } from './modules/messaging/notifications';
 import {
   registerIdentityRoutes,
   registerCatalogRoutes,
   registerOrderingRoutes,
+  registerPaymentWebhook,
   registerReviewsRoutes,
   registerEngagementRoutes,
   registerPromotionsRoutes,
   registerReportingRoutes,
+  registerMessagingRoutes,
+  auditTrail,
 } from './modules';
+
+registerNotifications();
 
 const app = express();
 if (env.TRUST_PROXY > 0) app.set('trust proxy', env.TRUST_PROXY);
@@ -31,6 +37,8 @@ app.use(
     credentials: true,
   }),
 );
+// before express.json: the Stripe signature covers the raw body
+registerPaymentWebhook(app);
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 app.use(originCheck);
@@ -41,6 +49,15 @@ if (env.NODE_ENV !== 'test') {
 if (env.NODE_ENV !== 'test') {
   app.use(globalRateLimiter);
 }
+
+// the API is never meant to show up in search results
+app.use((_req, res, next) => {
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  next();
+});
+app.get('/robots.txt', (_req, res) => {
+  res.type('text/plain').send('User-agent: *\nDisallow: /\n');
+});
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -66,6 +83,7 @@ app.use(
 );
 
 const apiV1 = express.Router();
+apiV1.use(auditTrail);
 registerIdentityRoutes(apiV1);
 registerCatalogRoutes(apiV1);
 registerOrderingRoutes(apiV1);
@@ -73,6 +91,7 @@ registerReviewsRoutes(apiV1);
 registerEngagementRoutes(apiV1);
 registerPromotionsRoutes(apiV1);
 registerReportingRoutes(apiV1);
+registerMessagingRoutes(apiV1);
 app.use('/api/v1', apiV1);
 
 app.use(notFoundHandler);

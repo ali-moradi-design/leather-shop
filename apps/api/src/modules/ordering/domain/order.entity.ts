@@ -21,11 +21,17 @@ export interface OrderItem {
   quantity: number;
 }
 
+/** `fake` is the old demo gateway (kept for existing orders); `manual` is staff recording a payment. */
+export const PAYMENT_METHODS = ['fake', 'stripe', 'manual'] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
 export interface Payment {
-  method: 'fake';
+  method: PaymentMethod;
   status: 'pending' | 'paid' | 'failed';
   paidAt?: Date;
   transactionId?: string;
+  /** The open Stripe Checkout Session, reused while the customer retries. */
+  checkoutSessionId?: string;
 }
 
 export interface ShippingAddress {
@@ -36,6 +42,15 @@ export interface ShippingAddress {
   state?: string;
   postalCode: string;
   country: string;
+}
+
+export const CARRIERS = ['UPS', 'USPS', 'FedEx', 'DHL', 'Other'] as const;
+export type Carrier = (typeof CARRIERS)[number];
+
+export interface Shipment {
+  carrier: Carrier;
+  trackingNumber: string;
+  shippedAt: Date;
 }
 
 export interface StatusHistory {
@@ -58,6 +73,9 @@ export interface Order {
   payment: Payment;
   shippingAddress: ShippingAddress;
   statusHistory: StatusHistory[];
+  shipment?: Shipment;
+  /** Set when a cancelled paid order was refunded through the provider. */
+  refundId?: string;
   deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;

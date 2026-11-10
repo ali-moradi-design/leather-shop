@@ -5,6 +5,8 @@ import type { ProductVariant } from '@/entities/product/model/types';
 import { useCart } from '@/features/cart';
 import { cn } from '@/shared/lib/cn';
 import { formatMoney } from '@/shared/lib/money';
+import { NotifyMe } from './NotifyMe';
+import { trackConversion, useExposure } from '@/shared/lib/ab';
 
 /** Width toggle, size grid with live stock, and the add-to-cart button. */
 export function BuyBox({
@@ -14,6 +16,7 @@ export function BuyBox({
   sizeNote,
   sizeGuide,
   title,
+  ctaVariant = 'control',
 }: {
   productId: string;
   price: number;
@@ -23,7 +26,10 @@ export function BuyBox({
   sizeGuide?: ReactNode;
   /** Shown in the phone's sticky bar. */
   title?: string;
+  /** A/B test "pdp-cta": the button with or without the shipping and returns promise. */
+  ctaVariant?: 'control' | 'benefits';
 }) {
+  useExposure('pdp-cta', ctaVariant);
   const { add, busy } = useCart();
   const widths = useMemo(() => [...new Set(variants.map((v) => v.width).filter(Boolean))] as string[], [variants]);
   const [width, setWidth] = useState<string | undefined>(widths[0]);
@@ -46,9 +52,12 @@ export function BuyBox({
       return;
     }
     setAddError(null);
-    await add(productId, selected.sku).catch((err: unknown) =>
-      setAddError(err instanceof Error ? err.message : 'Could not add to cart'),
-    );
+    try {
+      await add(productId, selected.sku);
+      trackConversion('add_to_cart');
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Could not add to cart');
+    }
   };
 
   return (
@@ -112,6 +121,7 @@ export function BuyBox({
           <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-warn" /> Only a few left
         </p>
       )}
+      {!oneSize && <NotifyMe key={width ?? 'all'} productId={productId} soldOut={sizes.filter((v) => v.stock === 0)} />}
       {missing && (
         <p role="alert" className="mt-3 border-t border-danger pt-1 text-[13px] text-danger">Please select a size</p>
       )}
@@ -121,13 +131,22 @@ export function BuyBox({
       {addError && (
         <p role="alert" className="mt-3 text-[13px] text-danger">{addError}</p>
       )}
-      <button ref={buttonRef} type="button" onClick={onAdd} disabled={busy || soldOut} className="btn btn-accent mt-5 h-[46px] w-full text-[16px]" data-testid="add-to-cart">
+      {ctaVariant === 'benefits' && !soldOut && (
+        <ul className="mt-5 grid grid-cols-3 gap-2 text-center text-[12px] leading-tight text-ink" aria-label="With every order">
+          <li className="border border-line px-2 py-2">Free shipping</li>
+          <li className="border border-line px-2 py-2">Free 30-day returns</li>
+          <li className="border border-line px-2 py-2">Easy size swaps</li>
+        </ul>
+      )}
+      <button ref={buttonRef} type="button" onClick={onAdd} disabled={busy || soldOut} className={cn('btn btn-accent h-[46px] w-full text-[16px]', ctaVariant === 'benefits' && !soldOut ? 'mt-3' : 'mt-5')} data-testid="add-to-cart">
         {soldOut ? 'Sold out' : `Add to cart — ${formatMoney(price)}`}
       </button>
-      <p className="mt-[22px] text-center text-[14px] leading-6 text-ink">
-        Free Shipping &amp; Returns
-        <span className="block text-mute">on every order</span>
-      </p>
+      {ctaVariant === 'control' && (
+        <p className="mt-[22px] text-center text-[14px] leading-6 text-ink">
+          Free Shipping &amp; Returns
+          <span className="block text-mute">on every order</span>
+        </p>
+      )}
       {showBar && !soldOut && (
         <div className="fixed inset-x-0 bottom-0 z-30 flex animate-fade-in items-center gap-3 border-t border-line bg-white px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] lg:hidden">
           <span className="min-w-0 flex-1 text-[14px] leading-tight">

@@ -30,6 +30,8 @@ services:
       PORT: 4000
       MONGODB_URI: mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongo:27017/leather?authSource=admin
       CORS_ORIGIN: https://shop-leather.ali-moradi-develop.com
+      # Stripe Checkout returns here; with no STRIPE_SECRET_KEY in .env the simulator is used
+      STOREFRONT_URL: https://shop-leather.ali-moradi-develop.com
       # one proxy hop in front of the API: the storefront's /api route
       TRUST_PROXY: 1
       WEB_REVALIDATE_URL: http://web:3000/hooks/revalidate

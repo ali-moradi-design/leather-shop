@@ -105,6 +105,11 @@ export function AuthForm({ mode, next }: { mode: 'login' | 'register'; next?: st
             className={field}
           />
           {fieldError('password')}
+          {mode === 'login' && (
+            <Link href="/account/forgot-password" className="mt-2 inline-block text-[13px] text-mute underline underline-offset-4 hover:text-ink">
+              Forgot your password?
+            </Link>
+          )}
         </div>
         {error && <p role="alert" className="text-danger">{error}</p>}
         <button type="submit" disabled={busy} className="btn w-full">

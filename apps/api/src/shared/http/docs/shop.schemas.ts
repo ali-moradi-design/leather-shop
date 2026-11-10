@@ -132,7 +132,7 @@ export const shopSchemas = {
       payment: {
         type: 'object',
         properties: {
-          method: { type: 'string', enum: ['fake'] },
+          method: { type: 'string', enum: ['fake', 'stripe', 'manual'] },
           status: { type: 'string', enum: ['pending', 'paid', 'failed'] },
           paidAt: { ...str, format: 'date-time' },
           transactionId: str,

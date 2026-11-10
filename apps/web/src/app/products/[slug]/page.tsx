@@ -10,6 +10,7 @@ import {
   type Product,
 } from '@/entities/product';
 import { BuyBox, BuyBoxSkeleton } from '@/features/add-to-cart';
+import { getVariant } from '@/shared/lib/ab/server';
 import { FavoriteButton } from '@/features/favorite';
 import { ReviewForm, ReviewList } from '@/features/reviews';
 import {
@@ -24,7 +25,7 @@ import {
   SizeGuide,
   SizeGuideButton,
 } from '@/widgets/product-detail';
-import { COLLECTIONS, SITE } from '@/shared/config';
+import { COLLECTIONS } from '@/shared/config';
 import { discountPercent, formatMoney } from '@/shared/lib/money';
 import { Icon, Skeleton, Stars } from '@/shared/ui';
 
@@ -56,7 +57,7 @@ function collectionOf(p: Product) {
 
 /** Live stock per size: a dynamic hole in the prerendered product page. */
 async function LiveBuyBox({ product }: { product: Product }) {
-  const variants = await fetchLiveVariants(product.slug);
+  const [variants, cta] = await Promise.all([fetchLiveVariants(product.slug), getVariant('pdp-cta')]);
   const sizeNote = product.category === 'boots' ? 'Order ½ size smaller than you wear in sneakers.' : undefined;
   return (
     <BuyBox
@@ -66,56 +67,12 @@ async function LiveBuyBox({ product }: { product: Product }) {
       variants={variants}
       sizeNote={sizeNote}
       title={product.name}
+      ctaVariant={cta}
       sizeGuide={hasSizeGuide(product) ? <SizeGuideButton><SizeGuide product={product} /></SizeGuideButton> : undefined}
     />
   );
 }
 
-function JsonLd({ product }: { product: Product }) {
-  const collection = collectionOf(product);
-  const url = `${SITE.url}/products/${product.slug}`;
-  const data = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Product',
-      name: product.title,
-      image: product.images,
-      description: product.description,
-      sku: product.variants[0]?.sku,
-      color: product.color,
-      material: product.leather,
-      brand: { '@type': 'Brand', name: SITE.name },
-      ...(product.ratingCount > 0 && {
-        aggregateRating: { '@type': 'AggregateRating', ratingValue: product.ratingAvg, reviewCount: product.ratingCount },
-      }),
-      offers: {
-        '@type': 'Offer',
-        url,
-        priceCurrency: product.currency,
-        price: (product.price / 100).toFixed(2),
-        availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      },
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE.url },
-        ...(collection
-          ? [{ '@type': 'ListItem', position: 2, name: collection.title, item: `${SITE.url}/collections/${collection.slug}` }]
-          : []),
-        { '@type': 'ListItem', position: collection ? 3 : 2, name: product.title, item: url },
-      ],
-    },
-  ];
-  return (
-    <script
-      type="application/ld+json"
-      // JSON-LD must be inline; the content is our own catalog data, escaped for </script>.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }}
-    />
-  );
-}
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
@@ -127,7 +84,6 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
-      <JsonLd product={product} />
       <div className="container-shop">
         <section className="grid gap-6 pt-4 lg:grid-cols-[minmax(0,730px)_minmax(0,1fr)] lg:gap-[50px] lg:pt-[18px]">
           <div>

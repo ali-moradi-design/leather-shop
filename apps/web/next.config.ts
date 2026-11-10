@@ -7,13 +7,24 @@ const isProd = process.env.NODE_ENV === 'production';
  * (PPR) pages carry Next.js' inline bootstrap scripts and nonces would make every
  * page dynamic; everything else is locked to this origin and the product CDN.
  */
+/** Hosts the optional Sentry and analytics scripts talk to (only when configured). */
+const hostOf = (url?: string) => {
+  try {
+    return url ? new URL(url).origin : '';
+  } catch {
+    return '';
+  }
+};
+const sentryHost = hostOf(process.env.NEXT_PUBLIC_SENTRY_DSN?.replace(/\/\/[^@]+@/, '//'));
+const analyticsHost = process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN ? hostOf(process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT ?? 'https://plausible.io/js/script.js') : '';
+
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isProd ? '' : " 'unsafe-eval'"}`,
+  `script-src 'self' 'unsafe-inline'${isProd ? '' : " 'unsafe-eval'"}${analyticsHost ? ` ${analyticsHost}` : ''}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://cdn.shopify.com",
   "font-src 'self'",
-  "connect-src 'self'",
+  `connect-src 'self'${sentryHost ? ` ${sentryHost}` : ''}${analyticsHost ? ` ${analyticsHost}` : ''}`,
   "frame-ancestors 'none'",
   "form-action 'self'",
   "base-uri 'self'",
@@ -26,6 +37,8 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  // no search engine may list, cache or preview any page, image or file
+  { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive, nosnippet, noimageindex' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=()' },
   ...(isProd ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }] : []),
 ];

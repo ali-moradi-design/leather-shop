@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ORDER_STATUSES } from '@modules/ordering/domain/order.entity';
+import { CARRIERS, ORDER_STATUSES } from '@modules/ordering/domain/order.entity';
 
 export const shippingAddressSchema = z.object({
   fullName: z.string().min(1),
@@ -28,6 +28,9 @@ export const createOrderSchema = z.object({
 export const updateStatusSchema = z.object({
   status: z.enum(ORDER_STATUSES),
   note: z.string().max(500).optional(),
+  shipment: z
+    .object({ carrier: z.enum(CARRIERS), trackingNumber: z.string().trim().min(4).max(40) })
+    .optional(),
 });
 
 export const idParamSchema = z.object({ id: z.string().min(1) });
@@ -38,3 +41,5 @@ export const listOrdersQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(50),
 });
+
+export const cancelOrderSchema = z.object({ reason: z.string().trim().max(300).optional() });

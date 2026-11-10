@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { AppError } from '../../errors/AppError';
+import { captureError } from '../../infra/monitoring';
 import { DomainError } from '../../domain/DomainError';
 import { domainToAppError } from '../../errors/mapDomainError';
 import { env } from '@shared/config/env';
@@ -52,6 +53,7 @@ export function errorHandler(
     return;
   }
 
+  captureError(appErr, { requestId, path: req.originalUrl });
   logger.error('unhandled_error', {
     requestId,
     err: appErr instanceof Error ? appErr.message : String(appErr),

@@ -15,3 +15,7 @@ process.env.CORS_ORIGIN = '*';
 process.env.UPLOAD_DIR = 'uploads';
 process.env.COOKIE_SECURE = 'false';
 process.env.COOKIE_SAME_SITE = 'lax';
+process.env.STOREFRONT_URL = 'http://shop.test';
+// known secret so tests can sign webhook events like Stripe does
+process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_secret';
+delete process.env.STRIPE_SECRET_KEY;

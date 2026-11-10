@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { orderNumber, STATUS_LABEL, type Order } from '@/entities/order';
+import { orderNumber, PAYMENT_METHOD_LABEL, STATUS_LABEL, type Order } from '@/entities/order';
 import type { User } from '@/entities/user';
 import { OrderStatusSelect, PageHeader } from '@/features/admin';
 import { requireAdmin } from '@/features/auth/server';
@@ -41,6 +41,7 @@ async function OrderDetail({ params }: Props) {
   return (
     <>
       <PageHeader title={`Order ${orderNumber(order.id)}`}>
+        <Link prefetch={false} href={`/admin/orders/${order.id}/label`} className="text-[13px] underline underline-offset-4">Print shipping label</Link>
         <span className="border border-ink px-3 py-1 text-[13px]">{STATUS_LABEL[order.status]}</span>
       </PageHeader>
       <p className="-mt-3 mb-8 text-[14px] text-mute">Placed {date.format(new Date(order.createdAt))}</p>
@@ -92,10 +93,23 @@ async function OrderDetail({ params }: Props) {
               {a.city}{a.state ? `, ${a.state}` : ''} {a.postalCode}<br />{a.country}
             </address>
           </section>
+          {order.shipment && (
+            <section>
+              <h2 className="heading mb-2 text-[18px]">Shipment</h2>
+              <p>{order.shipment.carrier}</p>
+              {order.shipment.url ? (
+                <a href={order.shipment.url} target="_blank" rel="noopener noreferrer" className="link-underline break-all font-mono">{order.shipment.trackingNumber}</a>
+              ) : (
+                <p className="break-all font-mono">{order.shipment.trackingNumber}</p>
+              )}
+            </section>
+          )}
           <section>
             <h2 className="heading mb-2 text-[18px]">Payment</h2>
+            <p>{PAYMENT_METHOD_LABEL[order.payment.method] ?? order.payment.method}</p>
             <p className="capitalize">{order.payment.status}{order.payment.paidAt && ` · ${date.format(new Date(order.payment.paidAt))}`}</p>
             {order.payment.transactionId && <p className="break-all text-mute">{order.payment.transactionId}</p>}
+            {order.refunded && <p className="text-mute">Refunded</p>}
           </section>
           {order.statusHistory && order.statusHistory.length > 0 && (
             <section>

@@ -5,7 +5,7 @@ import './globals.css';
 import { SiteHeader } from '@/widgets/header';
 import { SiteFooter } from '@/widgets/footer';
 import { SITE } from '@/shared/config';
-import { Icon } from '@/shared/ui';
+import { Analytics, Icon } from '@/shared/ui';
 import { CartButton, CartDrawer, CartProvider } from '@/features/cart';
 
 const serif = Frank_Ruhl_Libre({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-frank-ruhl', display: 'swap' });
@@ -18,6 +18,13 @@ export const metadata: Metadata = {
   applicationName: SITE.name,
   keywords: ['leather boots', 'leather shoes', 'leather bags', 'Goodyear welt', 'full-grain leather'],
   alternates: { canonical: '/' },
+  // kept out of every search engine: the X-Robots-Tag header (next.config.ts) says the same for files and images
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: { index: false, follow: false, noimageindex: true, 'max-snippet': 0, 'max-image-preview': 'none', 'max-video-preview': 0 },
+  },
   openGraph: { siteName: SITE.name, type: 'website', locale: 'en_US' },
   twitter: { card: 'summary_large_image' },
   formatDetection: { telephone: false },
@@ -33,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable}`}>
       <body className="flex min-h-svh flex-col">
+        <Analytics />
         <CartProvider>
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[60] focus:bg-white focus:p-2">
           Skip to content

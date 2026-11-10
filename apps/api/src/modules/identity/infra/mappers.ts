@@ -13,6 +13,8 @@ export function mapUser(doc: {
   name: string;
   email: string;
   passwordHash?: string;
+  guest?: boolean;
+  addresses?: { _id: { toString(): string }; label?: string; fullName: string; line1: string; line2?: string; city: string; state?: string; postalCode: string; country: string; isDefault?: boolean }[];
   roles: unknown[];
   isActive: boolean;
   deletedAt?: Date | null;
@@ -30,6 +32,19 @@ export function mapUser(doc: {
     name: doc.name,
     email: doc.email,
     passwordHash: doc.passwordHash,
+    guest: doc.guest ?? false,
+    addresses: (doc.addresses ?? []).map((a) => ({
+      id: a._id.toString(),
+      label: a.label,
+      fullName: a.fullName,
+      line1: a.line1,
+      line2: a.line2,
+      city: a.city,
+      state: a.state,
+      postalCode: a.postalCode,
+      country: a.country,
+      isDefault: a.isDefault ?? false,
+    })),
     roles,
     isActive: doc.isActive,
     deletedAt: doc.deletedAt,

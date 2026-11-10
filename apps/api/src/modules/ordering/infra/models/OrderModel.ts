@@ -1,5 +1,5 @@
 import { Schema, model, Document, Types, Query } from 'mongoose';
-import { ORDER_STATUSES, type OrderStatus } from '@modules/ordering/domain/order.entity';
+import { CARRIERS, ORDER_STATUSES, PAYMENT_METHODS, type OrderStatus, type Payment, type Shipment } from '@modules/ordering/domain/order.entity';
 
 export interface IOrderItemDoc {
   product: Types.ObjectId;
@@ -20,12 +20,9 @@ export interface IOrderDoc extends Document {
   discountAmount: number;
   totalAmount: number;
   status: OrderStatus;
-  payment: {
-    method: 'fake';
-    status: 'pending' | 'paid' | 'failed';
-    paidAt?: Date;
-    transactionId?: string;
-  };
+  payment: Payment;
+  shipment?: Shipment;
+  refundId?: string;
   shippingAddress: {
     fullName: string;
     line1: string;
@@ -69,11 +66,24 @@ const orderSchema = new Schema<IOrderDoc>(
     totalAmount: { type: Number, required: true, min: 0 },
     status: { type: String, enum: ORDER_STATUSES, default: 'pending_payment' },
     payment: {
-      method: { type: String, enum: ['fake'], default: 'fake' },
+      method: { type: String, enum: PAYMENT_METHODS, default: 'stripe' },
       status: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
       paidAt: Date,
       transactionId: String,
+      checkoutSessionId: String,
     },
+    shipment: {
+      type: new Schema<Shipment>(
+        {
+          carrier: { type: String, enum: CARRIERS, required: true },
+          trackingNumber: { type: String, required: true, trim: true },
+          shippedAt: { type: Date, required: true },
+        },
+        { _id: false },
+      ),
+      required: false,
+    },
+    refundId: String,
     shippingAddress: {
       fullName: { type: String, required: true },
       line1: { type: String, required: true },
@@ -104,5 +114,6 @@ orderSchema.pre(/^find/, function (this: Query<unknown, IOrderDoc>) {
 // the order lists: newest first, for one customer or one status
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ status: 1, createdAt: -1 });
+orderSchema.index({ 'payment.checkoutSessionId': 1 }, { sparse: true });
 
 export const OrderModel = model<IOrderDoc>('Order', orderSchema);
