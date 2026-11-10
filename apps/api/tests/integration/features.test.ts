@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import request from 'supertest';
 import {
   authHeader,
   registerCustomer,
@@ -230,7 +229,7 @@ describe('Shop features (integration)', () => {
   describe('Admin tools', () => {
     it('exports CSV and imports products back, dry run first', async () => {
       const exported = await ctx.request.get('/api/v1/admin/export/products.csv').set(admin()).expect(200);
-      expect(exported.text).toMatch(/^﻿slug,title/);
+      expect(exported.text).toMatch(/^\uFEFFslug,title/);
       await ctx.request.get('/api/v1/admin/export/orders.csv').set(admin()).expect(200);
       await ctx.request.get('/api/v1/admin/export/customers.csv').set(admin()).expect(200);
 
